@@ -22,5 +22,5 @@ public class UserApiController {
         //실제로는 ResponseEntity<String>이 아니라 DTO를 사용할 것
         return ResponseEntity.ok().body(req.getEmail());
     }
-    
+
 }
