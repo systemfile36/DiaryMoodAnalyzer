@@ -5,11 +5,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 //일기 정보 저장하는 엔티티
 //테스트를 위한 구현입니다.
@@ -35,10 +30,6 @@ public class Diary extends BaseEntity { //공통 컬럼 상속
     //SQL 타입을 TEXT로 지정
     @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
-
-    @CreatedDate
-    @Column(name = "created_date", nullable = false)
-    private LocalDate createdDate;
 
     @Builder
     public Diary(User user, String title, String content) {

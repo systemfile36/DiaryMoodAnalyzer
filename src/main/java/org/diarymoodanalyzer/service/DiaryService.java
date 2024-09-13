@@ -7,10 +7,13 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.diarymoodanalyzer.domain.Diary;
 import org.diarymoodanalyzer.domain.User;
-import org.diarymoodanalyzer.dto.AddDiaryRequest;
-import org.diarymoodanalyzer.dto.AddDiaryResponse;
+import org.diarymoodanalyzer.dto.*;
 import org.diarymoodanalyzer.repository.DiaryRepository;
 import org.diarymoodanalyzer.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -61,4 +64,30 @@ public class DiaryService {
         이를 통해 불필요하게 엔티티 전체를 불러오는 오버헤드를 막을 수 있다.
          */
     }
+
+    public Page<GetDiariesByPageResponse> getDiariesByEmail(GetDiariesByPageRequest req) {
+
+        //정렬 기준을 DTO에서 받아와서 할당함.
+        Sort sortBy = req.isAscending() ? Sort.by(req.getSortBy()) : Sort.by(req.getSortBy()).descending();
+
+        //페이지의 번호와 사이즈, 정렬 기준을 지정
+        Pageable pageable = PageRequest.of(req.getPage(), req.getSize(), sortBy);
+
+        Page<Diary> diaries = diaryRepository.findByUserEmail(req.getEmail(), pageable);
+
+        //리포지토리를 통해 페이지로 받아서 컨트롤러로 반환
+        //DTO의 생성자로 매핑하여, 원본 엔티티가 아닌 DTO의 페이지로 리턴한다.
+        return diaries.map(GetDiariesByPageResponse::new);
+    }
+
+    public Page<GetDiariesTitleByPageResponse> getDiariesTitleByEmail(GetDiariesByPageRequest req) {
+        //정렬 기준을 DTO에서 받아와서 할당함.
+        Sort sortBy = req.isAscending() ? Sort.by(req.getSortBy()) : Sort.by(req.getSortBy()).descending();
+
+        //페이지의 번호와 사이즈, 정렬 기준을 지정
+        Pageable pageable = PageRequest.of(req.getPage(), req.getSize(), sortBy);
+
+        return diaryRepository.findByUserEmailOnlyTitle(req.getEmail(), pageable);
+    }
+
 }

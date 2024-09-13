@@ -1,8 +1,10 @@
 package org.diarymoodanalyzer.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 //Diary 추가 요청을 보낼 때 사용할 DTO
+@AllArgsConstructor
 @Getter
 public class AddDiaryRequest {
     private String email;
