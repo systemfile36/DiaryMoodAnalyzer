@@ -7,7 +7,12 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.diarymoodanalyzer.domain.Diary;
 import org.diarymoodanalyzer.domain.User;
-import org.diarymoodanalyzer.dto.*;
+import org.diarymoodanalyzer.dto.request.AddDiaryRequest;
+import org.diarymoodanalyzer.dto.request.GetDiaryByPageRequest;
+import org.diarymoodanalyzer.dto.response.AddDiaryResponse;
+import org.diarymoodanalyzer.dto.response.GetDiaryByIdResponse;
+import org.diarymoodanalyzer.dto.response.GetDiaryByPageResponse;
+import org.diarymoodanalyzer.dto.response.GetDiaryTitleByPageResponse;
 import org.diarymoodanalyzer.repository.DiaryRepository;
 import org.diarymoodanalyzer.repository.UserRepository;
 import org.springframework.data.domain.Page;
@@ -54,9 +59,9 @@ public class DiaryService {
                 .build();
 
         //리포지토리에 저장
-        diaryRepository.save(diary);
+        Diary savedDiary = diaryRepository.save(diary);
 
-        return new AddDiaryResponse(dto.getEmail(), dto.getTitle());
+        return new AddDiaryResponse(savedDiary.getDiaryId(), dto.getEmail(), dto.getTitle());
 
         /*
         프록시 객체의 속성에 접근하지 않고 단순히 diary에 참조만 넘겼다.
@@ -65,7 +70,13 @@ public class DiaryService {
          */
     }
 
-    public Page<GetDiariesByPageResponse> getDiariesByEmail(GetDiariesByPageRequest req) {
+    public GetDiaryByIdResponse getDiaryById(long id) {
+        return new GetDiaryByIdResponse(diaryRepository.findById(id).orElseThrow(
+                () -> new IllegalArgumentException("not found with userId : " + id)
+        ));
+    }
+
+    public Page<GetDiaryByPageResponse> getDiariesByEmail(GetDiaryByPageRequest req) {
 
         //정렬 기준을 DTO에서 받아와서 할당함.
         Sort sortBy = req.isAscending() ? Sort.by(req.getSortBy()) : Sort.by(req.getSortBy()).descending();
@@ -77,10 +88,10 @@ public class DiaryService {
 
         //리포지토리를 통해 페이지로 받아서 컨트롤러로 반환
         //DTO의 생성자로 매핑하여, 원본 엔티티가 아닌 DTO의 페이지로 리턴한다.
-        return diaries.map(GetDiariesByPageResponse::new);
+        return diaries.map(GetDiaryByPageResponse::new);
     }
 
-    public Page<GetDiariesTitleByPageResponse> getDiariesTitleByEmail(GetDiariesByPageRequest req) {
+    public Page<GetDiaryTitleByPageResponse> getDiariesTitleByEmail(GetDiaryByPageRequest req) {
         //정렬 기준을 DTO에서 받아와서 할당함.
         Sort sortBy = req.isAscending() ? Sort.by(req.getSortBy()) : Sort.by(req.getSortBy()).descending();
 
@@ -89,5 +100,10 @@ public class DiaryService {
 
         return diaryRepository.findByUserEmailOnlyTitle(req.getEmail(), pageable);
     }
+
+    public void deleteDiaryById(long id) {
+        diaryRepository.deleteById(id);
+    }
+
 
 }

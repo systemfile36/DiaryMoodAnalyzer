@@ -2,7 +2,7 @@ package org.diarymoodanalyzer.service;
 
 import lombok.RequiredArgsConstructor;
 import org.diarymoodanalyzer.domain.User;
-import org.diarymoodanalyzer.dto.AddUserRequest;
+import org.diarymoodanalyzer.dto.request.AddUserRequest;
 import org.diarymoodanalyzer.repository.UserRepository;
 import org.springframework.stereotype.Service;
 

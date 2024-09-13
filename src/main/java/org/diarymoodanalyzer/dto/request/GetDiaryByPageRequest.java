@@ -1,6 +1,5 @@
-package org.diarymoodanalyzer.dto;
+package org.diarymoodanalyzer.dto.request;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -9,7 +8,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class GetDiariesByPageRequest extends BaseGetDiaryRequest{
+public class GetDiaryByPageRequest extends BaseGetDiaryRequest{
     //페이지의 인덱스와 사이즈를 받는다.
     private int page;
     private int size;

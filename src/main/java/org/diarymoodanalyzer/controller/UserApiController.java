@@ -1,7 +1,7 @@
 package org.diarymoodanalyzer.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.diarymoodanalyzer.dto.AddUserRequest;
+import org.diarymoodanalyzer.dto.request.AddUserRequest;
 import org.diarymoodanalyzer.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

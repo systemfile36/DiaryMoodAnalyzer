@@ -1,4 +1,4 @@
-package org.diarymoodanalyzer.dto;
+package org.diarymoodanalyzer.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,7 +1,7 @@
 package org.diarymoodanalyzer.repository;
 
 import org.diarymoodanalyzer.domain.Diary;
-import org.diarymoodanalyzer.dto.GetDiariesTitleByPageResponse;
+import org.diarymoodanalyzer.dto.response.GetDiaryTitleByPageResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -27,11 +27,11 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
     JPQL 쿼리에서 new를 통해 생성자를 사용하면 쿼리 결과를 자동으로 해당 DTO로 매핑해준다.
      */
     @Query("""
-            SELECT new org.diarymoodanalyzer.dto.GetDiariesTitleByPageResponse
-                (d.title, d.createdAt, d.updatedAt, d.user.email)
+            SELECT new org.diarymoodanalyzer.dto.response.GetDiaryTitleByPageResponse
+                (d.diaryId, d.title, d.createdAt, d.updatedAt, d.user.email)
             FROM Diary d WHERE d.user.email = :email
             """)
-    Page<GetDiariesTitleByPageResponse> findByUserEmailOnlyTitle(@Param("email") String email, Pageable pageable);
+    Page<GetDiaryTitleByPageResponse> findByUserEmailOnlyTitle(@Param("email") String email, Pageable pageable);
 
 
 

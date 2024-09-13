@@ -1,4 +1,4 @@
-package org.diarymoodanalyzer.dto;
+package org.diarymoodanalyzer.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,6 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public class AddDiaryResponse {
+    private Long id;
     private String email;
     private String title;
 }
