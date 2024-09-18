@@ -79,7 +79,7 @@ public class DiaryService {
     public Page<GetDiaryByPageResponse> getDiariesByEmail(GetDiaryByPageRequest req) {
 
         //정렬 기준을 DTO에서 받아와서 할당함.
-        Sort sortBy = req.isAscending() ? Sort.by(req.getSortBy()) : Sort.by(req.getSortBy()).descending();
+        Sort sortBy = req.isAscending() ? Sort.by(req.getSortBy()).ascending() : Sort.by(req.getSortBy()).descending();
 
         //페이지의 번호와 사이즈, 정렬 기준을 지정
         Pageable pageable = PageRequest.of(req.getPage(), req.getSize(), sortBy);

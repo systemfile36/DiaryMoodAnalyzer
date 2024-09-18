@@ -6,18 +6,22 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 //회원 정보를 저장하는 클래스. 
-//테스트를 위한 구현입니다. 실제로는 스프링 시큐리티 사용을 위해 UserDetails를 구현할 예정입니다.
+//스프링 시큐리티 사용을 위해 UserDetails 를 구현
 @NoArgsConstructor
 @Getter
 @Table(name = "users")
 @Entity
-public class User extends BaseEntity { //공통 컬럼 상속
+public class User extends BaseEntity implements UserDetails { //공통 컬럼 상속
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -51,5 +55,42 @@ public class User extends BaseEntity { //공통 컬럼 상속
     @Builder
     public User(String email, String password) {
         this.email = email; this.password = password;
+    }
+
+    //사용자의 권한 목록을 반환. 현재는 단순히 USER로 반환. 사용 시에는 ROLE_USER로 사용
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+
+        return List.of(new SimpleGrantedAuthority("USER"));
+    }
+
+    //이메일을 유저 명으로 사용 (인덱스된 유니크 값이기 때문)
+    @Override
+    public String getUsername() {
+        return this.email;
+    }
+
+    //계정의 만료 여부 반환
+    @Override
+    public boolean isAccountNonExpired() {
+        return false;
+    }
+
+    //계정 잠금 여부 반환
+    @Override
+    public boolean isAccountNonLocked() {
+        return false;
+    }
+
+    //비밀번호 만료 여부 반환
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    //계정이 활성화 되어 있는지 여부
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 }
