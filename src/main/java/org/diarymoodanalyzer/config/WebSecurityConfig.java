@@ -52,7 +52,7 @@ public class WebSecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll() //로그인/회원가입 엔드 포인트는 인증 불필요. 누구나 접근 O
                 .anyRequest().authenticated() //다른 모든 요청은 인증이 필요
                 .and()
-                //.addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                //.addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); //아직 미구현
                 .build();
     }
 

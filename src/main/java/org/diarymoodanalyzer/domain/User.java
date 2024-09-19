@@ -61,7 +61,7 @@ public class User extends BaseEntity implements UserDetails { //공통 컬럼 �
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
 
-        return List.of(new SimpleGrantedAuthority("USER"));
+        return List.of(new SimpleGrantedAuthority("ROLE_USER"));
     }
 
     //이메일을 유저 명으로 사용 (인덱스된 유니크 값이기 때문)

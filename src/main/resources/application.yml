@@ -1,6 +1,6 @@
 spring:
   jpa:
-    show-sql: true
+    show-sql: true #쿼리문 출력하게 함
     properties:
       hibernate:
         format_sql: true
@@ -15,3 +15,7 @@ spring:
   h2:
     console:
       enabled: true
+
+jwt:
+  issuer: diaryMoodAnalyzer@gmail.com
+  secret_key: someSecretKeyToCreateJwt
