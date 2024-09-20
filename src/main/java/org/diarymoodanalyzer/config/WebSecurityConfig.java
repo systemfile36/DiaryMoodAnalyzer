@@ -12,6 +12,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import static org.springframework.boot.autoconfigure.security.servlet.PathRequest.toH2Console;
 
@@ -25,6 +26,8 @@ import static org.springframework.boot.autoconfigure.security.servlet.PathReques
 public class WebSecurityConfig {
 
     private final UserDetailService userDetailService;
+
+    private final TokenAuthenticationFilter tokenAuthenticationFilter;
 
     /*
     보안 인증이 불필요한 정적 리소스에 대해 필터 적용을 해제하는 부분
@@ -40,6 +43,7 @@ public class WebSecurityConfig {
 
     /*
     필터 기반의 스프링 시큐리티의 주요 보안 설정
+    JWT 기반 인증 설정
      */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -52,7 +56,8 @@ public class WebSecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll() //로그인/회원가입 엔드 포인트는 인증 불필요. 누구나 접근 O
                 .anyRequest().authenticated() //다른 모든 요청은 인증이 필요
                 .and()
-                //.addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); //아직 미구현
+                //UsernamePasswordAuthenticationFilter 앞에 필터 추가함 (실질적으로 맨 앞에 위치)
+                .addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 

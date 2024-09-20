@@ -71,6 +71,8 @@ public class TokenProvider {
             //JWT 가 만료됨
         } catch(UnsupportedJwtException e) {
             //지원하지 않는 JWT
+        } catch(IllegalArgumentException e) {
+            //null or empty
         }
 
         //오류가 발생하여 catch 블록으로 이동했다면 false를 반환
@@ -87,7 +89,7 @@ public class TokenProvider {
         //UserDetails 를 불러옴. 클레임에서 sub 값(사용자 이메일)을 받아와서 찾는다.
         UserDetails user = userDetailService.loadUserByUsername(claims.getSubject());
 
-        //principal 을 UserDetails 타 user, credential 을 JWT 토큰 그 자체로, 권한을 UserDetails 에 정의된 대로 설정하였다.
+        //principal 을 UserDetails 타입 user, credential 을 JWT 토큰 그 자체로, 권한을 UserDetails 에 정의된 대로 설정하였다.
         //Authentication 을 구현한 객체임.
         return new UsernamePasswordAuthenticationToken(user, token, user.getAuthorities());
     }

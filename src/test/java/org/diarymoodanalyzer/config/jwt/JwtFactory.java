@@ -45,13 +45,14 @@ public class JwtFactory {
                 .setIssuedAt(issuedAt) // 발급 시간, iat
                 .setExpiration(expire) // 만료 시간, exp
                 .setSubject(subject) // 제목, sub. 사용자의 이메일
+                .addClaims(claims)
                 .signWith(SignatureAlgorithm.HS256, jwtProperties.getSecretKey()) // 서명 설정. HS256과 비밀 키로 서명
                 .compact();
     }
 
     //이하 빌더 패턴
 
-    public JwtFactoryBuilder build() {
+    public static JwtFactoryBuilder  builder() {
         return new JwtFactoryBuilder();
     }
 
