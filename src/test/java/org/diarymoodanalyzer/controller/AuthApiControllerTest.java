@@ -3,6 +3,7 @@ package org.diarymoodanalyzer.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.diarymoodanalyzer.domain.User;
 import org.diarymoodanalyzer.dto.request.LoginRequest;
+import org.diarymoodanalyzer.dto.request.SignUpRequest;
 import org.diarymoodanalyzer.repository.DiaryRepository;
 import org.diarymoodanalyzer.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,6 +24,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -78,6 +80,29 @@ class AuthApiControllerTest {
 
 
 
+    }
+
+    @DisplayName("signup: 올바른 요청을 보내면 회원가입에 성공한다.")
+    @Test
+    public void signUp() throws Exception {
+        //테스트 데이터 세팅
+        String url = "/api/auth/signup";
+
+        String userEmail = "test@gmail.com";
+        String password = "password";
+
+        SignUpRequest req = new SignUpRequest(userEmail, password);
+
+        String reqBody = objectMapper.writeValueAsString(req);
+
+        ResultActions result = mockMvc.perform(MockMvcRequestBuilders.post(url)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(reqBody));
+
+        result.andExpect(MockMvcResultMatchers.status().isCreated());
+
+        //제대로 들어갔는지 확인
+        assertThat(userRepository.existsByEmail(userEmail)).isTrue();
     }
 
 }
