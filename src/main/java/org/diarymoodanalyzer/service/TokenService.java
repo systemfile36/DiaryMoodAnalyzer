@@ -27,6 +27,6 @@ public class TokenService {
         User user = userService.findById(userId);
 
         //엑세스 토큰 반환
-        return tokenProvider.createToken(user, Duration.ofHours(1));
+        return tokenProvider.createToken(user, TokenProvider.ACCESS_EXPIRE);
     }
 }

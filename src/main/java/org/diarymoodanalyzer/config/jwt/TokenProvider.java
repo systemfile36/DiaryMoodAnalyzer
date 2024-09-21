@@ -25,6 +25,10 @@ public class TokenProvider {
 
     private final UserDetailService userDetailService;
 
+    //토큰 생성 측에서 사용할 상수
+    public static final Duration REFRESH_EXPIRE = Duration.ofHours(3);
+    public static final Duration ACCESS_EXPIRE = Duration.ofMinutes(10);
+
     /*
     User 객체와 Duration 타입으로 만료까지의 시간을 받아서 JWT 토큰을 만들어 반환
      */
@@ -73,6 +77,8 @@ public class TokenProvider {
             //지원하지 않는 JWT
         } catch(IllegalArgumentException e) {
             //null or empty
+        } catch(Exception e) {
+            //Unexpected Exception
         }
 
         //오류가 발생하여 catch 블록으로 이동했다면 false를 반환
@@ -91,7 +97,7 @@ public class TokenProvider {
 
         //principal 을 UserDetails 타입 user, credential 을 JWT 토큰 그 자체로, 권한을 UserDetails 에 정의된 대로 설정하였다.
         //Authentication 을 구현한 객체임.
-        return new UsernamePasswordAuthenticationToken(user, token, user.getAuthorities());
+        return new JwtAuthenticationToken(user, token, user.getAuthorities());
     }
 
     /*

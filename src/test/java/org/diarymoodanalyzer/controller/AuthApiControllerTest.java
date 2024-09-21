@@ -73,7 +73,8 @@ class AuthApiControllerTest {
                 .content(reqBody));
 
         result
-                .andExpect(MockMvcResultMatchers.status().isOk());
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(jsonPath("$.accessToken").exists());
 
 
 

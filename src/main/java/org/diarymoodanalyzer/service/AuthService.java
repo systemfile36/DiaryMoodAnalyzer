@@ -44,16 +44,11 @@ public class AuthService {
             User user = (User)userDetails;
 
             //인증되면 토큰 생성
-            String accessToken = tokenProvider.createToken((User)userDetails, Duration.ofHours(1));
-            String refreshToken = tokenProvider.createToken((User)userDetails, Duration.ofHours(12));
+            String accessToken = tokenProvider.createToken(user, TokenProvider.ACCESS_EXPIRE);
+            String refreshToken = tokenProvider.createToken(user, TokenProvider.REFRESH_EXPIRE);
 
             //리프레쉬 토큰 저장
             refreshTokenService.save(user.getUserId(), refreshToken);
-
-            //생성한 액세스 토큰으로 인증 정보 생성 후, SecurityContext에 저장
-            UsernamePasswordAuthenticationToken auth =
-                    new UsernamePasswordAuthenticationToken(userDetails, accessToken, userDetails.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(auth);
 
             //응답 DTO 구성
             LoginResponse response = new LoginResponse();
