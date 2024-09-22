@@ -7,10 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public class AddDiaryRequest {
-    private String email;
+    //private String email; //해당 정보 대신 인증 정보로 소유자 결정함
     private String title;
     private String content;
-    /*
-    실제로는 인증을 위한 토큰 등도 넘겨야 함. 현재는 생략
-     */
 }

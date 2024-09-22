@@ -34,6 +34,22 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
     Page<GetDiaryTitleByPageResponse> findByUserEmailOnlyTitle(@Param("email") String email, Pageable pageable);
 
 
+    /*
+    diaryId를 받아서 해당 다이어리의 소유자를 userId로 반환한다.
+     */
+    @Query("SELECT d.userId FROM Diary d WHERE d.diaryId = :diaryId")
+    Long findUserIdById(@Param("diaryId") Long diaryId);
 
+/*
 
+    diaryId와 userId를 받아서 해당 다이어리의 소유자가 맞는지 여부를 반환한다.
+    JPQL/SQL CASE 문을 사용한다. d.diaryId == && d.user.userId == userId 조건에 맞는 레코드의 개수를 세어서
+    0개 이상이면 TRUE, 아니면 FALSE 를 반환한다. 해당 반환값은 boolean 값으로 호출자로 넘어갈 것이다.
+
+    @Query("""
+            SELECT CASE WHEN COUNT(d) > 0 THEN TRUE ELSE FALSE END
+            FROM Diary d WHERE d.diaryId = :diaryId AND d.user.userId = :userId
+            """)
+    boolean existsByDiaryIdAndUserId(@Param("diaryId") Long diaryId, @Param("userId") Long userId);
+*/
 }
