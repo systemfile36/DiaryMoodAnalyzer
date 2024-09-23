@@ -24,6 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 @RequiredArgsConstructor
@@ -93,11 +94,11 @@ public class DiaryService {
         }
 
         return new GetDiaryByIdResponse(diaryRepository.findById(id).orElseThrow(
-                () -> new IllegalArgumentException("not found with diary id : " + id)
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,"not found with diary id : " + id)
         ));
     }
 
-    public Page<GetDiaryByPageResponse> getDiariesByEmail(GetDiaryByPageRequest req) {
+    public Page<GetDiaryByPageResponse> getDiariesByEmail(GetDiaryByPageRequest req) throws ResponseStatusException {
 
         //정렬 기준을 DTO에서 받아와서 할당함.
         Sort sortBy = req.isAscending() ? Sort.by(req.getSortBy()).ascending() : Sort.by(req.getSortBy()).descending();
@@ -108,6 +109,10 @@ public class DiaryService {
         //현재 인증된 유저 정보 불러옴
         String currentUserEmail = AuthenticationUtils.getCurrentUserEmail();
 
+        if(currentUserEmail == null) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You have not permission");
+        }
+
         Page<Diary> diaries = diaryRepository.findByUserEmail(currentUserEmail, pageable);
 
         //리포지토리를 통해 페이지로 받아서 컨트롤러로 반환
@@ -115,7 +120,7 @@ public class DiaryService {
         return diaries.map(GetDiaryByPageResponse::new);
     }
 
-    public Page<GetDiaryTitleByPageResponse> getDiariesTitleByEmail(GetDiaryByPageRequest req) {
+    public Page<GetDiaryTitleByPageResponse> getDiariesTitleByEmail(GetDiaryByPageRequest req) throws ResponseStatusException {
         //정렬 기준을 DTO에서 받아와서 할당함.
         Sort sortBy = req.isAscending() ? Sort.by(req.getSortBy()) : Sort.by(req.getSortBy()).descending();
 
@@ -124,6 +129,10 @@ public class DiaryService {
 
         //현재 인증된 유저 정보 불러옴
         String currentUserEmail = AuthenticationUtils.getCurrentUserEmail();
+
+        if(currentUserEmail == null) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You have not permission");
+        }
 
         return diaryRepository.findByUserEmailOnlyTitle(currentUserEmail, pageable);
     }

@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RequiredArgsConstructor
 @RestController
@@ -40,9 +41,6 @@ public class DiaryApiController {
     public ResponseEntity<Page<GetDiaryByPageResponse>> getDiariesByEmail(
             @ModelAttribute GetDiaryByPageRequest req //GET으로 받은 파라미터가 DTO로 자동 매핑됨
             ) {
-        /*
-        스프링 시큐리티를 통해 헤더에서 JWT 토큰을 읽어서 확인하는 부분이 추가될 것
-         */
         return ResponseEntity.ok(diaryService.getDiariesByEmail(req));
     }
 
@@ -55,9 +53,6 @@ public class DiaryApiController {
     public ResponseEntity<Page<GetDiaryTitleByPageResponse>> getDiariesTitleByEmail(
             @ModelAttribute GetDiaryByPageRequest req
             ) {
-        /*
-        스프링 시큐리티를 통해 헤더에서 JWT 토큰을 읽어서 확인하는 부분이 추가될 것
-         */
         return ResponseEntity.ok(diaryService.getDiariesTitleByEmail(req));
     }
 
@@ -66,9 +61,6 @@ public class DiaryApiController {
      */
     @DeleteMapping("/api/diary/{id}")
     public ResponseEntity<Void> deleteDiaryById(@PathVariable long id) {
-        /*
-        헤더로 넘어온 토큰으로 인증하는 과정이 들어가게 될 것
-         */
 
         diaryService.deleteDiaryById(id);
 

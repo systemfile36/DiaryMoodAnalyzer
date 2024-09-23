@@ -19,14 +19,13 @@ import java.util.Objects;
 OncePerRequestFilter 를 상속받아서 구현
  */
 @RequiredArgsConstructor
-@Component
 public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
     private final TokenProvider tokenProvider;
 
     //토큰 추출을 위한 문자열 상수
     private final static String HEADER_AUTH = "Authorization";
-    private final static String TOKEN_PREFIX = "Bearer";
+    private final static String TOKEN_PREFIX = "Bearer ";
 
     @Override
     protected void doFilterInternal(

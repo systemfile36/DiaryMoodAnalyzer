@@ -1,6 +1,8 @@
 package org.diarymoodanalyzer.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.diarymoodanalyzer.config.TokenAuthenticationFilter;
+import org.diarymoodanalyzer.config.jwt.TokenProvider;
 import org.diarymoodanalyzer.domain.Diary;
 import org.diarymoodanalyzer.domain.User;
 import org.diarymoodanalyzer.dto.request.AddDiaryRequest;
@@ -14,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -24,6 +27,7 @@ import org.springframework.web.context.WebApplicationContext;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @SpringBootTest
@@ -45,13 +49,21 @@ class DiaryApiControllerTest {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    @Autowired
+    private TokenProvider tokenProvider;
+
     /*
     테스트 실행 전마다 MockMvc 초기화. 웹 어플리케이션 컨텍스트 세팅.
     리포지토리 초기화
      */
     @BeforeEach
     public void mockMvcSetUp() {
-        this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
+                .addFilter(new TokenAuthenticationFilter(tokenProvider))
+                .build();
         diaryRepository.deleteAll();
         userRepository.deleteAll();
     }
@@ -70,20 +82,29 @@ class DiaryApiControllerTest {
         final String userPw = "password";
 
         //User 데이터 저장
-        userRepository.save(User.builder()
+        User user = userRepository.save(User.builder()
                 .email(userEmail)
-                .password(userPw)
+                .password(bCryptPasswordEncoder.encode(userPw))
                 .build());
 
+        //엑세스 토큰 발급
+        String accessToken = tokenProvider.createToken(user, TokenProvider.ACCESS_EXPIRE);
+
+        assertThat(accessToken).isNotNull();
+        assertThat(tokenProvider.validateToken(accessToken)).isTrue();
+
         //DTO 생성 후, JSON으로 직렬화
-        final AddDiaryRequest req = new AddDiaryRequest(userEmail, title, content);
+        final AddDiaryRequest req = new AddDiaryRequest(title, content);
 
         final String reqBody = objectMapper.writeValueAsString(req);
 
         //실제 요청 perform
         ResultActions result = mockMvc.perform(MockMvcRequestBuilders.post(url)
+                .header("Authorization", "Bearer " + accessToken) //헤더에 엑세스 토큰 추가
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(reqBody));
+
+        result.andDo(print());
 
         //HTTP 코드 검증
         result.andExpect(MockMvcResultMatchers.status().isCreated());
@@ -108,8 +129,10 @@ class DiaryApiControllerTest {
 
         User user = userRepository.save(User.builder()
                 .email(userEmail)
-                .password(userPw)
+                .password(bCryptPasswordEncoder.encode(userPw))
                 .build());
+
+        String accessToken = tokenProvider.createToken(user, TokenProvider.ACCESS_EXPIRE);
 
         final int page = 1;
         final int size = 5;
@@ -117,7 +140,6 @@ class DiaryApiControllerTest {
         final boolean isAscending = true;
 
         GetDiaryByPageRequest req = new GetDiaryByPageRequest();
-        req.setEmail(userEmail);
         req.setPage(page);
         req.setSize(size);
         req.setSortBy(sortBy);
@@ -134,7 +156,8 @@ class DiaryApiControllerTest {
         }
 
         ResultActions result = mockMvc.perform(MockMvcRequestBuilders.get(url)
-                .param("email", req.getEmail())
+                .header("Authorization", "Bearer " + accessToken)
+                .param("email", user.getEmail())
                 .param("page", String.valueOf(req.getPage()))
                 .param("size", String.valueOf(req.getSize()))
                 .param("sortBy", req.getSortBy())
@@ -159,8 +182,10 @@ class DiaryApiControllerTest {
 
         User user = userRepository.save(User.builder()
                 .email(userEmail)
-                .password(userPw)
+                .password(bCryptPasswordEncoder.encode(userPw))
                 .build());
+
+        String accessToken = tokenProvider.createToken(user, TokenProvider.ACCESS_EXPIRE);
 
         final int page = 1;
         final int size = 5;
@@ -168,7 +193,6 @@ class DiaryApiControllerTest {
         final boolean isAscending = true;
 
         GetDiaryByPageRequest req = new GetDiaryByPageRequest();
-        req.setEmail(userEmail);
         req.setPage(page);
         req.setSize(size);
         req.setSortBy(sortBy);
@@ -185,7 +209,8 @@ class DiaryApiControllerTest {
         }
 
         ResultActions result = mockMvc.perform(MockMvcRequestBuilders.get(url)
-                .param("email", req.getEmail())
+                .header("Authorization", "Bearer " + accessToken)
+                .param("email", user.getEmail())
                 .param("page", String.valueOf(req.getPage()))
                 .param("size", String.valueOf(req.getSize()))
                 .param("sortBy", req.getSortBy())

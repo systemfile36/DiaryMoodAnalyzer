@@ -1,6 +1,7 @@
 package org.diarymoodanalyzer.config;
 
 import lombok.RequiredArgsConstructor;
+import org.diarymoodanalyzer.config.jwt.TokenProvider;
 import org.diarymoodanalyzer.service.UserDetailService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,7 +28,8 @@ public class WebSecurityConfig {
 
     private final UserDetailService userDetailService;
 
-    private final TokenAuthenticationFilter tokenAuthenticationFilter;
+    //TokenAuthenticationFilter 의 생성자에 넘기기 위함
+    private final TokenProvider tokenProvider;
 
     /*
     보안 인증이 불필요한 정적 리소스에 대해 필터 적용을 해제하는 부분
@@ -52,12 +54,12 @@ public class WebSecurityConfig {
                 .sessionManagement()
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS) //세션을 사용하지 않음(Stateless)
                 .and()
+                //UsernamePasswordAuthenticationFilter 앞에 필터 추가함 (실질적으로 맨 앞에 위치)
+                .addFilterBefore(new TokenAuthenticationFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests()
                 .requestMatchers("/api/auth/**").permitAll() //로그인/회원가입 엔드 포인트는 인증 불필요. 누구나 접근 O
                 .anyRequest().authenticated() //다른 모든 요청은 인증이 필요
                 .and()
-                //UsernamePasswordAuthenticationFilter 앞에 필터 추가함 (실질적으로 맨 앞에 위치)
-                .addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 

@@ -37,7 +37,7 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
     /*
     diaryId를 받아서 해당 다이어리의 소유자를 userId로 반환한다.
      */
-    @Query("SELECT d.userId FROM Diary d WHERE d.diaryId = :diaryId")
+    @Query("SELECT d.user.userId FROM Diary d WHERE d.diaryId = :diaryId")
     Long findUserIdById(@Param("diaryId") Long diaryId);
 
 /*
