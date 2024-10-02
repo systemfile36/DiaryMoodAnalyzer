@@ -8,19 +8,14 @@ import org.diarymoodanalyzer.dto.request.LoginRequest;
 import org.diarymoodanalyzer.dto.request.SignUpRequest;
 import org.diarymoodanalyzer.dto.response.LoginResponse;
 import org.diarymoodanalyzer.repository.UserRepository;
+import org.diarymoodanalyzer.util.AuthenticationUtils;
 import org.diarymoodanalyzer.util.EmailValidator;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.time.Duration;
+import org.springframework.web.server.ResponseStatusException;
 
 /*
 로그인/로그아웃/회원가입 등 인증 관련 서비스
@@ -55,8 +50,8 @@ public class AuthService {
             String accessToken = tokenProvider.createToken(user, TokenProvider.ACCESS_EXPIRE);
             String refreshToken = tokenProvider.createToken(user, TokenProvider.REFRESH_EXPIRE);
 
-            //리프레쉬 토큰 저장
-            refreshTokenService.save(user.getUserId(), refreshToken);
+            //리프레쉬 토큰을 저장하거나, 업데이트함
+            refreshTokenService.saveOrUpdate(user.getUserId(), refreshToken);
 
             //응답 DTO 구성
             LoginResponse response = new LoginResponse();
@@ -71,7 +66,7 @@ public class AuthService {
     }
 
     @Transactional
-    public void signUp(SignUpRequest req) throws IllegalArgumentException {
+    public void signUp(SignUpRequest req) throws IllegalArgumentException, DuplicateKeyException {
 
         //이메일 형식이 유효한 지 체크
         if(!EmailValidator.isValidEmail(req.getEmail()))
@@ -90,5 +85,21 @@ public class AuthService {
                 .build();
 
         userRepository.save(user);
+    }
+
+    public void logout() throws ResponseStatusException {
+        //현재 인증된 유저의 이메일 받아옴
+        String currentUserEmail = AuthenticationUtils.getCurrentUserEmail();
+
+        if(currentUserEmail == null) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "There is no Authentication");
+        }
+
+        //인증된 유저의 이메일로 userId 받아옴
+        Long userId = userRepository.findIdByEmail(currentUserEmail);
+
+        //로그아웃시, 리프레쉬 토큰 삭제
+        refreshTokenService.deleteByUserId(userId);
+
     }
 }

@@ -11,12 +11,18 @@
             <p class="row" v-if="isLogined">{{ userEmail }}</p>
             <router-link to="/diary"
                 class="btn btn-primary row">Write Diary</router-link>
+            <button class="btn btn-primary row"
+                @click="logout">Logout</button>
         </div>
         
     </div>
 </template>
 <script setup>
 import { ref, onMounted } from 'vue'
+import axios from 'axios'
+import { useRouter } from 'vue-router'
+
+const router = useRouter();
 
 let userEmail = "";
 
@@ -32,8 +38,32 @@ function decodingJWT() {
     console.log(userEmail, expire);
 }
 
+function logout() {
+    const accessToken = localStorage.getItem('accessToken');
+
+    axios.get('/api/logout', 
+        {
+            headers: {
+                'Authorization': 'Bearer ' + accessToken,
+                'Content-Type': 'application/json'
+            }
+        }
+    ).then((res)=>{
+        localStorage.clear();
+        console.log(res);
+        router.push('/');
+    }).catch((error)=>{
+        console.log(error);
+        router.push('/');
+    })
+    
+}
+
 onMounted(()=>{
     const accessToken = localStorage.getItem('accessToken');
+    if(accessToken === null) {
+        return;
+    }
     const claim = JSON.parse(window.atob(accessToken.split('.')[1]));
     userEmail = claim.sub;
     if(userEmail != null) {
