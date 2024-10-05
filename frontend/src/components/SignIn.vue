@@ -8,7 +8,11 @@
                      type="email" class="form-control" 
                      id="exampleInputEmail1" aria-describedby="emailHelp"
                      v-model="email">
-                <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+                <div class="error form-text" v-if="errors['email']"> 
+                    <div v-for="(message, i) in errors['email']" :key="i">
+                        {{ message }}
+                    </div>
+                </div>
             </div>
             <div class="mb-3">
                 <label for="exampleInputPassword1" class="form-label">Password</label>
@@ -16,10 +20,6 @@
                     type="password" class="form-control" 
                    id="exampleInputPassword1"
                     v-model="password"    >
-             </div>
-             <div class="mb-3 form-check">
-              <input type="checkbox" class="form-check-input" id="exampleCheck1">
-              <label class="form-check-label" for="exampleCheck1">Check me out</label>
              </div>
              <button type="button" class="btn btn-primary"
               @click="signIn">Submit</button>
@@ -31,35 +31,43 @@
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
+import { useAuthManagerStore } from '../stores/AuthManager';
+import Validator from '../utils/Validator';
+import ErrMessages from '../utils/ErrMessages';
+import { useFormValidation } from '../utils/FormValidation';
 
 //setup 내에서 vue-router의 router를 사용하기 위함
 const router = useRouter();
 
+const authManager = useAuthManagerStore();
+
 const email = ref("");
 const password = ref("");
+const { errors } = useFormValidation([
+  {
+    field: email,
+    fieldName: 'email',
+    rules: [
+      {
+        validate: (value) => Validator.checkEmail(value),
+        message: ErrMessages.ERR_EMAIL
+      }
+    ]
+  }
+]);
 
-//회원가입 테스트용 메소드 
 function signIn() {
 
-    axios.post('/api/auth/login',
-        {
-            email: email.value,
-            password: password.value
-        }
-    ).then((res) => {
-        console.log(res.data);
-        localStorage.setItem('accessToken', res.data.accessToken);
-        localStorage.setItem('refreshToken', res.data.refreshToken);
-        alert('SignUp Success!');
-        router.push('/');
-    }).catch((error) => {
-        console.log(error);
-    })
+    authManager.login({
+        email: email.value,
+        password: password.value
+    });
 
 }
 
 //테스트용 
 //
+/*
 onMounted(()=>{
     const accessToken = localStorage.getItem('accessToken');
     const claim = JSON.parse(window.atob(accessToken.split('.')[1]));
@@ -84,5 +92,10 @@ onMounted(()=>{
         router.push('/');
     }
 })
+    */
 </script>
-<style lang="scss"></style>
+<style lang="scss">
+    .error {
+        color: red;
+    }
+</style>
