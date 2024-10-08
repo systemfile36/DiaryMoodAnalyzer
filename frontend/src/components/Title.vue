@@ -18,10 +18,8 @@
                 class="btn btn-primary">Write Diary</router-link>
             <button class="btn btn-primary"
                 @click="logoutHandler">Logout</button>
-            </div>
-            
-        </div>
-        
+            </div>         
+        </div>       
     </div>
 </template>
 <script setup>

@@ -1,28 +1,32 @@
 <template lang="">
-    <div class="container">
-        <h2 class="display-5 mb-4">Sign In</h2>
+    <div class="m-3">
+        <h2 class="display-5 mb-4">로그인</h2>
         <form class="p-2 border border-primary">
             <div class="mb-3">
-                <label for="exampleInputEmail1" class="form-label">Email address</label>
+                <label for="InputEmail" class="form-label">Email address</label>
                 <input 
                      type="email" class="form-control" 
-                     id="exampleInputEmail1" aria-describedby="emailHelp"
+                     id="InputEmail" aria-describedby="emailHelp"
                      v-model="email">
-                <div class="error form-text" v-if="errors['email']"> 
-                    <div v-for="(message, i) in errors['email']" :key="i">
-                        {{ message }}
-                    </div>
-                </div>
+                <FormErrorText
+                    :errors="errors"
+                    :fieldName="'email'"/>
             </div>
             <div class="mb-3">
-                <label for="exampleInputPassword1" class="form-label">Password</label>
+                <label for="InputPassword" class="form-label">Password</label>
               <input 
                     type="password" class="form-control" 
-                   id="exampleInputPassword1"
-                    v-model="password"    >
+                   id="InputPassword"
+                    v-model="password">
              </div>
-             <button type="button" class="btn btn-primary"
-              @click="signIn">Submit</button>
+
+            <div class="d-flex ">
+                <button type="button" class="btn btn-primary"
+                @click="signIn">로그인</button>
+                <router-link to="/signup" class="btn btn-light">
+                계정 만들기
+                </router-link>
+                </div>
             </form>
     </div>
 
@@ -31,6 +35,8 @@
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
+import FormErrorText from './FormErrorText.vue';
+
 import { useAuthManagerStore } from '../stores/AuthManager';
 import Validator from '../utils/Validator';
 import ErrMessages from '../utils/ErrMessages';
