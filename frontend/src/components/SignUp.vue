@@ -1,7 +1,7 @@
 <template lang="">
     <div class="m-3">
-        <h2 class="display-6 mb-4">회원가입</h2>
-        <form class="p-2 border border-primary">
+        <h2 class="display-6 mb-4 text-center">회원가입</h2>
+        <form class="p-2 d-flex flex-column">
             <div class="mb-3">
                 <label for="InputEmail" class="form-label">Email address</label>
                 <input 
@@ -35,6 +35,10 @@
              <div class="d-flex">
               <button type="button" class="btn btn-primary"
               @click="signUp">회원가입</button>
+              <button type="button" class="btn btn-light"
+                @click="$router.go(-1)">
+                뒤로 가기
+              </button>
              </div>  
         </form>
     </div>

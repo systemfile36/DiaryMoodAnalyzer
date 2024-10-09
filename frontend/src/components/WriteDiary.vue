@@ -1,21 +1,26 @@
 <template>
-<div class="container mt-5">
-    <div class="mb-3">
-        <label for="diary-title" class="form-label">Diary Title</label>
-        <input type="email" class="form-control" 
-        id="diary-title" placeholder="Title"
-        v-model="title">
+<div class="m-3">
+        <h2 class="display-5 mb-4">일기 작성</h2>
+        <form class="p-2 d-flex flex-column">
+            <div class="mb-3">
+                <label for="InputTitle" class="form-label">Diary Title</label>
+                <input 
+                     type="email" class="form-control" 
+                     id="InputTitle"
+                     v-model="email">
+            </div>
+            <div class="mb-3">
+                <label for="InputContent" class="form-label">Diary Content</label>
+                <textarea class="form-control" id="InputContent" 
+                rows="15" v-model="content"></textarea>
+             </div>
+
+            <div class="d-flex ">
+                <button type="button" class="btn btn-primary"
+                @click="">일기 작성</button>
+            </div>
+        </form>
     </div>
-    <div class="mb-3">
-        <label for="diary-content" class="form-label">Content</label>
-        <textarea class="form-control" id="diary-content" 
-        rows="3" v-model="content"></textarea>
-    </div>
-    <div class="mb-3">
-        <button type="button" class="btn btn-primary"
-            @click="onSubmit">Submit</button>
-    </div>
- </div>
 
 </template>
 <script setup>

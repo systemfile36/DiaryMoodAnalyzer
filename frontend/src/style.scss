@@ -1,0 +1,56 @@
+/*
+전역 변수와 반응형 스타일을 정의함 
+*/
+
+$sidebar-width: 260px;
+$sidebar-trigger-attr: 'sidebar-on';
+
+
+#sidebar-toggler {
+    display: none;
+}
+
+//**px 이하일 때, 적용
+//화면이 작아지면 사이드 바를 접는다.
+@media (max-width: 850px) {
+    #sidebar {
+        transition: transform .3s ease;
+        transform: translateX(-$sidebar-width);
+    }
+
+    #main, #topbar {
+        transition: transform .3s ease;
+    }
+
+    #sidebar-toggler {
+        display: block;
+    }
+
+    #topbar-title {
+        display: none;
+    }
+
+    //sidebar-on 속성이 있으면 사이드 바를 펼친다. (없으면 원상복귀 됨)
+    body[sidebar-on] {
+        #sidebar {
+            transform: translateX(0);
+        }
+    
+        
+        #main, #topbar {
+            transform: translateX($sidebar-width);
+        }
+    }
+}
+
+//**px 이상일 때, 적용 
+//화면이 커지면 다른 요소들의 왼쪽을 사이드 바 너비 만큼 비운다.
+@media (min-width: 849px) {
+    #main, #topbar{
+        margin-left: $sidebar-width;
+    }
+}
+
+
+
+
