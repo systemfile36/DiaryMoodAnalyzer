@@ -5,9 +5,9 @@
             <div class="mb-3">
                 <label for="InputTitle" class="form-label">Diary Title</label>
                 <input 
-                     type="email" class="form-control" 
+                     type="text" class="form-control"
                      id="InputTitle"
-                     v-model="email">
+                     v-model="title">
             </div>
             <div class="mb-3">
                 <label for="InputContent" class="form-label">Diary Content</label>
@@ -17,7 +17,7 @@
 
             <div class="d-flex ">
                 <button type="button" class="btn btn-primary"
-                @click="">일기 작성</button>
+                @click="onSubmit">일기 작성</button>
             </div>
         </form>
     </div>
