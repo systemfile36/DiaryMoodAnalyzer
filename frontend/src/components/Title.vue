@@ -24,19 +24,19 @@
 </template>
 <script setup>
 import { ref, onMounted } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useRouter } from 'vue-router';
 import { useAuthManagerStore } from '../stores/AuthManager';
 
 const authManager = useAuthManagerStore();
+
+const router = useRouter();
 
 function logoutHandler() {
     authManager.logout();
     
 }
 
-onMounted(()=>{
-    //토큰에서 인증 정보 가져와서 초기화
-    authManager.initStates();
-})
 
 </script>
 <style lang="scss">
