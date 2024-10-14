@@ -47,6 +47,8 @@ function onSubmit() {
     .then((res)=>{
         console.log(res.data);
         console.log(res.status);
+        alert('일기를 작성하였습니다.');
+        router.go(0);
     }).catch((error)=>{
         console.log(error);
     })
