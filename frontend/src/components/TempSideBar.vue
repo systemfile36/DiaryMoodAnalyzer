@@ -21,6 +21,12 @@
                         <span>Write Diary</span>
                     </router-link>
                 </li>
+                <li class="nav-item">
+                  <router-link to="/writtenDiary" class="nav-link">
+                    <i class="fas fa-book"></i>
+                    <span>Written Diary</span>
+                  </router-link>
+                </li>
             </ul>
         </nav>
         <div class="d-flex flex-wrap align-item-center w-100">
