@@ -12,7 +12,7 @@ export const useAuthManagerStore = defineStore('authManager', () => {
     const logoutUrl = '/api/logout'
     const signUpUrl = '/api/auth/signup'
     const refreshTokenUrl = '/api/token'
-    const TOKEN_PREFIX = 'Baerer '
+    const TOKEN_PREFIX = 'Bearer '
 
     //store에서 router를 사용하기 위함
     const router = useRouter();
@@ -213,6 +213,7 @@ export const useAuthManagerStore = defineStore('authManager', () => {
         isRefreshTokenExpired,
         checkTokens,
         initStates,
+        getDefaultHeaders,
     }
 
 })

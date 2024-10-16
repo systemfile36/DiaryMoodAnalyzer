@@ -8,6 +8,7 @@ import Title from "../components/Title.vue";
 import SignIn from "../components/SignIn.vue";
 import WriteDiary from "../components/WriteDiary.vue";
 import WrittenDiary from "../components/WrittenDiary.vue";
+import TempDiaryList from "../components/TempDiaryList.vue";
 
 //router 인스턴스 생성 
 const router = createRouter({
@@ -18,7 +19,8 @@ const router = createRouter({
         { path: '/signin', component: SignIn },
         { path: '/', component: Title, meta: { requireAuth: true } },
         { path: '/diary', component: WriteDiary, meta: { requireAuth: true } },
-        { path: '/writtenDiary', component: WrittenDiary, meta: { requireAuth: true }}
+        { path: '/writtenDiary', component: WrittenDiary, meta: { requireAuth: true }},
+        { path: '/test', component: TempDiaryList, meta: { requireAuth: true} }
     ]
 })
 
