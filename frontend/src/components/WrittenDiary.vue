@@ -1,6 +1,6 @@
 <template>
   <div class="board-list">
-    <table class="table">
+    <table class="table table-striped">
       <thead>
       <tr>
         <th scope="col">No</th>
@@ -11,12 +11,12 @@
       </tr>
       </thead>
       <tbody>
-      <tr v-for="diary in diaries" :key="diary">
-        <td>{{diary.id}}</td>
-        <td>{{diary.title}}</td>
-        <td>{{diary.userEmail}}</td>
-        <td>{{diary.content}}</td>
-        <td>{{diary.createdAt}}</td>
+      <tr v-for="(diary, index) in diaries" :key="diary">
+        <td width="100px">{{index+1}}</td>
+        <td class="truncate-cell-1">{{diary.title}}</td>
+        <td width="200px">{{diary.userEmail}}</td>
+        <td class="truncate-cell-2">{{diary.content}}</td>
+        <td width="300px">{{formatDate(diary.createdAt)}}</td>
       </tr>
       </tbody>
     </table>
@@ -25,12 +25,12 @@
 
 <script>
 import axios from 'axios'
+import dayjs from "dayjs";
 
 export default {
   data() {
     return {
       diaries: {},
-      no: '',
     };
   },
   props: {
@@ -54,8 +54,6 @@ export default {
         }
       })
           .then((response) => {
-            //console.log(response.data);
-            //this.diaries = response.data.content;
             this.diaries = response.data.content;
             console.log(response.data.content)
             console.log(this.diaries);
@@ -63,6 +61,9 @@ export default {
           .catch((error) => {
             console.log('다이어리 목록을 가져오는 중 오류 발생:', error);
           });
+    },
+    formatDate(date) {
+      return dayjs(date).format('YYYY-MM-DD HH:mm:ss'); // 날짜 포맷 설정
     }
   }
 }
@@ -70,4 +71,17 @@ export default {
 </script>
 <style lang="scss">
 
+.truncate-cell-1 {
+  max-width: 100px; /* 셀의 최대 너비 */
+  white-space: nowrap; /* 텍스트를 한 줄로 표시 */
+  overflow: hidden; /* 넘치는 텍스트를 숨김 */
+  text-overflow: ellipsis; /* 넘치는 텍스트 부분을 ...으로 표시 */
+}
+
+.truncate-cell-2 {
+  max-width: 300px; /* 셀의 최대 너비 */
+  white-space: nowrap; /* 텍스트를 한 줄로 표시 */
+  overflow: hidden; /* 넘치는 텍스트를 숨김 */
+  text-overflow: ellipsis; /* 넘치는 텍스트 부분을 ...으로 표시 */
+}
 </style>
