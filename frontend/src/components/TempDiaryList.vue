@@ -38,6 +38,7 @@ const diaryManager = useDiaryManagerStore();
 const { diaries } = storeToRefs(diaryManager);
 
 onMounted(()=>{
+    //마운트 되면 다이어리들 로드 
     diaryManager.loadDiaries();
     console.log(`diaries : ${diaryManager.diaries}`);
 })
