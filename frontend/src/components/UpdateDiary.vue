@@ -107,8 +107,6 @@ function onUpdate() {
       console.error("설정 중 오류가 발생했습니다:", error.message);
     }
   })
-  // 작성한 일기를 저장
-
 }
 
 function onDelete(){
