@@ -11,7 +11,7 @@
       </tr>
       </thead>
       <tbody>
-      <tr v-for="(diary, index) in diaries" :key="diary">
+      <tr v-for="(diary, index) in diaries" :key="diary.id" @click="goToDiaryPage(diary.id)" style="cursor: pointer;">
         <td width="100px">{{index+1}}</td>
         <td class="truncate-cell-1">{{diary.title}}</td>
         <td width="200px">{{diary.userEmail}}</td>
@@ -64,6 +64,10 @@ export default {
     },
     formatDate(date) {
       return dayjs(date).format('YYYY-MM-DD HH:mm:ss'); // 날짜 포맷 설정
+    },
+    goToDiaryPage(diaryId) {
+      // 해당 다이어리의 작성 페이지로 이동
+      this.$router.push({ name: 'UpdateDiary', params: { id: diaryId } });
     }
   }
 }

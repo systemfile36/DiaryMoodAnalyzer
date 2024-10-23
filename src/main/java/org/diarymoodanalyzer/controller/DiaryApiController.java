@@ -55,7 +55,17 @@ public class DiaryApiController {
             ) {
         return ResponseEntity.ok(diaryService.getDiariesTitleByEmail(req));
     }
-
+    /*
+    Diary의 id로 수정
+     */
+    @PutMapping("/api/diary/{id}")
+    public ResponseEntity<GetDiaryByIdResponse> updateDiary(
+            @PathVariable long id,
+            @RequestBody AddDiaryRequest req // 수정에 사용할 요청 DTO
+    ) {
+        GetDiaryByIdResponse updatedDiary = diaryService.updateDiaryById(id, req);
+        return ResponseEntity.ok(updatedDiary);
+    }
     /*
     Diary의 id로 삭제
      */

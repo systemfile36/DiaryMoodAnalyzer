@@ -24,10 +24,12 @@ public class Diary extends BaseEntity { //공통 컬럼 상속
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Setter
     @Column(name = "title", nullable = false)
     private String title;
 
     //SQL 타입을 TEXT로 지정
+    @Setter
     @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
 

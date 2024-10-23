@@ -137,6 +137,23 @@ public class DiaryService {
         return diaryRepository.findByUserEmailOnlyTitle(currentUserEmail, pageable);
     }
 
+    public GetDiaryByIdResponse updateDiaryById(long id, AddDiaryRequest req) {
+        // 기존 다이어리 항목 찾기
+        Diary diary = diaryRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        // 다이어리 필드 업데이트
+        diary.setTitle(req.getTitle());
+        diary.setContent(req.getContent());
+        // 필요한 경우 추가 필드 업데이트
+
+        // 업데이트된 다이어리 저장
+        diaryRepository.save(diary);
+
+        // 응답 DTO로 변환
+        return new GetDiaryByIdResponse(diary);
+    }
+
     public void deleteDiaryById(long id) throws ResponseStatusException {
 
         Long ownerId = diaryRepository.findUserIdById(id);
