@@ -26,12 +26,13 @@ export const useDiaryManagerStore = defineStore('diaryManager', ()=>{
     //페이징 관련 변수
     const currentPage = ref(0);
     const currentPageSize = ref(10);
+    const currentTotalPages = ref(0);
     const isAscending = ref(false);
 
     const maxTitleLength = ref(50);
     const maxContentLength = ref(500);
     
-    /** @type {string} */
+    /** @type {Ref(string)} */
     const sortBy = ref(DiaryColumns.CREATED);
 
     /**
@@ -67,7 +68,8 @@ export const useDiaryManagerStore = defineStore('diaryManager', ()=>{
     }
 
     /**
-     * diaries 변수에 현재 인증된 유저의 전체 다이어리들을 로드한다.
+     * diaries 변수에 현재 인증된 유저의 다이어리를 로드한다. 
+     * 로드한 다이어리의 정렬과 순서는 페이징 변수 설정에 따른다.
      */
     async function loadDiaries() {
 
@@ -81,8 +83,11 @@ export const useDiaryManagerStore = defineStore('diaryManager', ()=>{
                 console.log(res);
     
                 diaries.value = res.data.content;
-    
-                console.log(diaries.value);
+
+                //전체 페이지 수 저장
+                currentTotalPages.value = res.data.totalPages;
+
+                //console.log(diaries.value);
             }).catch((error) => {
                 console.log(error);
             })
@@ -92,6 +97,30 @@ export const useDiaryManagerStore = defineStore('diaryManager', ()=>{
         
     }
 
+    /**
+     * 인자로 받은 page의 Diary를 불러옴
+     * @param {number} page - 페이지 번호. 0-indexed.
+     */
+    async function setDiaryPage(page) {
+        currentPage.value = Math.min(page, currentPageSize.value);
+        await loadDiaries();
+    }
+
+    /**
+     * 현재 페이지가 첫번째 페이지인지 여부를 반환
+     * @returns {boolean} - if current page is first, return true
+     */
+    function isFirstPage() {
+        return currentPage.value === 0;
+    }
+
+    /**
+     * 현재 페이지가 마지막 페이지인지 여부를 반환
+     * @returns {boolean} - if current page is last, return true
+     */
+    function isLastPage() {
+        return currentPage.value >= (currentTotalPages.value - 1);
+    }
 
     /**
      * id를 받아서 해당 id와 일치하는 다이어리 객체를 반환함
@@ -149,6 +178,7 @@ export const useDiaryManagerStore = defineStore('diaryManager', ()=>{
     return {
         currentPage,
         currentPageSize,
+        currentTotalPages,
         isAscending,
         sortBy,
         diaries,
@@ -159,5 +189,8 @@ export const useDiaryManagerStore = defineStore('diaryManager', ()=>{
         formatDate,
         getTruncated,
         getDiaryById,
+        setDiaryPage,
+        isFirstPage,
+        isLastPage,
     }
 })

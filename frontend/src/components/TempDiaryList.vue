@@ -25,6 +25,27 @@
                 </div>
             </router-link>
         </article>
+        <!-- Pagination -->
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                <li class="page-item" :class="{ disabled : diaryManager.isFirstPage() }" >
+                    <a class="page-link" href="#"
+                        @click="onMovePage(diaryManager.currentPage - 1)">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </a>
+                </li>
+                <li class="page-item" v-for="i in diaryManager.currentTotalPages" :key="i" 
+                     :class="{ active : (diaryManager.currentPage + 1) === i}">
+                    <!-- convert 1-indexed to 0-indexed -->
+                    <a class="page-link" href="#" @click="onMovePage(i-1)">{{ i }}</a>
+                </li>
+                <li class="page-item" :class="{ disabled : diaryManager.isLastPage() }">
+                    <a class="page-link" href="#">
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
     </div>
 </template>
 <script setup>
@@ -40,8 +61,12 @@ const { diaries } = storeToRefs(diaryManager);
 onMounted(()=>{
     //마운트 되면 다이어리들 로드 
     diaryManager.loadDiaries();
-    console.log(`diaries : ${diaryManager.diaries}`);
+
 })
+
+function onMovePage(page) {
+    diaryManager.setDiaryPage(page);
+}
 
  /**
   * maxLength 만큼 자른 값을 반환한다. 
