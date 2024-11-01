@@ -15,13 +15,14 @@ const authManager = useAuthManagerStore();
 </script>
 
 <template>
-  
+  <!-- AuthManager.js를 통해 인증 여부 확인 -->
   <div v-if="authManager.isAuthenticated">
     <!-- 인증 되었을 때만 표시 -->
     <TempSideBar/>
     <TempNavBar/>
     <Mask/>
 
+    <!-- 사이드바의 컨트롤을 위해 #main 아래에 <router-view/> 배치-->
     <div id="main">
       <router-view/>
     </div>

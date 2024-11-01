@@ -1,7 +1,7 @@
 <template>
     <div id="diary-list" class="flex-grow-1 px-4">
         <article class="card-wrapper card" v-for="(diary, i) in diaries" :key="i">
-            <router-link to="#" class="diary-preview row g-0 flex-md-row-reverse">
+            <router-link :to="`/diaries/${diary.id}`" class="diary-preview row g-0 flex-md-row-reverse">
                 <div class="col-md-12">
                     <div class="card-body d-flex flex-column">
                         <h1 class="card-title my-2 mt-md-0 text-primary-emphasis">
@@ -12,6 +12,7 @@
                         </div>
                         <div class="diary-meta flex-grow-1 d-flex align-items-end text-primary-emphasis">
                             <div class="me-auto">
+                                <!-- 작성 시각 -->
                                 <i class="fa-regular fa-calendar"></i>
                                 <time>
                                     {{ diaryManager.formatDate(diary.createdAt) }}
@@ -19,6 +20,9 @@
                                 <!-- 감정 분석 결과 -->
                                 <i class="fa-regular fa-face-smile"></i>
                                 <span class="sentimental">not bad</span>
+                                <!-- 코멘트 개수 -->
+                                <i class="fa-solid fa-comments"></i>
+                                <span class="comments">1개</span>
                             </div>
                         </div>
                     </div>
@@ -40,7 +44,8 @@
                     <a class="page-link" href="#" @click="onMovePage(i-1)">{{ i }}</a>
                 </li>
                 <li class="page-item" :class="{ disabled : diaryManager.isLastPage() }">
-                    <a class="page-link" href="#">
+                    <a class="page-link" href="#"
+                        @click="onMovePage(diaryManager.currentPage + 1)">
                         <i class="fa-solid fa-arrow-right"></i>
                     </a>
                 </li>

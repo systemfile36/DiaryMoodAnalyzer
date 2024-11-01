@@ -19,7 +19,7 @@ export const useDiaryManagerStore = defineStore('diaryManager', ()=>{
     const diariesTitleUrl = '/api/diaries/title';
 
     /**
-     * 다이어리의 날짜 포맷 형식 
+     * 다이어리의 기본 날짜 포맷 형식 
      */
     const diaryDateFormat = 'YYYY-MM-DD HH:mm:ss';
 
@@ -131,7 +131,7 @@ export const useDiaryManagerStore = defineStore('diaryManager', ()=>{
      */
     function getDiaryById(id) {
         const result = diaries.value.filter((value)=>{
-            return value['id'] === id;
+            return value['id'] == id;
         });
 
         //result가 존재하면 해당 객체, 그렇지 않으면 null
@@ -156,10 +156,12 @@ export const useDiaryManagerStore = defineStore('diaryManager', ()=>{
      * @param {string} date - datetime 문자열
      * @returns formatted datetime string
      */
-    function formatDate(date) {
+    function formatDate(date, format=diaryDateFormat) {
         //day.js 사용 
-        return dayjs(date).format(diaryDateFormat); // 날짜 포맷 설정
+        return dayjs(date).format(format); // 날짜 포맷 설정
     }
+
+
 
      /**
       * maxLength 만큼 자른 값을 반환한다. 
