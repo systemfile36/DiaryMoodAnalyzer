@@ -16,8 +16,10 @@
                 <label for="InputPassword" class="form-label">Password</label>
               <input 
                     type="password" class="form-control" 
-                   id="InputPassword"
-                    v-model.trim="password">
+                    id="InputPassword"
+                    v-model.trim="password"
+                    @input="checkRules"> 
+                    <!-- 비밀 번호가 바뀌면 비밀 번호 일치도 갱신해야 함 -->
               <FormErrorText
                 :errors="errors"
                 :fieldName="'password'"/>
@@ -54,18 +56,22 @@ import Validator from '../utils/Validator';
 import ErrMessages from '../utils/ErrMessages';
 import { useFormValidation } from '../utils/FormValidation';
 import { useAuthManagerStore } from '../stores/AuthManager';
+import { useModalManagerStore } from '../stores/ModalManager';
 
 //setup 내에서 vue-router의 router를 사용하기 위함
 const router = useRouter();
 
 const authManager = useAuthManagerStore();
 
+const modalManager = useModalManagerStore();
+
 const email = ref("");
 const password = ref("");
 const passwordCheck = ref("");
 
 //컴포저블을 통해 폼 입력값의 유효성 검사
-const { errors } = useFormValidation([
+//checkRules도 받아옴 
+const { errors, checkRules } = useFormValidation([
   {
     field: email,
     fieldName: 'email',
@@ -100,13 +106,22 @@ const { errors } = useFormValidation([
 ]);
 
 function signUp() {
-  if(Object.entries(errors.value).length === 0) {
-    authManager.signUp({
-        email: email.value,
-        password: password.value
-    })
+  //예외 처리 강제 실행
+  checkRules();
+
+  if(Object.keys(errors.value).length > 0) {
+    modalManager.setModalText(
+      "입력값 오류",
+      "잘못된 입력 값이 있습니다. 다시 확인해 주세요.",
+      "확인", "닫기"
+    );
+
+    modalManager.openModal(null, null);
   } else {
-    alert(ErrMessages.ERR_INVALID_FORM_INPUT);
+    authManager.signUp({
+      email: email.value,
+      password: password.value
+    })
   }
 }
 </script>

@@ -50,21 +50,23 @@ export const useDiaryManagerStore = defineStore('diaryManager', ()=>{
      * @param {string} content 
      */
     async function addDiary(title, content) {
-        const diary = {
-            title: title,
-            content: content
-        };
-
-        const headers = authManager.getDefaultHeaders();
-
-        await axios.post(diariesUrl, diary, {headers})
-            .then((res)=>{
-                console.log(res);
-                alert('일기 작성에 성공하였습니다.');
-                router.go(0);
-            }).catch((error)=>{
-                console.log(error);
-            })
+        if(await authManager.checkTokens()) {
+            const diary = {
+                title: title,
+                content: content
+            };
+    
+            const headers = authManager.getDefaultHeaders();
+    
+            await axios.post(diariesUrl, diary, {headers})
+                .then((res)=>{
+                    console.log(res);
+                    alert('일기 작성에 성공하였습니다.');
+                    router.go(0);
+                }).catch((error)=>{
+                    console.log(error);
+                })
+        }
     }
 
     /**

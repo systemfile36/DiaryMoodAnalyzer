@@ -14,6 +14,16 @@ export default class Validator {
     static PASSWORD_REGEX = /^(?=.*\d)(?=.*[a-z]).{8,12}$/
 
     /**
+     * Diary의 title 최대 길이
+     */
+    static DIARY_TITLE_MAX_LENGTH = 256;
+
+    /**
+     * Diary의 content 최대 길이
+     */
+    static DIARY_CONTENT_MAX_LENGTH = 1500;
+
+    /**
      * 
      * @param { string } email 
      * @returns { boolean } 유효하면 true, otherwise, false
@@ -29,5 +39,23 @@ export default class Validator {
      */
     static checkPassword(password) {
         return this.PASSWORD_REGEX.test(password);
+    }
+
+    /**
+     * Diary의 title의 최대 길이 검증 
+     * @param {string} title 
+     * @returns { boolean } 유효하면 true, otherwise, false
+     */
+    static checkDiaryTitleMaxLength(title) {
+        return title.length <= this.DIARY_TITLE_MAX_LENGTH;
+    }
+
+    /**
+     * Diary의 content의 최대 길이 검증 
+     * @param { string } content 
+     * @returns { boolean } 유효하면 true, otherwise, false
+     */
+    static checkDiaryContentMaxLength(content) {
+        return content.length <= this.DIARY_CONTENT_MAX_LENGTH;
     }
 }
