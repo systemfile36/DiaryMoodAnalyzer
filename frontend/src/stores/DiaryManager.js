@@ -68,6 +68,33 @@ export const useDiaryManagerStore = defineStore('diaryManager', ()=>{
     }
 
     /**
+     * id에 해당하는 다이어리를 삭제한 후, 리로드 한다. 
+     * @param {number | string} id - 삭제할 다이어리의 id
+     */
+    async function deleteDiary(id) {
+
+        //토큰 유효성 체크 
+        if(await authManager.checkTokens()) {
+
+            const headers = authManager.getDefaultHeaders();
+
+            //삭제 요청 보냄 
+            await axios.delete(`${diaryUrl}/${id}`, {headers}).catch((err)=>{
+                console.log(err);
+            })
+
+            //다이어리 리로드 
+            await loadDiaries();
+        } else {
+            console.log("토큰 획득에 실패하였습니다.");
+        }
+
+        
+
+        
+    }
+
+    /**
      * diaries 변수에 현재 인증된 유저의 다이어리를 로드한다. 
      * 로드한 다이어리의 정렬과 순서는 페이징 변수 설정에 따른다.
      */
@@ -187,6 +214,7 @@ export const useDiaryManagerStore = defineStore('diaryManager', ()=>{
         maxTitleLength,
         maxContentLength,
         addDiary,
+        deleteDiary,
         loadDiaries,
         formatDate,
         getTruncated,

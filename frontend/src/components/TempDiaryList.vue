@@ -63,9 +63,9 @@ const diaryManager = useDiaryManagerStore();
 //반응형을 유지하기 위해 destructuring 해서 받아옴 
 const { diaries } = storeToRefs(diaryManager);
 
-onMounted(()=>{
+onMounted(async ()=>{
     //마운트 되면 다이어리들 로드 
-    diaryManager.loadDiaries();
+    await diaryManager.loadDiaries();
 
 })
 
