@@ -10,6 +10,7 @@ import WriteDiary from "../components/WriteDiary.vue";
 import WrittenDiary from "../components/WrittenDiary.vue";
 import TempDiaryList from "../components/TempDiaryList.vue";
 import TempDiaryDetail from "../components/TempDiaryDetail.vue";
+import FrontPage from "../components/FrontPage.vue";
 
 //router 인스턴스 생성 
 const router = createRouter({
@@ -25,7 +26,9 @@ const router = createRouter({
         
         { path: '/diaries', component: TempDiaryList, meta: { requireAuth: true} },
         //다이어리 상세보기
-        { path: '/diaries/:id', component: TempDiaryDetail, meta: {requireAuth: true}}
+        { path: '/diaries/:id', component: TempDiaryDetail, meta: {requireAuth: true}},
+
+        { path: '/test', component: FrontPage }
     ]
 })
 
