@@ -10,11 +10,8 @@ import WriteDiary from "../components/WriteDiary.vue";
 import WrittenDiary from "../components/WrittenDiary.vue";
 import TempDiaryList from "../components/TempDiaryList.vue";
 import TempDiaryDetail from "../components/TempDiaryDetail.vue";
-<<<<<<< HEAD
 import FrontPage from "../components/FrontPage.vue";
-=======
 import Chart from "../components/Chart.vue";
->>>>>>> 3090e261efa6cbda2545604dd53e540c7d1545d1
 
 //router 인스턴스 생성 
 const router = createRouter({
