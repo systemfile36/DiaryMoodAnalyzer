@@ -52,7 +52,7 @@ public class TokenProviderTest {
                 .get("id", Long.class);
 
         //일치 여부 확인
-        assertThat(userId).isEqualTo(testUser.getUserId());
+        assertThat(userId).isEqualTo(testUser.getId());
     }
 
     @DisplayName("validateToken: 만료된 토큰에 대해 false를 반환한다.")

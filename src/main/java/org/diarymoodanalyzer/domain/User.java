@@ -5,13 +5,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -29,8 +25,8 @@ public class User extends BaseEntity implements UserDetails { //공통 컬럼 �
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_id")
-    private Long userId; //AUTO INCREMENT하는 기본 키
+    @Column(name = "id")
+    private Long id; //AUTO INCREMENT하는 기본 키
 
     @Column(name = "email", nullable = false, unique = true, length = 100)
     private String email; //NOT NULL, UNIQUE 중복 값 허용 안하는 제약

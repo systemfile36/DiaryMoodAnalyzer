@@ -5,10 +5,8 @@ import org.diarymoodanalyzer.domain.User;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.Objects;
 
 /*
 SecurityContextHolder 사용하여 인증에 대한 정보를 반환하는 유틸리티 클래스
@@ -49,7 +47,7 @@ public class AuthenticationUtils {
      */
     public static Long getCurrentUserId() {
         User user = getCurrentUser();
-        return user == null ? null : user.getUserId();
+        return user == null ? null : user.getId();
     }
 
     /*

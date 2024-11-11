@@ -4,7 +4,6 @@ import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 import org.diarymoodanalyzer.domain.User;
 import org.diarymoodanalyzer.service.UserDetailService;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -49,7 +48,7 @@ public class TokenProvider {
                 .setIssuedAt(expire) // 발급 시간, iat
                 .setExpiration(expire) // 만료 시간, exp
                 .setSubject(user.getEmail()) // 제목, sub. 사용자의 이메일
-                .claim("id", user.getUserId()) //사용자의 id
+                .claim("id", user.getId()) //사용자의 id
                 .claim("role", role) // 사용자의 권한
                 .signWith(SignatureAlgorithm.HS256, jwtProperties.getSecretKey()) // 서명 설정. HS256과 비밀 키로 서명
                 .compact();

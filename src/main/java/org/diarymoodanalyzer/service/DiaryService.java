@@ -1,7 +1,6 @@
 package org.diarymoodanalyzer.service;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -21,10 +20,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 @RequiredArgsConstructor
@@ -70,7 +66,7 @@ public class DiaryService {
         //리포지토리에 저장
         Diary savedDiary = diaryRepository.save(diary);
 
-        return new AddDiaryResponse(savedDiary.getDiaryId(), currentUserEmail, dto.getTitle());
+        return new AddDiaryResponse(savedDiary.getId(), currentUserEmail, dto.getTitle());
 
         /*
         프록시 객체의 속성에 접근하지 않고 단순히 diary에 참조만 넘겼다.

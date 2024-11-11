@@ -19,7 +19,7 @@ public class UserService {
         return userRepository.save(User.builder()
                 .email(req.getEmail())
                 .password(bCryptPasswordEncoder.encode(req.getPassword())) //비밀 번호 암호화
-                .build()).getUserId();
+                .build()).getId();
     }
 
     public User findById(Long userId) {

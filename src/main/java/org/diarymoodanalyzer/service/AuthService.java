@@ -51,7 +51,7 @@ public class AuthService {
             String refreshToken = tokenProvider.createToken(user, TokenProvider.REFRESH_EXPIRE);
 
             //리프레쉬 토큰을 저장하거나, 업데이트함
-            refreshTokenService.saveOrUpdate(user.getUserId(), refreshToken);
+            refreshTokenService.saveOrUpdate(user.getId(), refreshToken);
 
             //응답 DTO 구성
             LoginResponse response = new LoginResponse();

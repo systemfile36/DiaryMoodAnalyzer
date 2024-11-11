@@ -17,7 +17,7 @@ public class Diary extends BaseEntity { //공통 컬럼 상속
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long diaryId;
+    private Long id;
 
     /**
      * Diary의 소유자.
