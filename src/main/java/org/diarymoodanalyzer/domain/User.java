@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.security.core.GrantedAuthority;
@@ -15,12 +16,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-//회원 정보를 저장하는 클래스. 
-//스프링 시큐리티 사용을 위해 UserDetails 를 구현
+/**
+ * 사용자 엔티티.
+ */
 @NoArgsConstructor
 @Getter
+@Setter
 @Table(name = "users")
 @Entity
+@Inheritance(strategy = InheritanceType.JOINED) //상속 매핑을 JOIN 형태로 하기 위함
 public class User extends BaseEntity implements UserDetails { //공통 컬럼 상속
 
     @Id
@@ -38,10 +42,17 @@ public class User extends BaseEntity implements UserDetails { //공통 컬럼 �
     사용자의 일기 목록, Diary와 1대다 관계.
     cascade를 통해 모든 상태가 전이되게 한다. (User가 삭제되면, 연관된 자식들(=Diary)도 삭제된다.)
     orphanRemoval을 통해 부모와 연결이 끊긴 Diary를 삭제한다.
-    즉, user의 diaries에서 특정 Diary가 삭제되면, 해당 Diary는 diary 테이블에서도 삭제된다.
     */
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<Diary> diaries = new ArrayList<>();
+
+    /**
+     * 담당 전문가에 대한 참조.
+     * 외래 키 expert_id로 연결됨
+     */
+    @ManyToOne
+    @JoinColumn(name = "expert_id")
+    private Expert expert;
 
     /*
     User와 Diary 사이의 관계를 명확히 하기 위함이다.
@@ -57,14 +68,22 @@ public class User extends BaseEntity implements UserDetails { //공통 컬럼 �
         this.email = email; this.password = password;
     }
 
-    //사용자의 권한 목록을 반환. 현재는 단순히 USER로 반환. 사용 시에는 ROLE_USER로 사용
+    /**
+     * 사용자의 권한 목록을 반환. 권한 기반으로 인가를 하기 위해 사용.
+     * 다른 권한을 가진 사용자라면, 오버라이딩해서 사용한다.
+     * @return List.of(UserAuthority.USER.getAuthority());
+     */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
 
-        return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+        return List.of(UserAuthority.USER.getAuthority());
     }
 
-    //이메일을 유저 명으로 사용 (인덱스된 유니크 값이기 때문)
+    /**
+     * 사용자의 username을 반환.
+     * 해당 엔티티에서는 email을 반환한다.
+     * @return User 엔티티의 email 필드
+     */
     @Override
     public String getUsername() {
         return this.email;

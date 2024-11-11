@@ -6,8 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-//일기 정보 저장하는 엔티티
-//테스트를 위한 구현입니다.
+/**
+ * Diary 엔티티.
+ */
 @NoArgsConstructor
 @Getter
 @Table(name = "diaries")
@@ -18,7 +19,10 @@ public class Diary extends BaseEntity { //공통 컬럼 상속
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long diaryId;
 
-    //Diary의 외래키 설정, JoinColumn을 통해 외래키 지정
+    /**
+     * Diary의 소유자.
+     * User 엔티티와 다대1 관계로 연결됨 (양방향)
+     */
     @ManyToOne
     @Setter //Diary 추가시 유저와 동기화 하기 위하여
     @JoinColumn(name = "user_id", nullable = false)
