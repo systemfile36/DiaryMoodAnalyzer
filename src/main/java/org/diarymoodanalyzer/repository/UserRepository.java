@@ -17,7 +17,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     JPQL을 사용하여 이메일을 통해 User의 user_id만 받아온다.
     JPQL은 테이블과 컬럼이 아닌 엔티티와 필드를 대상으로 한다. 이 점 주의!
      */
-    @Query("SELECT u.userId FROM User u WHERE u.email = :email")
+    @Query("SELECT u.id FROM User u WHERE u.email = :email")
     Long findIdByEmail(@Param("email") String email);
 
     //이메일로 유저의 존재 유무를 반환

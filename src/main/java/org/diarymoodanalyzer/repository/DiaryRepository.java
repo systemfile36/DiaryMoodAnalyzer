@@ -28,7 +28,7 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
      */
     @Query("""
             SELECT new org.diarymoodanalyzer.dto.response.GetDiaryTitleByPageResponse
-                (d.diaryId, d.title, d.createdAt, d.updatedAt, d.user.email)
+                (d.id, d.title, d.createdAt, d.updatedAt, d.user.email)
             FROM Diary d WHERE d.user.email = :email
             """)
     Page<GetDiaryTitleByPageResponse> findByUserEmailOnlyTitle(@Param("email") String email, Pageable pageable);
@@ -37,8 +37,8 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
     /*
     diaryId를 받아서 해당 다이어리의 소유자를 userId로 반환한다.
      */
-    @Query("SELECT d.user.userId FROM Diary d WHERE d.diaryId = :diaryId")
-    Long findUserIdById(@Param("diaryId") Long diaryId);
+    @Query("SELECT d.user.id FROM Diary d WHERE d.id = :id")
+    Long findUserIdById(@Param("id") Long diaryId);
 
 /*
 
