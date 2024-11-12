@@ -50,6 +50,15 @@ public class User extends BaseEntity implements UserDetails { //공통 컬럼 �
     @JoinColumn(name = "expert_id")
     private Expert expert;
 
+    /**
+     * 해당 사용자의 권한.
+     * "USER", "EXPERT"와 같이 Enum의 name이 저장됨
+     * 기본값은 UserAuthority.USER 이다.
+     */
+    @Column
+    @Enumerated(EnumType.STRING)
+    private UserAuthority authority = UserAuthority.USER;
+
     /*
     User와 Diary 사이의 관계를 명확히 하기 위함이다.
     추가한 다이어리에 해당 다이어리의 주인을 추가해주어야 오류가 안생긴다.
@@ -65,14 +74,13 @@ public class User extends BaseEntity implements UserDetails { //공통 컬럼 �
     }
 
     /**
-     * 사용자의 권한 목록을 반환. 권한 기반으로 인가를 하기 위해 사용.
-     * 다른 권한을 가진 사용자라면, 오버라이딩해서 사용한다.
-     * @return List.of(UserAuthority.USER.getAuthority());
+     * 사용자의 권한 목록을 반환. 권한 기반으로 인가를 하기 위해 사용
+     * @return 사용자의 권한이 담긴 Collection
      */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-
-        return List.of(UserAuthority.USER.getAuthority());
+        //필드(컬럼)에 정의된 권한 정보 반환
+        return List.of(this.authority.getAuthority());
     }
 
     /**
