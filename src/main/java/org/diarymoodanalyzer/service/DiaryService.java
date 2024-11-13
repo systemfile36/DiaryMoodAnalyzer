@@ -9,7 +9,8 @@ import org.diarymoodanalyzer.domain.User;
 import org.diarymoodanalyzer.domain.UserAuthority;
 import org.diarymoodanalyzer.dto.request.AddDiaryRequest;
 import org.diarymoodanalyzer.dto.request.GetDiaryByPageRequest;
-import org.diarymoodanalyzer.dto.request.GetDiaryOfManagedUserByPageRequest;
+import org.diarymoodanalyzer.dto.request.GetDiaryByPageForExpertRequest;
+import org.diarymoodanalyzer.dto.request.GetDiaryForExpertRequest;
 import org.diarymoodanalyzer.dto.response.AddDiaryResponse;
 import org.diarymoodanalyzer.dto.response.GetDiaryByIdResponse;
 import org.diarymoodanalyzer.dto.response.GetDiaryByPageResponse;
@@ -94,6 +95,20 @@ public class DiaryService {
         ));
     }
 
+    public GetDiaryByIdResponse getDiaryByIdForExpert(GetDiaryForExpertRequest req) throws ResponseStatusException {
+
+        Diary diary = diaryRepository.findById(req.getId())
+                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "not found width diary id : " + req.getId()));
+
+
+        //조회한 다이어리의 소유자의 담당자와 현재 인증된 유저가 일치하지 않는다면 예외를 던진다.
+        if(!validateAuthByEmail(diary.getUser().getExpert().getEmail())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You have not permission");
+        } else {
+            return new GetDiaryByIdResponse(diary);
+        }
+    }
+
     public Page<GetDiaryByPageResponse> getDiariesByEmail(GetDiaryByPageRequest req) throws ResponseStatusException {
 
         Pageable pageable = req.getPageable();
@@ -119,7 +134,8 @@ public class DiaryService {
      * @return 요청한 유저의 다이어리 목록
      * @throws ResponseStatusException - 인증 정보가 잘못되었거나, 매개 변수가 잘못되거나, 권한이 없을 때 발생
      */
-    public Page<GetDiaryByPageResponse> getDiariesByEmailForExpert(GetDiaryOfManagedUserByPageRequest req) throws ResponseStatusException {
+    public Page<GetDiaryByPageResponse> getDiariesByEmailForExpert(GetDiaryByPageForExpertRequest req)
+            throws ResponseStatusException {
 
         Pageable pageable = req.getPageable();
 
@@ -154,7 +170,8 @@ public class DiaryService {
 
 
 
-    public Page<GetDiaryTitleByPageResponse> getDiariesTitleByEmail(GetDiaryByPageRequest req) throws ResponseStatusException {
+    public Page<GetDiaryTitleByPageResponse> getDiariesTitleByEmail(GetDiaryByPageRequest req)
+            throws ResponseStatusException {
 
         Pageable pageable = req.getPageable();
 
@@ -200,9 +217,10 @@ public class DiaryService {
         diaryRepository.deleteById(id);
     }
 
-    /*
-    현재 인증된 유저의 이메일이, 인자로 받은 이메일과 같으면 true.
-    otherwise, false
+    /**
+     * 현재 인증된 유저의 이메일이, 인자로 받은 이메일과 같은지 여부
+     * @param email - 현재 인증된 유저와 비교할 이메일
+     * @return 인증 정보의 이메일이 인자와 같으면 true, otherwise, false
      */
     private boolean validateAuthByEmail(String email) {
         String currentUserEmail = AuthenticationUtils.getCurrentUserEmail();

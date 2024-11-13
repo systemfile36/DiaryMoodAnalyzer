@@ -8,7 +8,7 @@ import lombok.Getter;
  *
  */
 @Getter
-public class GetDiaryOfManagedUserByPageRequest extends BasePagingRequest {
+public class GetDiaryByPageForExpertRequest extends BasePagingRequest {
     /**
      * 조회할 다이어리들의 주인
      */
