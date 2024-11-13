@@ -9,12 +9,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class GetDiaryByPageRequest {
-    //페이지의 인덱스와 사이즈를 받는다.
-    private int page;
-    private int size;
+public class GetDiaryByPageRequest extends BasePagingRequest{
 
-    //정렬 기준이 될 필드와 오름차순 여부. 기본값 : 생성 시간 기준 역순
-    private String sortBy = "createdAt";
-    private boolean isAscending = false;
 }

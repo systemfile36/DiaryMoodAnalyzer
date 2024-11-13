@@ -160,7 +160,7 @@ class DiaryApiControllerTest {
                 .param("email", user.getEmail())
                 .param("page", String.valueOf(req.getPage()))
                 .param("size", String.valueOf(req.getSize()))
-                .param("sortBy", req.getSortBy())
+                .param("sortBy", req.getSort())
                 .param("isAscending", String.valueOf(req.isAscending()))
                 .accept(MediaType.APPLICATION_JSON));
 
@@ -213,7 +213,7 @@ class DiaryApiControllerTest {
                 .param("email", user.getEmail())
                 .param("page", String.valueOf(req.getPage()))
                 .param("size", String.valueOf(req.getSize()))
-                .param("sortBy", req.getSortBy())
+                .param("sortBy", req.getSort())
                 .param("isAscending", String.valueOf(req.isAscending()))
                 .accept(MediaType.APPLICATION_JSON));
 

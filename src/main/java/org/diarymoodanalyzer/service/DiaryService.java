@@ -6,8 +6,10 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.diarymoodanalyzer.domain.Diary;
 import org.diarymoodanalyzer.domain.User;
+import org.diarymoodanalyzer.domain.UserAuthority;
 import org.diarymoodanalyzer.dto.request.AddDiaryRequest;
 import org.diarymoodanalyzer.dto.request.GetDiaryByPageRequest;
+import org.diarymoodanalyzer.dto.request.GetDiaryOfManagedUserByPageRequest;
 import org.diarymoodanalyzer.dto.response.AddDiaryResponse;
 import org.diarymoodanalyzer.dto.response.GetDiaryByIdResponse;
 import org.diarymoodanalyzer.dto.response.GetDiaryByPageResponse;
@@ -16,9 +18,7 @@ import org.diarymoodanalyzer.repository.DiaryRepository;
 import org.diarymoodanalyzer.repository.UserRepository;
 import org.diarymoodanalyzer.util.AuthenticationUtils;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -96,11 +96,7 @@ public class DiaryService {
 
     public Page<GetDiaryByPageResponse> getDiariesByEmail(GetDiaryByPageRequest req) throws ResponseStatusException {
 
-        //정렬 기준을 DTO에서 받아와서 할당함.
-        Sort sortBy = req.isAscending() ? Sort.by(req.getSortBy()).ascending() : Sort.by(req.getSortBy()).descending();
-
-        //페이지의 번호와 사이즈, 정렬 기준을 지정
-        Pageable pageable = PageRequest.of(req.getPage(), req.getSize(), sortBy);
+        Pageable pageable = req.getPageable();
 
         //현재 인증된 유저 정보 불러옴
         String currentUserEmail = AuthenticationUtils.getCurrentUserEmail();
@@ -116,12 +112,51 @@ public class DiaryService {
         return diaries.map(GetDiaryByPageResponse::new);
     }
 
-    public Page<GetDiaryTitleByPageResponse> getDiariesTitleByEmail(GetDiaryByPageRequest req) throws ResponseStatusException {
-        //정렬 기준을 DTO에서 받아와서 할당함.
-        Sort sortBy = req.isAscending() ? Sort.by(req.getSortBy()) : Sort.by(req.getSortBy()).descending();
+    /**
+     * Expert가 자신이 관리하는 유저의 Diary를 페이지로 조회하기 위한 서비스 메소드
+     * Expert만 접근 가능해야 함 (권한 체크는 컨트롤러 단에서 수행함)
+     * @param req 페이징 관련 변수와 조회할 Diary의 주인의 이메일이 포함된 요청 DTO
+     * @return 요청한 유저의 다이어리 목록
+     * @throws ResponseStatusException - 인증 정보가 잘못되었거나, 매개 변수가 잘못되거나, 권한이 없을 때 발생
+     */
+    public Page<GetDiaryByPageResponse> getDiariesByEmailForExpert(GetDiaryOfManagedUserByPageRequest req) throws ResponseStatusException {
 
-        //페이지의 번호와 사이즈, 정렬 기준을 지정
-        Pageable pageable = PageRequest.of(req.getPage(), req.getSize(), sortBy);
+        Pageable pageable = req.getPageable();
+
+        //현재 접속중인 유저(=전문가, Expert)의 이메일
+        String currentUserEmail = AuthenticationUtils.getCurrentUserEmail();
+
+        //인증되지 않았거나, EXPERT 권한이 없다면 FORBIDDEN 반환
+        if(currentUserEmail == null || AuthenticationUtils.hasAuthority(UserAuthority.EXPERT.getAuthority())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You have not permission");
+        }
+
+        //조회할 다이어리의 주인의 이메일
+        String ownerEmail = req.getOwnerEmail();
+
+        //다이어리의 주인을 받아옴
+        User owner = userRepository.findByEmail(ownerEmail)
+                .orElseThrow(()-> new ResponseStatusException(HttpStatus.BAD_REQUEST, "There is no user : " + ownerEmail));
+
+        //만약 현재 접속중인 유저가 다이어리 주인의 담당자가 아니라면, 역시 FORBIDDEN 반환
+        if(!currentUserEmail.equals(owner.getExpert().getEmail())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You have not permission");
+        } else {
+            //모든 정보가 일치하면 페이지를 구성해서 반환한다.
+
+            Page<Diary> diaries = diaryRepository.findByUserEmail(ownerEmail, pageable);
+
+            //DTO의 생성자로 매핑해서 반환
+            return diaries.map(GetDiaryByPageResponse::new);
+        }
+
+    }
+
+
+
+    public Page<GetDiaryTitleByPageResponse> getDiariesTitleByEmail(GetDiaryByPageRequest req) throws ResponseStatusException {
+
+        Pageable pageable = req.getPageable();
 
         //현재 인증된 유저 정보 불러옴
         String currentUserEmail = AuthenticationUtils.getCurrentUserEmail();

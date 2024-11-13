@@ -3,10 +3,13 @@ package org.diarymoodanalyzer.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.diarymoodanalyzer.config.jwt.TokenProvider;
+import org.diarymoodanalyzer.domain.Expert;
 import org.diarymoodanalyzer.domain.User;
+import org.diarymoodanalyzer.domain.UserAuthority;
 import org.diarymoodanalyzer.dto.request.LoginRequest;
 import org.diarymoodanalyzer.dto.request.SignUpRequest;
 import org.diarymoodanalyzer.dto.response.LoginResponse;
+import org.diarymoodanalyzer.repository.ExpertRepository;
 import org.diarymoodanalyzer.repository.UserRepository;
 import org.diarymoodanalyzer.util.AuthenticationUtils;
 import org.diarymoodanalyzer.util.EmailValidator;
@@ -31,6 +34,8 @@ public class AuthService {
     private final UserDetailService userDetailService;
 
     private final UserRepository userRepository;
+
+    private final ExpertRepository expertRepository;
 
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
@@ -77,14 +82,21 @@ public class AuthService {
             throw new DuplicateKeyException("Already exists email : " + req.getEmail());
         }
 
+        //일단은 권한에 따라 분기
+        if(req.getAuthority() == UserAuthority.EXPERT) {
+            Expert expert = new Expert(req.getEmail(),
+                    bCryptPasswordEncoder.encode(req.getPassword()));
 
-        //모든 체크를 통과하면 User 엔티티 만들어서 저장
-        User user = User.builder()
-                .email(req.getEmail())
-                .password(bCryptPasswordEncoder.encode(req.getPassword()))
-                .build();
+            expertRepository.save(expert);
+        } else {
+            //모든 체크를 통과하면 User 엔티티 만들어서 저장
+            User user = User.builder()
+                    .email(req.getEmail())
+                    .password(bCryptPasswordEncoder.encode(req.getPassword()))
+                    .build();
 
-        userRepository.save(user);
+            userRepository.save(user);
+        }
     }
 
     public void logout() throws ResponseStatusException {

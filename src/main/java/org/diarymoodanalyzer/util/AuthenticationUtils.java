@@ -2,14 +2,17 @@ package org.diarymoodanalyzer.util;
 
 
 import org.diarymoodanalyzer.domain.User;
+import org.diarymoodanalyzer.domain.UserAuthority;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
-/*
-SecurityContextHolder 사용하여 인증에 대한 정보를 반환하는 유틸리티 클래스
+/**
+ * SecurityContextHolder 사용하여 인증에 대한 정보를 반환하는 유틸리티 클래스
  */
 public class AuthenticationUtils {
 
@@ -17,8 +20,10 @@ public class AuthenticationUtils {
         return SecurityContextHolder.getContext().getAuthentication();
     }
 
-    /*
-    현재 프로젝트에서는 Username == userEmail 이다.
+    /**
+     * 현재 인증된 사용자의 이메일을 반환한다.
+     * Principal의 getName을 호출한다.
+     * @return 인증된 사용자의 이메일, 인증 정보가 없으면 null
      */
     public static String getCurrentUserEmail() {
         Authentication auth = getAuthentication();
@@ -28,6 +33,18 @@ public class AuthenticationUtils {
     public static Collection<? extends GrantedAuthority> getCurrentUserAuthorities() {
         Authentication auth = getAuthentication();
         return auth == null ? null : auth.getAuthorities();
+    }
+
+    /**
+     * 현재 인증된 사용자가 author과 일치하는 권한을 가지고 있는지 여부를 반환한다.
+     * @param author - 조회할 권한
+     * @return 권한이 존재하면 true, otherwise, false
+     */
+    public static boolean hasAuthority(GrantedAuthority author) {
+        Collection<? extends GrantedAuthority> authorities = getCurrentUserAuthorities();
+
+        return authorities != null && authorities.stream()
+                .anyMatch((value) -> value.getAuthority().equals(author.getAuthority()));
     }
 
     /*
