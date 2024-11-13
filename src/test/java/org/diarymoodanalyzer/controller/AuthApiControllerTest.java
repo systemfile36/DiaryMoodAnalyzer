@@ -1,10 +1,13 @@
 package org.diarymoodanalyzer.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.diarymoodanalyzer.domain.Expert;
 import org.diarymoodanalyzer.domain.User;
+import org.diarymoodanalyzer.domain.UserAuthority;
 import org.diarymoodanalyzer.dto.request.LoginRequest;
 import org.diarymoodanalyzer.dto.request.SignUpRequest;
 import org.diarymoodanalyzer.repository.DiaryRepository;
+import org.diarymoodanalyzer.repository.ExpertRepository;
 import org.diarymoodanalyzer.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -44,6 +47,9 @@ class AuthApiControllerTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private ExpertRepository expertRepository;
 
     @BeforeEach
     public void mockMvcSetUp() {
@@ -104,5 +110,32 @@ class AuthApiControllerTest {
         //제대로 들어갔는지 확인
         assertThat(userRepository.existsByEmail(userEmail)).isTrue();
     }
+
+    @DisplayName("signup: EXPERT 권한과 함께 회원 가입 요청을 보내면, 성공한다. ")
+    @Test
+    public void ExpertSignUp() throws Exception {
+        //테스트 데이터 세팅
+        String url = "/api/auth/signup";
+
+        String expertEmail = "manager@email.com";
+        String password = "password";
+
+        SignUpRequest req = new SignUpRequest(expertEmail, password);
+        req.setAuthority(UserAuthority.EXPERT);
+
+        String reqBody = objectMapper.writeValueAsString(req);
+
+        //요청 실행
+        ResultActions result = mockMvc.perform(MockMvcRequestBuilders.post(url)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(reqBody));
+
+        result.andExpect(MockMvcResultMatchers.status().isCreated());
+
+        //검증
+        Expert expert = expertRepository.findByEmail(expertEmail)
+                .orElseThrow(()->new IllegalArgumentException("There is no Expert : " + expertEmail));
+    }
+
 
 }

@@ -33,7 +33,7 @@ public class ExpertApiController {
      * 현재 인증된 전문가가 관리하는 사용자 목록 반환
      * @return 관리하는 사용자 목록
      */
-    @GetMapping("/expert/managedUsers")
+    @GetMapping("/api/expert/managedUsers")
     public ResponseEntity<List<GetManagedUserResponse>> getManagedUsers() {
         String currentUserEmail = AuthenticationUtils.getCurrentUserEmail();
         Expert expert = expertRepository.findByEmail(currentUserEmail)
@@ -49,7 +49,7 @@ public class ExpertApiController {
      * @param req - 요청 DTO. 페이징 관련 변수와 소유자의 이메일을 가진다.
      * @return 요청의 ownerEmail 에 해당하는 사용자의 Diary 목록을 Page로 반환
      */
-    @GetMapping("/expert/diaries")
+    @GetMapping("/api/expert/diaries")
     public ResponseEntity<Page<GetDiaryByPageResponse>> getDiariesByEmailForExpert(
             @ModelAttribute GetDiaryByPageForExpertRequest req) {
 
@@ -61,7 +61,7 @@ public class ExpertApiController {
      * @param req - 요청 DTO. 조회할 다이어리의 id와 소유자의 이메일을 가진다.
      * @return 요청의 ownerEmail과 id에 해당하는 사용자의 단일 Diary를 반환
      */
-    @GetMapping("/expert/diary")
+    @GetMapping("/api/expert/diary")
     public ResponseEntity<GetDiaryByIdResponse> getDiaryByIdForExpert(
             @ModelAttribute GetDiaryForExpertRequest req
     ) {
