@@ -15,6 +15,8 @@ import Chart from "../components/Chart.vue";
 import ExpertPage from "../components/ExpertPage.vue";
 import CounselWritePage from "../components/CounselWritePage.vue";
 import CounselEditPage from "../components/CounselEditPage.vue";
+import TempTitle from "../components/TempTitle.vue";
+import UserGuide from "../components/UserGuide.vue";
 
 //router 인스턴스 생성 
 const router = createRouter({
@@ -37,6 +39,9 @@ const router = createRouter({
         { path: '/diaries', component: TempDiaryList, meta: { requireAuth: true} },
         //다이어리 상세보기
         { path: '/diaries/:id', component: TempDiaryDetail, meta: {requireAuth: true}},
+
+        { path: '/tempTitle', component: TempTitle, meta: { requireAuth: true} },
+        { path: '/userGuide', name: 'UserGuide', component: UserGuide, meta: { requireAuth: true} },
 
         { path: '/test', component: FrontPage }
     ]
