@@ -21,8 +21,11 @@ import org.diarymoodanalyzer.util.AuthenticationUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -143,7 +146,7 @@ public class DiaryService {
         String currentUserEmail = AuthenticationUtils.getCurrentUserEmail();
 
         //인증되지 않았거나, EXPERT 권한이 없다면 FORBIDDEN 반환
-        if(currentUserEmail == null || AuthenticationUtils.hasAuthority(UserAuthority.EXPERT.getAuthority())) {
+        if(currentUserEmail == null || !AuthenticationUtils.hasAuthority(UserAuthority.EXPERT.getAuthority())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You have not permission");
         }
 
