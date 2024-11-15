@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Diary 엔티티.
  */
@@ -36,6 +39,13 @@ public class Diary extends BaseEntity { //공통 컬럼 상속
     @Setter
     @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
+
+    /**
+     * Diary에 달린 코멘트들.
+     * Comment와 1대다 관계
+     */
+    @OneToMany(mappedBy = "diary", cascade = CascadeType.ALL, orphanRemoval = true)
+    private final List<Comment> comments = new ArrayList<>();
 
     @Builder
     public Diary(User user, String title, String content) {

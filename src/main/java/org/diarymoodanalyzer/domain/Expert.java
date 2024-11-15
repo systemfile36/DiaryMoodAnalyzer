@@ -29,6 +29,13 @@ public class Expert extends User {
     @OneToMany(mappedBy = "expert") //관계의 주인이 자신이 아님을 나타냄
     private final List<User> managedUsers = new ArrayList<>();
 
+    /**
+     * 전문가가 작성한 코멘트들
+     * Comment와 1대다 관계
+     */
+    @OneToMany(mappedBy = "expert")
+    private final List<Comment> comments = new ArrayList<>();
+
 
     public Expert(String email, String password) {
         this.setEmail(email); this.setPassword(password);
