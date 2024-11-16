@@ -2,14 +2,12 @@ package org.diarymoodanalyzer.util;
 
 
 import org.diarymoodanalyzer.domain.User;
-import org.diarymoodanalyzer.domain.UserAuthority;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.Optional;
 
 /**
  * SecurityContextHolder 사용하여 인증에 대한 정보를 반환하는 유틸리티 클래스
@@ -23,11 +21,12 @@ public class AuthenticationUtils {
     /**
      * 현재 인증된 사용자의 이메일을 반환한다.
      * Principal의 getName을 호출한다.
-     * @return 인증된 사용자의 이메일, 인증 정보가 없으면 null
+     * @return 인증된 사용자의 이메일 값의 Optional. 인증 정보가 유효하지 않으면 Optional.EMPTY 반환.
      */
-    public static String getCurrentUserEmail() {
+    public static Optional<String> getCurrentUserEmail() {
         Authentication auth = getAuthentication();
-        return auth == null ? null : auth.getName();
+
+        return Optional.ofNullable(auth == null ? null : auth.getName());
     }
 
     public static Collection<? extends GrantedAuthority> getCurrentUserAuthorities() {

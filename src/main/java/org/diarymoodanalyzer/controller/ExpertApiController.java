@@ -12,11 +12,13 @@ import org.diarymoodanalyzer.repository.ExpertRepository;
 import org.diarymoodanalyzer.service.DiaryService;
 import org.diarymoodanalyzer.util.AuthenticationUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -35,7 +37,9 @@ public class ExpertApiController {
      */
     @GetMapping("/api/expert/managedUsers")
     public ResponseEntity<List<GetManagedUserResponse>> getManagedUsers() {
-        String currentUserEmail = AuthenticationUtils.getCurrentUserEmail();
+        String currentUserEmail = AuthenticationUtils.getCurrentUserEmail()
+                .orElseThrow(()->new ResponseStatusException(HttpStatus.FORBIDDEN ,"Invalid Authentication"));
+
         Expert expert = expertRepository.findByEmail(currentUserEmail)
                 .orElseThrow(() -> new IllegalArgumentException("not found Expert " + currentUserEmail));
 

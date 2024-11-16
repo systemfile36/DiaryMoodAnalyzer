@@ -43,11 +43,8 @@ public class DiaryService {
     public AddDiaryResponse addDiary(AddDiaryRequest dto) throws ResponseStatusException {
 
         //현재 인증된 사용자의 정보를 가져옴
-        String currentUserEmail = AuthenticationUtils.getCurrentUserEmail();
-
-        if(currentUserEmail == null) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "There is no Authentication");
-        }
+        String currentUserEmail = AuthenticationUtils.getCurrentUserEmail()
+                .orElseThrow(()->new ResponseStatusException(HttpStatus.FORBIDDEN, "There is no Authentication"));
 
         //이메일을 통해 User의 아이디 값만 받아온다.
         Long userId = userRepository.findIdByEmail(currentUserEmail);
@@ -117,11 +114,8 @@ public class DiaryService {
         Pageable pageable = req.getPageable();
 
         //현재 인증된 유저 정보 불러옴
-        String currentUserEmail = AuthenticationUtils.getCurrentUserEmail();
-
-        if(currentUserEmail == null) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You have not permission");
-        }
+        String currentUserEmail = AuthenticationUtils.getCurrentUserEmail()
+                .orElseThrow(()-> new ResponseStatusException(HttpStatus.FORBIDDEN, "You have not permission"));
 
         Page<Diary> diaries = diaryRepository.findByUserEmail(currentUserEmail, pageable);
 
@@ -143,10 +137,12 @@ public class DiaryService {
         Pageable pageable = req.getPageable();
 
         //현재 접속중인 유저(=전문가, Expert)의 이메일
-        String currentUserEmail = AuthenticationUtils.getCurrentUserEmail();
+        //인증되지 않았다면 예외 던짐
+        String currentUserEmail = AuthenticationUtils.getCurrentUserEmail()
+                .orElseThrow(()-> new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid Authentication"));
 
-        //인증되지 않았거나, EXPERT 권한이 없다면 FORBIDDEN 반환
-        if(currentUserEmail == null || !AuthenticationUtils.hasAuthority(UserAuthority.EXPERT.getAuthority())) {
+        //EXPERT 권한이 없다면 FORBIDDEN 반환
+        if(!AuthenticationUtils.hasAuthority(UserAuthority.EXPERT.getAuthority())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You have not permission");
         }
 
@@ -179,11 +175,8 @@ public class DiaryService {
         Pageable pageable = req.getPageable();
 
         //현재 인증된 유저 정보 불러옴
-        String currentUserEmail = AuthenticationUtils.getCurrentUserEmail();
-
-        if(currentUserEmail == null) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You have not permission");
-        }
+        String currentUserEmail = AuthenticationUtils.getCurrentUserEmail()
+                .orElseThrow(()->new ResponseStatusException(HttpStatus.FORBIDDEN, "You have not permission"));
 
         return diaryRepository.findByUserEmailOnlyTitle(currentUserEmail, pageable);
     }
@@ -226,8 +219,9 @@ public class DiaryService {
      * @return 인증 정보의 이메일이 인자와 같으면 true, otherwise, false
      */
     private boolean validateAuthByEmail(String email) {
-        String currentUserEmail = AuthenticationUtils.getCurrentUserEmail();
-        return currentUserEmail != null && currentUserEmail.equals(email);
+        String currentUserEmail = AuthenticationUtils.getCurrentUserEmail()
+                .orElse("");
+        return currentUserEmail.equals(email);
     }
 
     /*

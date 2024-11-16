@@ -101,11 +101,8 @@ public class AuthService {
 
     public void logout() throws ResponseStatusException {
         //현재 인증된 유저의 이메일 받아옴
-        String currentUserEmail = AuthenticationUtils.getCurrentUserEmail();
-
-        if(currentUserEmail == null) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "There is no Authentication");
-        }
+        String currentUserEmail = AuthenticationUtils.getCurrentUserEmail()
+                .orElseThrow(()->new ResponseStatusException(HttpStatus.FORBIDDEN, "There is no Authentication"));
 
         //인증된 유저의 이메일로 userId 받아옴
         Long userId = userRepository.findIdByEmail(currentUserEmail);
