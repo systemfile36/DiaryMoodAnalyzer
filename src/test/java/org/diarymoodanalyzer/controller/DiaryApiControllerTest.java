@@ -3,11 +3,16 @@ package org.diarymoodanalyzer.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.diarymoodanalyzer.config.TokenAuthenticationFilter;
 import org.diarymoodanalyzer.config.jwt.TokenProvider;
+import org.diarymoodanalyzer.domain.Comment;
 import org.diarymoodanalyzer.domain.Diary;
+import org.diarymoodanalyzer.domain.Expert;
 import org.diarymoodanalyzer.domain.User;
+import org.diarymoodanalyzer.dto.request.AddCommentRequest;
 import org.diarymoodanalyzer.dto.request.AddDiaryRequest;
 import org.diarymoodanalyzer.dto.request.GetDiaryByPageRequest;
+import org.diarymoodanalyzer.repository.CommentRepository;
 import org.diarymoodanalyzer.repository.DiaryRepository;
+import org.diarymoodanalyzer.repository.ExpertRepository;
 import org.diarymoodanalyzer.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -20,6 +25,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -48,6 +54,12 @@ class DiaryApiControllerTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private CommentRepository commentRepository;
+
+    @Autowired
+    private ExpertRepository expertRepository;
 
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -224,6 +236,190 @@ class DiaryApiControllerTest {
                 .andExpect(jsonPath("$.size").value(5))
                 .andExpect(jsonPath("$.totalElements").value(10))
                 .andExpect(jsonPath("$.numberOfElements").value(5));
+
+    }
+
+    @DisplayName("getCommentsByDiaryId : Diary의 소유자가 해당 Diary의 코멘트를 조회할 수 있다. ")
+    @Test
+    public void getCommentsByDiaryIdCaseOwner() throws Exception {
+        final String url = "/api/diary/{id}/comments";
+
+        final String expertEmail = "manager@email.com";
+
+        final String password = "password";
+
+        //작성자 역할을 할 Expert
+        Expert expert = new Expert(expertEmail, password);
+        expertRepository.save(expert);
+
+        final String userEmail = "test@email.com";
+
+        //다이어리의 주인 역할을 할 User
+        User user = User.builder()
+                .email(userEmail)
+                .password(password)
+                .build();
+
+        userRepository.save(user);
+
+        //테스트용 다이어리
+        Diary diary = Diary.builder()
+                .title("test")
+                .content("Content")
+                .build();
+
+
+        //소유자 설정
+        user.addDiary(diary);
+
+        //소유자 설정 후 저장
+        diaryRepository.save(diary);
+
+        StringBuilder strBuilder = new StringBuilder();
+
+        for(int i = 0; i < 10; i++) {
+            Comment comment = new Comment();
+            comment.setExpert(expert);
+            comment.setContent(strBuilder.append("TestContent ").append(i+1).toString());
+
+            //Diary에 코멘트 추가.
+            diary.addComment(comment);
+
+            commentRepository.save(comment);
+        }
+
+        assertThat(diary.getId()).isNotNull();
+
+        //소유자 명의로 접근
+        String accessToken = tokenProvider.createToken(user, TokenProvider.ACCESS_EXPIRE);
+
+        String reqUrl = url.replace("{id}", String.valueOf(diary.getId()));
+
+        ResultActions result = mockMvc.perform(MockMvcRequestBuilders.get(reqUrl)
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(MediaType.APPLICATION_JSON_VALUE));
+
+        result.andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(10));
+
+    }
+
+    @DisplayName("getCommentsByDiaryId : Diary의 소유자의 담당자가 해당 Diary의 코멘트를 조회할 수 있다. ")
+    @Test
+    public void getCommentsByDiaryIdCaseExpert() throws Exception {
+        final String url = "/api/diary/{id}/comments";
+
+        final String expertEmail = "manager@email.com";
+
+        final String password = "password";
+
+        Expert expert = new Expert(expertEmail, password);
+        expertRepository.save(expert);
+
+        final String userEmail = "test@email.com";
+
+        User user = User.builder()
+                .email(userEmail)
+                .password(password)
+                .build();
+
+        //관계 설정
+        expert.addManagedUser(user);
+
+        userRepository.save(user);
+
+        Diary diary = Diary.builder()
+                .title("TestTitle")
+                .content("TestContent")
+                .build();
+
+        //관계 설정
+        user.addDiary(diary);
+
+        diaryRepository.save(diary);
+
+        StringBuilder strBuilder  = new StringBuilder();
+        for(int i = 0; i < 10; i++) {
+            Comment comment = new Comment();
+            comment.setExpert(expert);
+            comment.setContent("TestContent");
+
+            diary.addComment(comment);
+
+            commentRepository.save(comment);
+        }
+
+        assertThat(diary.getId()).isNotNull();
+
+        //전문가 명의로 접근
+        String accessToken = tokenProvider.createToken(expert, TokenProvider.ACCESS_EXPIRE);
+
+        String reqUrl = url.replace("{id}", String.valueOf(diary.getId()));
+
+        ResultActions result = mockMvc.perform(MockMvcRequestBuilders.get(reqUrl)
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(MediaType.APPLICATION_JSON_VALUE));
+
+        result.andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(10));
+
+    }
+
+    @DisplayName("addCommentToDiary: 전문가가 자신이 담당하는 사용자의 다이어리에 코멘트를 추가할 수 있다.")
+    @Test
+    public void addCommentToDiary() throws Exception {
+        final String url = "/api/diary/{id}/comments";
+
+        final String expertEmail = "manager@email.com";
+
+        final String password = "password";
+
+        Expert expert = new Expert(expertEmail, password);
+        expertRepository.save(expert);
+
+        final String userEmail = "test@email.com";
+
+        User user = User.builder()
+                .email(userEmail)
+                .password(password)
+                .build();
+
+        //관계 설정
+        expert.addManagedUser(user);
+
+        userRepository.save(user);
+
+        Diary diary = Diary.builder()
+                .title("TestTitle")
+                .content("TestContent")
+                .build();
+
+        //관계 설정
+        user.addDiary(diary);
+
+        diaryRepository.save(diary);
+
+        //전문가 명의로 요청
+        String accessToken = tokenProvider.createToken(expert, TokenProvider.ACCESS_EXPIRE);
+
+        //코멘트를 추가할 다이어리의 id URL에 매핑
+        String reqUrl = url.replace("{id}", String.valueOf(diary.getId()));
+
+        //요청 DTO 생성 후 직렬화
+        AddCommentRequest req = new AddCommentRequest();
+        req.setContent("TestContent");
+
+        String reqBody = objectMapper.writeValueAsString(req);
+
+        ResultActions result = mockMvc.perform(MockMvcRequestBuilders.post(reqUrl)
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(reqBody));
+
+        result.andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.status().isCreated());
 
     }
 
