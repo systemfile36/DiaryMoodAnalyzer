@@ -10,8 +10,8 @@ import org.diarymoodanalyzer.domain.Comment;
 @Getter
 @Setter
 public class GetCommentByDiaryIdResponse  extends TimeStampedResponse{
+    private Long id;
     private String content;
     private String expertEmail;
     private Long diaryId;
-
 }

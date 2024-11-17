@@ -1,12 +1,11 @@
 package org.diarymoodanalyzer.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.diarymoodanalyzer.dto.request.AddCommentRequest;
 import org.diarymoodanalyzer.dto.request.AddDiaryRequest;
 import org.diarymoodanalyzer.dto.request.GetDiaryByPageRequest;
-import org.diarymoodanalyzer.dto.response.AddDiaryResponse;
-import org.diarymoodanalyzer.dto.response.GetDiaryByIdResponse;
-import org.diarymoodanalyzer.dto.response.GetDiaryByPageResponse;
-import org.diarymoodanalyzer.dto.response.GetDiaryTitleByPageResponse;
+import org.diarymoodanalyzer.dto.response.*;
+import org.diarymoodanalyzer.service.CommentService;
 import org.diarymoodanalyzer.service.DiaryService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -14,11 +13,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @RestController
 public class DiaryApiController {
 
     private final DiaryService diaryService;
+
+    private final CommentService commentService;
 
     @PostMapping("/api/diaries")
     public ResponseEntity<AddDiaryResponse> addDiary(
@@ -73,6 +76,43 @@ public class DiaryApiController {
     public ResponseEntity<Void> deleteDiaryById(@PathVariable long id) {
 
         diaryService.deleteDiaryById(id);
+
+        return ResponseEntity.ok().build();
+    }
+
+
+    /* Comment 관련 엔드 포인트  */
+
+    /**
+     * Diary의 id를 받아서 Comment 목록을 반환
+     * @param id 코멘트를 추가할 Diary의 id
+     * @return HTTP 응답
+     */
+    @GetMapping("/api/diary/{id}/comments")
+    public ResponseEntity<List<GetCommentByDiaryIdResponse>> getCommentsByDiaryId(
+            @PathVariable Long id
+    ) {
+        return ResponseEntity.ok(commentService.getCommentsByDiaryId(id));
+    }
+
+    @PostMapping("/api/diary/{id}/comments")
+    public ResponseEntity<Void> addCommentToDiary(
+            @PathVariable Long id,
+            @RequestBody AddCommentRequest req
+    ) {
+
+        commentService.addCommentToDiary(id, req.getContent());
+
+        //예외가 발생하지 않으면 201 CREATED 반환
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+
+    }
+
+    @DeleteMapping("/api/diary/comments/{id}")
+    public ResponseEntity<Void> deleteComment(
+            @PathVariable Long id
+    ) {
+        commentService.deleteComment(id);
 
         return ResponseEntity.ok().build();
     }

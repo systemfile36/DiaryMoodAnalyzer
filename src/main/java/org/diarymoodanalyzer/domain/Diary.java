@@ -47,6 +47,15 @@ public class Diary extends BaseEntity { //공통 컬럼 상속
     @OneToMany(mappedBy = "diary", cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<Comment> comments = new ArrayList<>();
 
+    /**
+     * Diary의 코멘트 목록에 코멘트를 추가한다. (상호 관계 설정)
+     * @param comment 추가할 코멘트
+     */
+    public void addComment(Comment comment) {
+        this.comments.add(comment);
+        comment.setDiary(this);
+    }
+
     @Builder
     public Diary(User user, String title, String content) {
         this.user = user; this.title = title; this.content = content;

@@ -5,10 +5,12 @@ import org.diarymoodanalyzer.domain.Expert;
 import org.diarymoodanalyzer.dto.request.GetDiaryByPageForExpertRequest;
 import org.diarymoodanalyzer.dto.request.GetDiaryByPageRequest;
 import org.diarymoodanalyzer.dto.request.GetDiaryForExpertRequest;
+import org.diarymoodanalyzer.dto.response.GetCommentByDiaryIdResponse;
 import org.diarymoodanalyzer.dto.response.GetDiaryByIdResponse;
 import org.diarymoodanalyzer.dto.response.GetDiaryByPageResponse;
 import org.diarymoodanalyzer.dto.response.GetManagedUserResponse;
 import org.diarymoodanalyzer.repository.ExpertRepository;
+import org.diarymoodanalyzer.service.CommentService;
 import org.diarymoodanalyzer.service.DiaryService;
 import org.diarymoodanalyzer.util.AuthenticationUtils;
 import org.springframework.data.domain.Page;
@@ -30,6 +32,8 @@ public class ExpertApiController {
     private final ExpertRepository expertRepository;
 
     private final DiaryService diaryService;
+
+    private final CommentService commentService;
 
     /**
      * 현재 인증된 전문가가 관리하는 사용자 목록 반환
@@ -70,5 +74,14 @@ public class ExpertApiController {
             @ModelAttribute GetDiaryForExpertRequest req
     ) {
         return ResponseEntity.ok(diaryService.getDiaryByIdForExpert(req));
+    }
+
+    /**
+     * 전문가가 작성한(소유한) 코멘트 목록을 반환
+     * @return 코멘트 목록
+     */
+    @GetMapping("/api/expert/comments")
+    public ResponseEntity<List<GetCommentByDiaryIdResponse>> getCommentsByExpert() {
+        return ResponseEntity.ok().body(commentService.getCommentsByExpert());
     }
 }

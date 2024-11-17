@@ -45,13 +45,22 @@ public class Expert extends User {
     }
 
     /**
-     *
-     * @param user - 해당 전문가의 관리를 받을 사용자의 엔티티
+     * Expert의 관리되는 사용자 목록에 사용자를 추가한다. (상호 관계 설정)
+     * @param user - 추가할 사용자 엔티티
      */
     public void addManagedUser(User user) {
         //양방향 관계 설정
         this.managedUsers.add(user);
         user.setExpert(this);
+    }
+
+    /**
+     * Expert의 코멘트 목록에 코멘트를 추가한다. (상호 관계 설정)
+     * @param comment - 추가할 코멘트
+     */
+    public void addComment(Comment comment) {
+        this.comments.add(comment);
+        comment.setExpert(this);
     }
 
     /**
