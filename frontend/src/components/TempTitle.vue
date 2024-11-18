@@ -5,6 +5,9 @@
   </div>
 
   <div id = "chart_list">
+    <div v-if="data_line.datasets[0].data.length === 0" class="chart-empty-msg">
+      데이터가 없습니다.
+    </div>
     <div id = "MyChart_line">
       <canvas
           ref="MyChart_line"/>
@@ -42,12 +45,15 @@
     <h5 class = "user_guide_txt">자세히</h5>
   </div>
 
-  <div id = "test111">
-    <h2>클릭 시 관련 사이트 링크 이동</h2>
+  <div id = "webSiteLink">
+    <h2 onclick = "window.location.href='https://www.gyeongnam.go.kr/board/list.gyeong?boardId=BBS_0000057&menuCd=DOM_000000144001000000&contentsSid=7247&cpath='"
+        class="goToWebSite">경상남도 보건복지 사이트</h2>
+    <h2 onclick = "window.location.href='https://youth.gyeongnam.go.kr/youth/#close'" class="goToWebSite">경상남도 청년정보플랫폼</h2>
+    <h2 onclick = "window.location.href='https://www.jinju.go.kr/00134/00614/02690.web'" class="goToWebSite">진주시 보건복지 사이트</h2>
   </div>
 
-  <div id = "test222">
-    <h2>???</h2>
+  <div id = "self_test" onclick = "window.location.href='http://seoulymind.org/hq-25/'" style="cursor: pointer;">
+    <h2 style="font-weight: bold">고립/은둔 자가진단 테스트</h2>
   </div>
 
 </template>
@@ -135,19 +141,22 @@ export default {
   },
   methods:{
     createChart_pie(){
-      new Chart(this.$refs.MyChart_pie, {
-        type:'pie',
-        data:this.data_pie,
-        options:this.options_pie
-      })
+      if (this.data_pie.datasets[0].data.length > 0) {
+        new Chart(this.$refs.MyChart_pie, {
+          type: 'pie',
+          data: this.data_pie,
+          options: this.options_pie
+        })
+      }
     },
     createChart_line(){
-      new Chart(this.$refs.MyChart_line, {
-        type:'line',
-        data:this.data_line,
-        options:this.options_line
-      })
-
+      if (this.data_line.datasets[0].data.length > 0) {
+        new Chart(this.$refs.MyChart_line, {
+          type: 'line',
+          data: this.data_line,
+          options: this.options_line
+        })
+      }
     },
     goToCounselWritePage() {
       this.$router.push({ name: 'CounselWritePage' })
@@ -160,7 +169,7 @@ export default {
           .catch(err => {
             console.error('라우팅 에러:', err);
           });
-    }
+    },
   }
 
 }
@@ -198,6 +207,15 @@ export default {
   padding: 15px;
   border: 1px solid black;
   border-radius: 30px;
+}
+
+.chart-empty-msg {
+  position: absolute;
+  top: 45%;
+  left: 35%;
+  height: 100%;
+  font-size: 28px;
+  font-weight: bold;
 }
 
 #MyChart_line{
@@ -245,7 +263,7 @@ export default {
   font-weight: bolder;
 }
 
-#test111{
+#webSiteLink{
   position: absolute;
   top: 60%;
   left: 44%;
@@ -254,9 +272,20 @@ export default {
   border: 1px solid black;
   border-radius: 30px;
   padding: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
-#test222{
+.goToWebSite{
+  cursor: pointer;
+  font-weight: bold;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+#self_test{
   position: absolute;
   top: 60%;
   left: 73%;
@@ -265,5 +294,9 @@ export default {
   border: 1px solid black;
   border-radius: 30px;
   padding: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 </style>
