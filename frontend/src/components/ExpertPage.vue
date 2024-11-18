@@ -5,6 +5,9 @@
   </div>
 
   <div id = "chart_list">
+    <div v-if="data_line.datasets[0].data.length === 0" class="chart-empty-msg">
+      데이터가 없습니다.
+    </div>
     <div id = "MyChart_line">
       <canvas
           ref="MyChart_line"/>
@@ -21,54 +24,54 @@
       <tr>
         <th scope="col">No</th>
         <th scope="col">이름</th>
-        <th scope="col">나이</th>
-        <th scope="col">성별</th>
-        <th scope="col">상담자 상태</th>
-        <th scope="col">상담예약시간</th>
       </tr>
       </thead>
       <tbody>
-      <tr v-for="(user, index) in userList" :key="index">
+      <!--<tr v-for="(user, index) in userList" :key="index">-->
+      <tr v-for="(user, index) in testList" :key="index" @click="getDiaryList(user.email)" style="cursor: pointer;">
         <td>{{ index + 1 }}</td>
-        <td>{{ user.name }}</td>
-        <td>{{ user.age }}</td>
-        <td>{{ user.gender }}</td>
-        <td>{{ user.status }}</td>
-        <td>{{ user.reservationTime }}</td>
+        <td>{{ user.email }}</td>
       </tr>
       </tbody>
     </table>
   </div>
 
-  <div id="counsel_list">
+  <div id="diary_list">
     <table class="table table-striped">
       <thead>
       <tr>
         <th scope="col">No</th>
-        <th scope="col">이름</th>
-        <th scope="col">상담진행시간</th>
-        <th scope="col">상담소요시간</th>
-        <th scope="col">추가상담예약</th>
-        <th scope="col">상담내역</th>
+        <th scope="col">제목</th>
+        <th scope="col">작성자</th>
+        <th scope="col">작성내역</th>
+        <th scope="col">등록일시</th>
       </tr>
       </thead>
       <tbody>
-      <tr v-for="(counsel, index) in counselList" :key="index" @click="goToCounselEditPage" style="cursor: pointer;">
-        <td>{{ index + 1 }}</td>
-        <td>{{ counsel.name }}</td>
-        <td>{{ counsel.counselTime }}</td>
-        <td>{{ counsel.Duration_of_time}}</td>
-        <td>{{ counsel.addCounsel_YN }}</td>
-        <td>{{ counsel.counselContent }}</td>
+      <tr v-for="(diary, index) in diaries" :key="diary.id" @click="goToDiaryPage(diary.id)" style="cursor: pointer;">
+        <td>{{index}}</td>
+        <td>{{diary.title}}</td>
+        <td>{{diary.userEmail}}</td>
+        <td class="truncate_cell_content">{{diary.content}}</td>
+        <td>{{formatDate(diary.createdAt)}}</td>
+      </tr>
+      <tr v-if="diaries.length === 0">
+        <td colspan="5" class="text-center">작성된 일기가 없습니다.</td>
       </tr>
       </tbody>
     </table>
   </div>
+
+ <div id="apply_counsel_list">
+   <h2>상담 신청 내역</h2>
+ </div>
 
 </template>
 
 <script>
 import { Chart, registerables } from 'chart.js'
+import axios from "axios";
+import dayjs from "dayjs";
 Chart.register(...registerables)
 
 const dataset_mood = [ '기쁨', '우울', '슬픔', '화남']
@@ -76,15 +79,13 @@ const dataset_date = [ '11-01', '11-02', '11-03', '11-04', '11-05', '11-06', '11
 
 export default {
   data:() => ({
-
-    userList: [
-      { name: '홍길동', age: 28, gender: '남', status: '우울 하', reservationTime: '2024.11.12.14:30' },
-      { name: '김철수', age: 35, gender: '남', status: '우울 중', reservationTime: '2024.11.12.15:00' },
-      { name: '이영희', age: 24, gender: '여', status: '우울 중', reservationTime: '2024.11.12.16:00' },
-      { name: '박지민', age: 40, gender: '여', status: '우울 상', reservationTime: '2024.11.12.16:30' },
-      { name: '최수현', age: 30, gender: '남', status: '우울 하', reservationTime: '2024.11.12.17:00' }
+    testList : [
+      {email: 'test@gmail.com'},
+      {email: 'test12@gmail.com'},
+      {email: 'test34@gmail.com'}
     ],
-
+    userList: [],
+    diaries: [],
     counselList : [
       { name: '홍길동', counselTime: '2024.11.12.14:30', Duration_of_time: '30', addCounsel_YN: 'Y', counselContent: '상담내역은 가나다라마바사아자차타가나다라마바사아자차타' },
       { name: '홍길동', counselTime: '2024.11.12.15:00', Duration_of_time: '40', addCounsel_YN: 'Y', counselContent: '상담내역은 가나다라마바사아자차타가나다라마바사아자차타' },
@@ -151,36 +152,80 @@ export default {
     }
   }),
   mounted(){
+    this.getManagedUsers()
     this.createChart_pie()
     this.createChart_line()
   },
   methods:{
-    createChart_pie(){
-      new Chart(this.$refs.MyChart_pie, {
-        type:'pie',
-        data:this.data_pie,
-        options:this.options_pie
+    getManagedUsers() {
+      axios.get('/api/expert/managedUsers', {
+        headers: {
+          'Authorization': 'Bearer ' + localStorage.getItem('accessToken'),
+          "Content-Type": 'application/json'
+        },
       })
+          .then((response) => {
+            console.log('API Response:', response.data);
+            this.userList = response.data.content;
+            console.log(response.data)
+            console.log(response.data.content)
+          })
+          .catch((error) => {
+            console.error('사용자 목록을 가져오는 중 오류 발생:', error.response || error.message);
+          });
+    },
+    getDiaryList(userEmail) {
+      axios.get('/api/expert/diaries', {
+        headers: {
+          'Authorization': 'Bearer ' + localStorage.getItem('accessToken'),
+          "Content-Type": 'application/json'
+        },
+
+        params: {
+          ownerEmail: userEmail, // 조회하려는 다이어리 주인의 이메일
+          page: 0,
+          size: 10,
+        },
+      })
+          .then((response) => {
+            console.log('API Response:', response.data); // 전체 응답 로그 출력
+            this.diaries = response.data.content;
+            console.log(this.diaries)
+          })
+          .catch((error) => {
+            console.error('다이어리 목록을 가져오는 중 오류 발생:', error.response || error.message);
+          });
+    },
+    createChart_pie(){
+      if (this.data_pie.datasets[0].data.length > 0) {
+        new Chart(this.$refs.MyChart_pie, {
+          type: 'pie',
+          data: this.data_pie,
+          options: this.options_pie
+        })
+      }
     },
     createChart_line(){
-      new Chart(this.$refs.MyChart_line, {
-        type:'line',
-        data:this.data_line,
-        options:this.options_line
-      })
-
-    },
-    goToCounselEditPage() {
-      this.$router.push({ name: 'CounselEditPage' })
-          .catch(err => {
-            console.error('라우팅 에러:', err);
-          });
+      if (this.data_line.datasets[0].data.length > 0) {
+        new Chart(this.$refs.MyChart_line, {
+          type: 'line',
+          data: this.data_line,
+          options: this.options_line
+        })
+      }
     },
     goToCounselWritePage() {
       this.$router.push({ name: 'CounselWritePage' })
           .catch(err => {
             console.error('라우팅 에러:', err);
           });
+    },
+    goToDiaryPage(diaryId) {
+      // 해당 다이어리의 작성 페이지로 이동
+      this.$router.push({ name: 'UpdateDiary', params: { id: diaryId } });
+    },
+    formatDate(date) {
+      return dayjs(date).format('YYYY-MM-DD HH:mm:ss'); // 날짜 포맷 설정
     }
   }
 
@@ -214,11 +259,20 @@ export default {
 #chart_list{
   position: absolute;
   width : 850px;
-  height : 450px;
+  height : 400px;
   margin: 20px;
   padding: 15px;
   border: 1px solid black;
   border-radius: 30px;
+}
+
+.chart-empty-msg {
+  position: absolute;
+  top: 45%;
+  left: 35%;
+  height: 100%;
+  font-size: 28px;
+  font-weight: bold;
 }
 
 #MyChart_line{
@@ -238,18 +292,37 @@ export default {
   position: absolute;
   left: 60%;
   width : 750px;
-  height : 450px;
+  height : 400px;
   padding: 20px;
+  border: 1px solid black;
+  border-radius: 20px;
+  margin-top: 20px;
+}
+
+#diary_list{
+  position: absolute;
+  top: 60%;
+  width: 1100px;
+  height: 300px;
+  padding: 20px;
+  margin-top: 30px;
+}
+.truncate_cell_content{
+  max-width: 250px; /* 셀의 최대 너비 */
+  white-space: nowrap; /* 텍스트를 한 줄로 표시 */
+  overflow: hidden; /* 넘치는 텍스트를 숨김 */
+  text-overflow: ellipsis; /* 넘치는 텍스트 부분을 ...으로 표시 */
+}
+
+#apply_counsel_list{
+  position: absolute;
+  top: 60%;
+  left: 73%;
+  width: 500px;
+  height: 300px;
+  padding: 10px;
   border: 1px solid black;
   border-radius: 30px;
   margin-top: 20px;
-  margin-bottom: 50px;
-}
-
-#counsel_list{
-  position: absolute;
-  top: 60%;
-  padding: 20px;
-  margin-top: 30px;
 }
 </style>
