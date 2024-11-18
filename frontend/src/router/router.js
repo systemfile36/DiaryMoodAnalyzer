@@ -26,7 +26,7 @@ const router = createRouter({
         { path: '/signUp', component: SignUp },
         { path: '/signin', component: SignIn },
         { path: '/', component: Title, meta: { requireAuth: true } },
-        { path: '/diary', component: WriteDiary, meta: { requireAuth: true } },
+        { path: '/diary', name: 'WriteDiary', component: WriteDiary, meta: { requireAuth: true } },
         { path: '/writtenDiary', component: WrittenDiary, meta: { requireAuth: true }},
         { path: '/updateDiary/:id', name: 'UpdateDiary', component: () => import('../components/UpdateDiary.vue') },
 

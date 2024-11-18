@@ -1,94 +1,150 @@
 <template>
-  <h3>이용 안내</h3>
-
+<div id = headerDiv>
   <div id = "user_guide_image">
-    <h2>이미지</h2>
+    <img src="../assets/images/loner_image.png"/>
   </div>
 
   <div id = "user_guide_description">
     <h2 class = "user_guide_title">이용 안내</h2>
-    <h5>웹사이트 이름 이용방법을 안내드립니다.</h5>
-    <h5 class = "user_guide_txt">자세히</h5>
+    <h5 class = "diaryPage_clickLink" @click="goToDiaryPage" >다이어리 작성 페이지 이동 (클릭)</h5>
+    <h5 class = "user_guide_content">1. 다이어리 작성 후에 감정 분석을 진행해 주세요.</h5>
+    <h5 class = "user_guide_content">2. 다이어리를 작성 후 상담을 신청해주세요.</h5>
+    <h5 class = "user_guide_content">- 신청 시 다이어리 내역과 분석 결과가 전문가에게 제공됩니다.</h5>
+    <h5 class = "user_guide_content">3. 상담이 확정되면 지정된 장소로 방문하여 상담을 받으시면 됩니다.</h5>
   </div>
 
-  <div id = "directions">
-    <div id = "directions_text">
-      <h2>오시는 길</h2>
+  <div id = "user_guide_target">
+    <h2 class = "user_guide_title">지원 대상</h2>
+    <h5 class = "user_guide_content">- 진주시 거주 은둔형외톨이 당사자 및 가족</h5>
+    <h5 class = "user_guide_content">- 연령제한 없음</h5>
+    <h2 class = "user_guide_title">문의</h2>
+    <h5 class = "user_guide_content">- 전화 : 010-0000-0000</h5>
+    <h5 class = "user_guide_content">- 카카오톡 : @test1111</h5>
+    <h5 class = "user_guide_content">- email : test@gmail.com</h5>
+  </div>
+</div>
+
+<div id ="footerDiv">
+    <div id = "destination_text">
+      <h2 style="font-weight: bolder">오시는 길</h2>
       <h5>경상남도 진주시 진주대로 501</h5>
-      <h5>경상국립대하교 심리상담센터</h5>
+      <h5>경상국립대학교 심리상담센터</h5>
     </div>
     <div id = "kakao_map">
+      <h2>지도</h2>
     </div>
-  </div>
+</div>
 
 </template>
 
 <script>
 export default {
+  methods: {
+    goToDiaryPage() {
+      this.$router.push({name: 'WriteDiary'})
+          .catch(err => {
+            console.error('라우팅 에러:', err);
+          });
+    }
+  }
 }
 </script>
 
 <style>
 
+#headerDiv{
+  width: 100%;
+  height: 48vh;
+  background: bisque;
+}
+
+#footerDiv{
+  width: 100%;
+  height: 45.5vh;
+}
+
 #user_guide_image{
   position: absolute;
-  width : 650px;
-  height : 350px;
-  border: 1px solid black;
-  border-radius: 30px;
+  top: 10%;
+  width : 500px;
+  height : 330px;
   margin-top: 20px;
   margin-left: 20px;
+  border: 2px solid black;
+  border-radius: 20px;
+  background: coral;
 }
+
+#user_guide_image img{
+  width: 500px;
+  height: 350px;
+}
+
 
 #user_guide_description{
   position: absolute;
   top: 10%;
-  left: 55%;
-  width : 650px;
-  height : 350px;
+  left: 41%;
+  width : 550px;
+  height : 330px;
   border: 1px solid black;
   border-radius: 30px;
   margin-left: 20px;
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  padding: 20px;
   margin-top: 20px;
+  background: white;
+}
+
+#user_guide_target {
+  position: absolute;
+  top: 10%;
+  left: 71%;
+  width : 500px;
+  height : 330px;
+  border: 1px solid black;
+  border-radius: 30px;
+  margin-left: 20px;
+  padding: 20px;
+  margin-top: 20px;
+  background: white;
 }
 
 .user_guide_title{
   font-weight: bolder;
+  margin-bottom: 10px;
+  color: orange;
 }
 
-.user_guide_txt{
-  padding: 10px;
+.diaryPage_clickLink{
   font-weight: bolder;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  cursor: pointer;
 }
 
-#directions_text{
+.user_guide_content{
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+#destination_text{
   position: absolute;
-  top: 55%;
+  top: 54%;
   width : 800px;
-  height : 400px;
-  border: 1px solid black;
+  height : 415px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  background: orange;
 }
 
 #kakao_map{
   position: absolute;
-  top: 55%;
+  top: 54%;
   left: 55%;
   width : 860px;
-  height : 400px;
-  border: 1px solid black;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  height : 415px;
 }
 
 
