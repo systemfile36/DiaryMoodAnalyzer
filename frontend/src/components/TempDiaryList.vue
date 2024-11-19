@@ -1,4 +1,10 @@
 <template>
+<div class="d-flex flex-column">
+    <!-- 다이어리 주인의 이름이 들어갈 곳 (전문가용) -->
+    <h2 class="author-name px-4 mt-3"
+        v-if="authManager.role === Authority.EXPERT">
+        {{ authManager.userName }}
+    </h2>
     <div id="diary-list" class="flex-grow-1 px-4">
         <article class="card-wrapper card" v-for="(diary, i) in diaries" :key="i">
             <router-link :to="`/diaries/${diary.id}`" class="diary-preview row g-0 flex-md-row-reverse">
@@ -52,13 +58,19 @@
             </ul>
         </nav>
     </div>
+</div>
 </template>
 <script setup>
 import { onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useDiaryManagerStore } from '../stores/DiaryManager';
+import { useAuthManagerStore } from '../stores/AuthManager';
+
+import Authority from '../utils/Authority';
 
 const diaryManager = useDiaryManagerStore();
+
+const authManager = useAuthManagerStore();
 
 //반응형을 유지하기 위해 destructuring 해서 받아옴 
 const { diaries } = storeToRefs(diaryManager);
