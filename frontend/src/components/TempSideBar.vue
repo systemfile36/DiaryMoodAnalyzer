@@ -21,12 +21,12 @@
                         <span>Write Diary</span>
                     </router-link>
                 </li>
-                <li class="nav-item">
+                <!-- <li class="nav-item">
                   <router-link to="/writtenDiary" class="nav-link">
                     <i class="fas fa-book"></i>
                     <span>Written Diary</span>
                   </router-link>
-                </li>
+                </li> -->
                 <li class="nav-item">
                     <router-link to="/diaries" class="nav-link">
                         <i class="fa-solid fa-book-open"></i>

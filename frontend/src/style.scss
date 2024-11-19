@@ -10,6 +10,11 @@ $sidebar-trigger-attr: 'sidebar-on';
     display: none;
 }
 
+.btn {
+    margin: 10px;
+    width: 100%;
+}
+
 //**px 이하일 때, 적용
 //화면이 작아지면 사이드 바를 접는다.
 @media (max-width: 850px) {

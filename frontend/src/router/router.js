@@ -27,11 +27,12 @@ const router = createRouter({
         { path: '/signin', component: SignIn },
         { path: '/', component: Title, meta: { requireAuth: true } },
         { path: '/diary', name: 'WriteDiary', component: WriteDiary, meta: { requireAuth: true } },
-        { path: '/writtenDiary', component: WrittenDiary, meta: { requireAuth: true }},
-        { path: '/updateDiary/:id', name: 'UpdateDiary', component: () => import('../components/UpdateDiary.vue') },
+        
+        //{ path: '/writtenDiary', component: WrittenDiary, meta: { requireAuth: true }},
+
+        //{ path: '/updateDiary/:id', name: 'UpdateDiary', component: () => import('../components/UpdateDiary.vue') },
 
         { path: '/chart', component: Chart, meta: { requireAuth: true} },
-
         { path: '/expertPage', component: ExpertPage, meta: { requireAuth: true} },
         { path: '/counselWritePage', name: 'CounselWritePage',component: CounselWritePage, meta: { requireAuth: true} },
         { path: '/counselEditPage', name: 'CounselEditPage', component: CounselEditPage, meta: { requireAuth: true} },
