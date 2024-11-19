@@ -30,8 +30,8 @@
       <h5>경상남도 진주시 진주대로 501</h5>
       <h5>경상국립대학교 심리상담센터</h5>
     </div>
-    <div id = "kakao_map">
-      <h2>지도</h2>
+    <div id = "map_div">
+      <div id="naverMap" style="width: 100%; height: 100%;"></div>
     </div>
 </div>
 
@@ -39,13 +39,35 @@
 
 <script>
 export default {
+  mounted() {
+    this.loadNaverMap();
+  },
   methods: {
-    goToDiaryPage() {
-      this.$router.push({name: 'WriteDiary'})
-          .catch(err => {
-            console.error('라우팅 에러:', err);
-          });
-    }
+    loadNaverMap() {
+      const script = document.createElement("script");
+      script.src = `https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=zcc8z9vig1`;
+      script.onload = () => {
+        // 스크립트 로드 후 지도 생성
+        const map = new naver.maps.Map("naverMap", {
+          center: new naver.maps.LatLng(35.154542, 128.098707), // 경상국립대 가좌캠퍼스 중심 좌표
+          zoom: 16,
+        });
+
+        // 마커 추가
+        new naver.maps.Marker({
+          position: new naver.maps.LatLng(35.154542, 128.098707),
+          map: map,
+          title: "경상국립대학교 심리상담센터",
+        });
+      };
+      document.head.appendChild(script);
+    },
+  },
+  goToDiaryPage() {
+    this.$router.push({name: 'WriteDiary'})
+        .catch(err => {
+          console.error('라우팅 에러:', err);
+        });
   }
 }
 </script>
@@ -139,7 +161,7 @@ export default {
   background: orange;
 }
 
-#kakao_map{
+#map_div{
   position: absolute;
   top: 54%;
   left: 55%;
