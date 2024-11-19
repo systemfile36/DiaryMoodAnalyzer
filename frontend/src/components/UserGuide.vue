@@ -62,12 +62,12 @@ export default {
       };
       document.head.appendChild(script);
     },
-  },
-  goToDiaryPage() {
-    this.$router.push({name: 'WriteDiary'})
-        .catch(err => {
-          console.error('라우팅 에러:', err);
-        });
+    goToDiaryPage() {
+      this.$router.push({name: 'WriteDiary'})
+          .catch(err => {
+            console.error('라우팅 에러:', err);
+          });
+    }
   }
 }
 </script>
