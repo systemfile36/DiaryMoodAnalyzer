@@ -22,7 +22,7 @@
                                 <span class="sentimental">not bad</span>
                                 <!-- 코멘트 개수 -->
                                 <i class="fa-solid fa-comments"></i>
-                                <span class="comments">1개</span>
+                                <span class="comments">{{ diary.commentsSize + "개" }}</span>
                             </div>
                         </div>
                     </div>

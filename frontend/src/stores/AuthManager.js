@@ -49,8 +49,8 @@ export const useAuthManagerStore = defineStore('authManager', () => {
     }
 
     /**
-     * 
-     * @param {{email: string, password: string}} info 
+     * 회원가입 요청을 보낸다. authority는 포함하지 않으면 `ROLE_USER`로 작동한다.
+     * @param {{email: string, password: string, authority: string}} info 
      */
     async function signUp(info) {
         await axios.post(signUpUrl, info, 

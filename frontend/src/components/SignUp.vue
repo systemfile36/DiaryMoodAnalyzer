@@ -34,6 +34,16 @@
                   :errors="errors"
                   :fieldName="'passwordCheck'"/>
              </div>
+
+             <div class="form-check form-switch mb-3 mt-3">
+                <input class="form-check-input" type="checkbox" role="switch"
+                value="" id="isExpert"
+                @change="onIsExpertChanged">
+                <label class="form-check-label" for="isExpert">
+                    당신은 전문가 입니까?
+                </label>
+             </div>
+
              <div class="d-flex">
               <button type="button" class="btn btn-primary"
               @click="signUp">회원가입</button>
@@ -54,6 +64,7 @@ import FormErrorText from './FormErrorText.vue'
 
 import Validator from '../utils/Validator';
 import ErrMessages from '../utils/ErrMessages';
+import Authority from '../utils/Authority';
 import { useFormValidation } from '../utils/FormValidation';
 import { useAuthManagerStore } from '../stores/AuthManager';
 import { useModalManagerStore } from '../stores/ModalManager';
@@ -68,6 +79,8 @@ const modalManager = useModalManagerStore();
 const email = ref("");
 const password = ref("");
 const passwordCheck = ref("");
+
+const isExpert = ref(false);
 
 //컴포저블을 통해 폼 입력값의 유효성 검사
 //checkRules도 받아옴 
@@ -120,10 +133,16 @@ function signUp() {
   } else {
     authManager.signUp({
       email: email.value,
-      password: password.value
+      password: password.value,
+      authority: isExpert.value ? "EXPERT": "USER"
     })
   }
 }
+
+function onIsExpertChanged(event) {
+  isExpert.value = event.target.checked;
+}
+
 </script>
 <style lang="scss">
     .error {

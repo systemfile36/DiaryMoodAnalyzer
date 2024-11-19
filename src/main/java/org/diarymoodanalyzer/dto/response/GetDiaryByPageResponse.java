@@ -12,9 +12,12 @@ public class GetDiaryByPageResponse extends BaseGetDiaryResponse{
 
     private final String content;
 
+    private final int commentsSize;
 
     public GetDiaryByPageResponse(Diary diary) {
         super(diary.getId(), diary.getTitle(), diary.getCreatedAt(), diary.getUpdatedAt(), diary.getUser().getEmail());
         this.content = diary.getContent();
+        this.commentsSize = diary.getComments().size();
     }
+
 }

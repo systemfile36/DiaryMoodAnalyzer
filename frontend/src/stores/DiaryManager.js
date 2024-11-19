@@ -91,9 +91,6 @@ export const useDiaryManagerStore = defineStore('diaryManager', ()=>{
             console.log("토큰 획득에 실패하였습니다.");
         }
 
-        
-
-        
     }
 
     /**
@@ -125,6 +122,7 @@ export const useDiaryManagerStore = defineStore('diaryManager', ()=>{
         }
         
     }
+
 
     /**
      * 인자로 받은 page의 Diary를 불러옴
@@ -189,8 +187,6 @@ export const useDiaryManagerStore = defineStore('diaryManager', ()=>{
         //day.js 사용 
         return dayjs(date).format(format); // 날짜 포맷 설정
     }
-
-
 
      /**
       * maxLength 만큼 자른 값을 반환한다. 

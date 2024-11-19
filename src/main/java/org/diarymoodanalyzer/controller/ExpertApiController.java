@@ -2,6 +2,7 @@ package org.diarymoodanalyzer.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.diarymoodanalyzer.domain.Expert;
+import org.diarymoodanalyzer.domain.User;
 import org.diarymoodanalyzer.dto.request.GetDiaryByPageForExpertRequest;
 import org.diarymoodanalyzer.dto.request.GetDiaryByPageRequest;
 import org.diarymoodanalyzer.dto.request.GetDiaryForExpertRequest;
@@ -10,6 +11,7 @@ import org.diarymoodanalyzer.dto.response.GetDiaryByIdResponse;
 import org.diarymoodanalyzer.dto.response.GetDiaryByPageResponse;
 import org.diarymoodanalyzer.dto.response.GetManagedUserResponse;
 import org.diarymoodanalyzer.repository.ExpertRepository;
+import org.diarymoodanalyzer.repository.UserRepository;
 import org.diarymoodanalyzer.service.CommentService;
 import org.diarymoodanalyzer.service.DiaryService;
 import org.diarymoodanalyzer.util.AuthenticationUtils;
@@ -17,9 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -30,6 +30,8 @@ import java.util.List;
 public class ExpertApiController {
 
     private final ExpertRepository expertRepository;
+
+    private final UserRepository userRepository;
 
     private final DiaryService diaryService;
 
@@ -83,5 +85,24 @@ public class ExpertApiController {
     @GetMapping("/api/expert/comments")
     public ResponseEntity<List<GetCommentByDiaryIdResponse>> getCommentsByExpert() {
         return ResponseEntity.ok().body(commentService.getCommentsByExpert());
+    }
+
+    //테스트용 임시 엔드 포인트
+    @PostMapping("/api/expert/managedUsers/{userEmail}")
+    public ResponseEntity<String> addManagedUser(@PathVariable String userEmail) {
+        String currentUserEmail = AuthenticationUtils.getCurrentUserEmail()
+                .orElse("");
+
+        Expert expert = expertRepository.findByEmail(currentUserEmail)
+                .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND, "not found expert : " + currentUserEmail));
+
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND, "not found user : " + userEmail));
+
+        expert.addManagedUser(user);
+
+        userRepository.save(user);
+
+        return ResponseEntity.ok(userEmail);
     }
 }
