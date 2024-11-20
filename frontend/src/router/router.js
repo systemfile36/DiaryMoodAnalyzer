@@ -18,6 +18,8 @@ import CounselEditPage from "../components/CounselEditPage.vue";
 import TempTitle from "../components/TempTitle.vue";
 import UserGuide from "../components/UserGuide.vue";
 
+import Authority from "../utils/Authority";
+
 //router 인스턴스 생성 
 const router = createRouter({
     history: createWebHistory(),
@@ -40,6 +42,9 @@ const router = createRouter({
         { path: '/diaries', component: TempDiaryList, meta: { requireAuth: true} },
         //다이어리 상세보기
         { path: '/diaries/:id', component: TempDiaryDetail, meta: {requireAuth: true}},
+
+        //전문가용 특정 사용자의 다이어리 목록 조회
+        { path: '/expert/diaries/:email', component: TempDiaryList, meta: { requireAuth: true, authority: Authority.EXPERT } },
 
         { path: '/tempTitle', component: TempTitle, meta: { requireAuth: true} },
         { path: '/userGuide', name: 'UserGuide', component: UserGuide, meta: { requireAuth: true} },
@@ -65,6 +70,10 @@ router.beforeEach(async (to, from) => {
         //인증된 상태가 아니라면 로그인 창으로 리다이렉트
         if(!authManager.isAuthenticated) {
             return '/signin';
+        //만약 권한이 필요한 곳이라면, 권한을 체크한다. 
+        } else if(to.meta.authority) {
+
+            return to.meta.authority === authManager.role;
         } else {
             return true;
         }

@@ -2,8 +2,8 @@
 <div class="d-flex flex-column">
     <!-- 다이어리 주인의 이름이 들어갈 곳 (전문가용) -->
     <h2 class="author-name px-4 mt-3"
-        v-if="authManager.role === Authority.EXPERT">
-        {{ authManager.userName }}
+        v-if="isCurrentUserExpert() && $route.params.email">
+        {{ $route.params.email }} 님의 Diary 목록입니다.
     </h2>
     <div id="diary-list" class="flex-grow-1 px-4">
         <article class="card-wrapper card" v-for="(diary, i) in diaries" :key="i">
@@ -62,6 +62,7 @@
 </template>
 <script setup>
 import { onMounted } from 'vue';
+import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useDiaryManagerStore } from '../stores/DiaryManager';
 import { useAuthManagerStore } from '../stores/AuthManager';
@@ -72,17 +73,27 @@ const diaryManager = useDiaryManagerStore();
 
 const authManager = useAuthManagerStore();
 
+const route = useRoute();
+
 //반응형을 유지하기 위해 destructuring 해서 받아옴 
 const { diaries } = storeToRefs(diaryManager);
 
 onMounted(async ()=>{
-    //마운트 되면 다이어리들 로드 
-    await diaryManager.loadDiaries();
 
+    if(isCurrentUserExpert() && route.params.email) {
+        await diaryManager.loadDiariesForExpert(route.params.email);
+    } else {
+        //마운트 되면 다이어리들 로드 
+        await diaryManager.loadDiaries();
+    }
 })
 
 function onMovePage(page) {
     diaryManager.setDiaryPage(page);
+}
+
+function isCurrentUserExpert() {
+    return authManager.role === Authority.EXPERT;
 }
 
  /**

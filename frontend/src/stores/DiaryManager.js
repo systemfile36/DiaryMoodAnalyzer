@@ -18,6 +18,8 @@ export const useDiaryManagerStore = defineStore('diaryManager', ()=>{
     const diaryUrl = '/api/diary';
     const diariesTitleUrl = '/api/diaries/title';
 
+    const diariesForExpertUrl = '/api/expert/diaries';
+
     /**
      * 다이어리의 기본 날짜 포맷 형식 
      */
@@ -123,6 +125,34 @@ export const useDiaryManagerStore = defineStore('diaryManager', ()=>{
         
     }
 
+    /**
+     * 인자로 받은 이메일로 사용자의 다이어리 목록을 로드한다. 
+     * 전문가가 자신이 관리하는 사용자의 다이어리 목록을 볼 때 사용한다. 
+     * @param {string} email 조회할 다이어리의 소유자의 이메일
+     */
+    async function loadDiariesForExpert(email) {
+        if(await authManager.checkTokens()) {
+
+            const parameters = getPagingParams();
+            parameters['ownerEmail'] = email;
+
+            await axios.get(diariesForExpertUrl, {
+                headers: authManager.getDefaultHeaders(),
+                params: parameters,
+            }).then((res) => {
+                console.log(res);
+
+                diaries.value = res.data.content;
+
+                currentTotalPages.value = res.data.totalPages;
+            }).catch((error) => {
+                console.log(error);
+            })
+        } else {
+            console.log("토큰 획득에 실패하였습니다.");
+        }
+    }
+
 
     /**
      * 인자로 받은 page의 Diary를 불러옴
@@ -214,6 +244,7 @@ export const useDiaryManagerStore = defineStore('diaryManager', ()=>{
         addDiary,
         deleteDiary,
         loadDiaries,
+        loadDiariesForExpert,
         formatDate,
         getTruncated,
         getDiaryById,

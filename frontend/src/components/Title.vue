@@ -5,7 +5,27 @@
         </div>
 
 
-        <div class="ex-link-list mt-5 flex-grow-1">
+        <div class="ex-link-list d-lg-flex mt-5">
+          <div class="card ex-link">
+                <div class="card-body d-flex flex-column align-items-center">
+                    <h5 class="card-title fw-bold">고립/은둔 자가진단 테스트</h5>
+                    <p class="card-text text-body-secondary">자가 테스트</p>
+                    <a href="http://seoulymind.org/hq-25/"
+                    class="btn btn-outline-primary">
+                        이동
+                    </a>
+                </div>
+            </div>
+            <div class="card ex-link">
+                <div class="card-body d-flex flex-column align-items-center">
+                    <h5 class="card-title fw-bold">고립/은둔 자가진단 테스트</h5>
+                    <p class="card-text text-body-secondary">자가 테스트</p>
+                    <a href="http://seoulymind.org/hq-25/"
+                    class="btn btn-outline-primary">
+                        이동
+                    </a>
+                </div>
+            </div>
             <div class="card ex-link">
                 <div class="card-body d-flex flex-column align-items-center">
                     <h5 class="card-title fw-bold">고립/은둔 자가진단 테스트</h5>
@@ -134,6 +154,10 @@ function getLast7Days() {
     .btn {
         margin: 0px;
         width: 50%;
+    }
+
+    .ex-link { 
+      margin: 2rem;
     }
 
 </style>
