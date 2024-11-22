@@ -24,8 +24,8 @@
                                     {{ diaryManager.formatDate(diary.createdAt) }}
                                 </time>
                                 <!-- 감정 분석 결과 -->
-                                <i class="fa-regular fa-face-smile"></i>
-                                <span class="sentimental">not bad</span>
+                                <i :class="DepressionLevel.getValue(diary.depressionLevel).icon"></i>
+                                <span class="sentimental">{{ DepressionLevel.getValue(diary.depressionLevel).status }}</span>
                                 <!-- 코멘트 개수 -->
                                 <i class="fa-solid fa-comments"></i>
                                 <span class="comments">{{ diary.commentsSize + "개" }}</span>
@@ -68,6 +68,9 @@ import { useDiaryManagerStore } from '../stores/DiaryManager';
 import { useAuthManagerStore } from '../stores/AuthManager';
 
 import Authority from '../utils/Authority';
+
+//감정 분석 결과 수치와 상태, 아이콘을 매칭하기 위한 import 
+import DepressionLevel from '../utils/DepressionLevel';
 
 const diaryManager = useDiaryManagerStore();
 
