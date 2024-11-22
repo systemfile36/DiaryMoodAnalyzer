@@ -28,7 +28,7 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
      */
     @Query("""
             SELECT new org.diarymoodanalyzer.dto.response.GetDiaryTitleByPageResponse
-                (d.id, d.title, d.createdAt, d.updatedAt, d.user.email)
+                (d.id, d.title, d.depressionLevel, d.createdAt, d.updatedAt, d.user.email)
             FROM Diary d WHERE d.user.email = :email
             """)
     Page<GetDiaryTitleByPageResponse> findByUserEmailOnlyTitle(@Param("email") String email, Pageable pageable);

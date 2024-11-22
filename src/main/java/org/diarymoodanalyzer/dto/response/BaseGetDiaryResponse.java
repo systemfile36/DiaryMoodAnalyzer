@@ -15,6 +15,8 @@ Diary를 반환할때 사용하는 DTO의 추상 클래스이다.
 public abstract class BaseGetDiaryResponse {
     private Long id;
     private String title;
+    private byte depressionLevel;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String userEmail;

@@ -12,8 +12,8 @@ import java.time.LocalDateTime;
 @Setter
 public class GetDiaryTitleByPageResponse extends BaseGetDiaryResponse{
 
-    public GetDiaryTitleByPageResponse(long id, String title, LocalDateTime createdAt, LocalDateTime updatedAt, String userEmail) {
-        super(id, title, createdAt, updatedAt, userEmail);
+    public GetDiaryTitleByPageResponse(long id, String title, byte depressionLevel, LocalDateTime createdAt, LocalDateTime updatedAt, String userEmail) {
+        super(id, title, depressionLevel, createdAt, updatedAt, userEmail);
     }
 
 }
