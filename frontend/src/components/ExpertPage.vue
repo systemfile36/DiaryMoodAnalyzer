@@ -1,9 +1,9 @@
 <template>
-  <div class="div-top d-lg-flex mt-3">
-     <div class="user-chart d-flex flex-row">
+  <div class="expert-top d-lg-flex mt-3">
+     <div class="user-chart d-flex">
          <canvas ref="userMoodChart"></canvas>
      </div>
-     <div class="user-list d-flex flex-row">
+     <div class="user-list d-flex">
         <table class="table table-striped">
           <caption>상담자 리스트</caption>
           <thead>
@@ -23,7 +23,7 @@
      </div>
    </div>
 
-   <div class="div-bottom d-lg-flex flex-column mt-5 align-items-center">
+   <div class="expert-bottom d-lg-flex flex-column mt-5 align-items-center">
      <div class = "user-diary"></div>
    </div>
 </template>
@@ -139,7 +139,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.div-top {
+.expert-top {
   width: 100%;
   height: 50vh;
 }
