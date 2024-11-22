@@ -35,12 +35,16 @@ public class DiaryService {
 
     private final UserRepository userRepository;
 
+    private final DiaryEmotionService diaryEmotionService;
+
     @PersistenceContext
     private final EntityManager entityManager;
 
     //트랜잭션으로 관리
     @Transactional
     public AddDiaryResponse addDiary(AddDiaryRequest dto) throws ResponseStatusException {
+
+        //리팩터링 예정. (변경 감지를 활용함. 프록세 객체 필요없음)
 
         //현재 인증된 사용자의 정보를 가져옴
         String currentUserEmail = AuthenticationUtils.getCurrentUserEmail()
@@ -64,8 +68,15 @@ public class DiaryService {
                 .content(dto.getContent())
                 .build();
 
-        //리포지토리에 저장
+        //리포지토리에 저장하며 저장된 엔티티 받아옴
+        //AUTOINCREMENT id 참조를 위해서는 저장하고 나서 받아와야 함
         Diary savedDiary = diaryRepository.save(diary);
+
+
+        //AI 서버에 분석을 요청한다.
+        //비동기로 실행되며, 분석이 완료되면 DB에 반영 될것이다.
+        diaryEmotionService.submitTask(new DiaryEmotionTask(savedDiary));
+
 
         return new AddDiaryResponse(savedDiary.getId(), currentUserEmail, dto.getTitle());
 
