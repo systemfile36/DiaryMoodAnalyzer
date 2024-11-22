@@ -41,6 +41,13 @@ public class Diary extends BaseEntity { //공통 컬럼 상속
     private String content;
 
     /**
+     * 우울한 정도를 나타내는 수치
+     * -2에서 10의 값을 가진다.
+     */
+    @Column(name = "depression_level")
+    private Byte depressionLevel = -1;
+
+    /**
      * Diary에 달린 코멘트들.
      * Comment와 1대다 관계
      */
@@ -59,5 +66,29 @@ public class Diary extends BaseEntity { //공통 컬럼 상속
     @Builder
     public Diary(User user, String title, String content) {
         this.user = user; this.title = title; this.content = content;
+    }
+
+    //setter를 통해 depressionLevel의 값이 DepressionLevel의 enum값을 가지도록 유지한다. 
+
+    /**
+     * Enum 값을 통해 depressionLevel을 설정한다. 
+     * @param level 설정할 depressionLevel의 Enum 값
+     */
+    public void setDepressionLevel(DepressionLevel level) {
+        this.depressionLevel = level.getValue();
+    }
+
+    /**
+     * byte 값을 통해 depressionLevel을 설정한다.
+     * Enum에 정의되지 않은 값이면 DepressionLevel.ERROR 값으로 설정한다.
+     * @param value 설정할 depressionLevel의 byte
+     */
+    public void setDepressionLevel(byte value) {
+        try {
+            this.setDepressionLevel(DepressionLevel.fromValue(value));
+        } catch (IllegalArgumentException e) {
+            this.setDepressionLevel(DepressionLevel.ERROR);
+        }
+
     }
 }
