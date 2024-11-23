@@ -153,6 +153,35 @@ export const useDiaryManagerStore = defineStore('diaryManager', ()=>{
         }
     }
 
+    /**
+     * 최근 {days}일 간의 
+     * @param {number} days 
+     * @returns 
+     */
+    async function getRecentDepressionLevels(days) {
+
+        //변경 전 페이징 변수 캐싱 
+        const before = getPagingParams();
+
+        //최근 {days}일 만큼의 Diary를 로드한다. 
+        setPagingParams({size: days, sort: DiaryColumns.CREATED, ascending: false});
+        await loadDiaries();
+
+        
+        const dates = [];
+        const depressionLevels = [];
+
+        diaries.value.forEach((value) => {
+            dates.push(value.createdAt);
+            depressionLevels.push(value.depressionLevel);
+        })
+
+        return {
+            dates: dates,
+            depressionLevels: depressionLevels
+        }
+
+    }
 
     /**
      * 인자로 받은 page의 Diary를 불러옴
@@ -206,6 +235,26 @@ export const useDiaryManagerStore = defineStore('diaryManager', ()=>{
             sortBy: sortBy.value,
             isAscending: isAscending.value,
         };
+    }
+
+    /**
+     * 페이징에 필요한 파라미터들을 설정한다. 
+     * 객체 destructuring을 사용해
+     * @param {{page?: number, 
+     * size?: number,
+     * sort?: string,
+     * ascending?: boolean}} param0 
+     */
+    function setPagingParams({
+        page = currentPage.value,
+        size = currentPageSize.value,
+        sort = sortBy.value,
+        ascending = isAscending.value
+    } = {}) {
+        currentPage.value = page;
+        currentPageSize.value = size;
+        sortBy.value = sort;
+        isAscending.value = ascending;
     }
 
     /**

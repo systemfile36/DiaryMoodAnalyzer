@@ -63,7 +63,7 @@ onMounted(()=>{
 
     //테스트용 랜덤 값 
     for(let i = 0; i < 7; i++) {
-        data.push(parseFloat((Math.random()*4).toFixed(1)));
+        data.push(parseFloat((Math.random()*10).toFixed(1)));
     }
 
     const labels = getLast7Days();
@@ -106,7 +106,7 @@ onMounted(()=>{
                 text: "변화량",
               },
               min: 0.0,
-              max: 4.0,
+              max: 10.0,
             },
           },
         },
