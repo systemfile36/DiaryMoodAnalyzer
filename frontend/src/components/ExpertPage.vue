@@ -5,7 +5,7 @@
      </div>
      <div class="user-list d-flex">
         <table class="table table-striped">
-          <caption>상담자 리스트</caption>
+          <caption>담당 사용자 리스트</caption>
           <thead>
           <tr>
             <th scope="col">No</th>
@@ -14,27 +14,73 @@
           </thead>
           <tbody>
           <!--<tr v- for="(user, index) in userList" :key="index" @click="getDiaryList(user.email)" style="cursor: pointer;">-->
-          <tr v-for="(user, index) in testList" :key="index">
+<!--      <tr v-for="(user, index) in testList" :key="index">
             <td>{{ index + 1 }}</td>
             <td>{{ user.email }}</td>
+          </tr> -->
+          <!-- 테스트용으로 하드 코딩. 나중에 수정 예정 -->
+          <tr>
+            <td>1</td>
+            <td>
+              <router-link to="/expert/diaries/test@email.com"
+              style="text-decoration: none; color: black;"
+              data-bs-toggle="tooltip" data-bs-placement="top"
+              data-bs-title="해당 사용자의 Diary 리스트를 보려면 클릭하세요">
+                test@email.com
+              </router-link>
+            </td>
           </tr>
           </tbody>
         </table>
      </div>
    </div>
 
-   <div class="expert-bottom d-lg-flex flex-column mt-5 align-items-center">
+<!--    <div class="expert-bottom d-lg-flex flex-column mt-5 align-items-center">
      <div class = "user-diary"></div>
-   </div>
+   </div> -->
 </template>
 
 <script>
 import { Chart, registerables } from 'chart.js'
 import axios from "axios";
 import dayjs from "dayjs";
+
+import { Tooltip } from 'bootstrap';
+
 Chart.register(...registerables)
 
-const dataset_date = [ '11-01', '11-02', '11-03', '11-04', '11-05', '11-06', '11-07', '11-08', '11-09', '11-10']
+const getLast7Days = () => {
+    const dates = [];
+
+    //현재 날짜 
+    const today = new Date();
+
+    //현재 - 6일에서 현재 - 0일 까지 
+    for(let i = 6; i >= 0; i--) {
+        const date = new Date();
+        //날짜 세팅 
+        date.setDate(today.getDate()-i);
+
+        //날짜를 나타내는 문자열 추가 (MM-DD 형식)
+        dates.push(`${date.getMonth() + 1}-${date.getDate()}`);
+    }
+
+    return dates;
+    };
+
+const generateRandomValue = () => {
+    let data = [];
+    for(let i = 0; i < 7; i++) {
+        data.push(parseFloat((Math.random()*10).toFixed(1)));
+    }
+    return data;
+}
+
+const dataset_date = getLast7Days();
+
+const random_data = generateRandomValue();
+
+
 
 export default {
   data:() => ({
@@ -50,7 +96,7 @@ export default {
       labels: dataset_date,
       datasets: [{
         label: '11월',
-        data: [1,3,4,2,4,1,3,2,1,1],
+        data: random_data,
         backgroundColor: [
           'rgba(255, 99, 132, 0.2)'
         ],
@@ -68,7 +114,7 @@ export default {
         },
         title: {
           display: true,
-          text: "기분 통계(Day)",
+          text: "test@email.com 님의 최근 감정 통계(Day)",
         }
       },
     }
@@ -76,6 +122,9 @@ export default {
   mounted(){
     this.getManagedUsers()
     this.createChart_line()
+
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new Tooltip(tooltipTriggerEl))
   },
   methods:{
     getManagedUsers() {

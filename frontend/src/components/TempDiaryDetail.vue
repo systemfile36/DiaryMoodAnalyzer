@@ -141,7 +141,7 @@ function onAddComment() {
     );
 
     modalManager.openModal(async ()=>{
-        await commentManager.addCommentByDiaryId(route.params.id);
+        await commentManager.addCommentByDiaryId(route.params.id, commentContent.value);
         router.go(0);
     }, null);
 }
