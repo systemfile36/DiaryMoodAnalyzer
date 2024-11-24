@@ -11,7 +11,7 @@
       <h4>"오늘의 다이어리를 쓰며 기분을 표현해보세요."</h4>
       <h4>"작은 감정 하나에도 의미가 담겨 있어요"</h4>
       <h4>당신의 하루를 함께하고픈 우리는</h4>
-      <h3>'서비스 이름'입니다.</h3>
+      <h3>'EmoLog'입니다.</h3>
     </div>
 
     <div id="carouselExampleAutoplaying" class="carousel slide" data-bs-ride="carousel">
