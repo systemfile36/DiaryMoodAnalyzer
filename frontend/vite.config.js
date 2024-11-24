@@ -12,6 +12,11 @@ export default defineConfig({
 
   //set proxy to run dev server
   server: {
+
+    //외부에서 접근 가능하도록 포트포워딩 
+    host: '0.0.0.0',
+    port: 5173,
+
     proxy: {
       "/api": {
         target: 'http://localhost:8080',
