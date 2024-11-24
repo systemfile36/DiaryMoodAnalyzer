@@ -6,19 +6,13 @@
 
     <div class="userGuide-description d-flex flex-column">
       <h2 class = "user_guide_title">이용 안내</h2>
-      <h5>1. 다이어리 작성 후에 감정 분석을 진행해 주세요.</h5>
-      <h5>2. 다이어리를 작성 후 상담을 신청해주세요.</h5>
-      <h5>3. 상담이 확정되면 지정된 장소로 방문하여 상담을 받으시면 됩니다.</h5>
+      <p>1. 매일 또는 필요한 순간에, 기분이나 생각을 기록해 보세요. 일기는 언제든지 수정할 수 있으며, 일기를 저장해두면 나중에 다시 볼 수 있습니다.</p>
+      <p>2. 작성한 일기를 저장하면, AI 감정 분석이 자동으로 이루어집니다. AI는 일기에서 감지된 감정을 분석해 감정 분포를 그래프로 제공합니다.</p>
+      <p>3. 작성한 일기와 AI 감정 분석 결과는 전문가에게 공유됩니다. 전문가가 이를 확인하고, 코멘트를 달아줄 것입니다.</p>
+      <p> - 전문가의 피드백을 통해 자신의 감정을 더욱 잘 이해하고, 필요한 피드백을 받을 수 있습니다.</p>
+      <p>4. 좀 더 깊은 상담이 필요하다면, 전문가의 이메일을 통해 상담을 신청할 수 있습니다.</p>
     </div>
 
-    <div class="userGuide-target d-flex flex-column">
-      <h2 class = "user_guide_title">지원 대상</h2>
-      <h5>- 진주시 거주 은둔형외톨이 당사자 및 가족</h5>
-      <h5>- 연령제한 없음</h5>
-      <h2 class = "user_guide_title">문의</h2>
-      <h5>- 전화 : 010-9480-2749</h5>
-      <h5>- email : chan941027@gnu.ac.kr</h5>
-    </div>
   </div>
 
   <div class="userGuide-bottom d-lg-flex mt-3 align-items-center">
@@ -78,7 +72,7 @@ export default {
 }
 
 .userGuide-description{
-  width: 30%;
+  width: 70%;
   height: 30vh;
   margin: 2rem;
   padding: 10px;
@@ -86,13 +80,9 @@ export default {
   border-radius: 10px;
 }
 
-.userGuide-target {
-  width: 30%;
-  height: 30vh;
-  margin: 2rem;
-  padding: 10px;
-  border: 1px solid black;
-  border-radius: 10px;
+p{
+  font-size: clamp(8px, 2vw, 16px);  /* 최소 14px, 최대 24px로 글자 크기 자동 조정 */
+  font-weight: bold;
 }
 
 .user_guide_title{
@@ -119,9 +109,12 @@ export default {
 }
 
 @media (max-width: 991px) {
+
+  .userGuide-top{
+    margin-top: 300px;
+  }
   .userGuide-image,
-  .userGuide-description,
-  .userGuide-target{
+  .userGuide-description{
     width: 70%;
   }
   .destination-description,

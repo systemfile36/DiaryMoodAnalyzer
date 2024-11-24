@@ -4,14 +4,14 @@
     <h4 class="menu-content" style="cursor: pointer" @click="goToSignUp">회원가입</h4>
   </div>
 
-  <div class="tempLogin-main d-lg-flex">
+  <div class="tempLogin-main d-lg-flex align-items-center">
     <div class="tempLogin-introduction d-flex flex-column">
-      <h1 class = "user_guide_title">오늘도</h1>
-      <h1 class = "user_guide_title">우리 이웃의 안녕을 묻습니다.</h1>
-      <h4>"오늘의 기분은 어떠세요?"</h4>
-      <h4>"오늘 햇살은 참 좋더라구요"</h4>
-      <h4>사소한 안부 인사로 우리 이웃의 안녕을 묻는</h4>
-      <h3>광주광역시 외톨이지원센터입니다.</h3>
+      <h1 class = "user_guide_title">오늘의 기분은 어떠신가요?</h1>
+      <h4>"오늘 하루 동안의 당신의 이야기를 나눠주세요."</h4>
+      <h4>"오늘의 다이어리를 쓰며 기분을 표현해보세요."</h4>
+      <h4>"작은 감정 하나에도 의미가 담겨 있어요"</h4>
+      <h4>당신의 하루를 함께하고픈 우리는</h4>
+      <h3>'서비스 이름'입니다.</h3>
     </div>
 
     <div id="carouselExampleAutoplaying" class="carousel slide" data-bs-ride="carousel">
@@ -85,20 +85,19 @@ export default {
 
 .tempLogin-main {
   width: 100%;
-  height: 70vh;
+  height: 60vh;
 }
 
 .tempLogin-introduction {
   width: 50%;
   height: 50vh;
-  margin: 4rem;
+  margin: 1rem;
   padding: 10px;
 }
 
 #carouselExampleAutoplaying {
   width: 50%;
   height: 50vh;
-  margin: 4rem;
 }
 
 @media (max-width: 991px) {
