@@ -1,4 +1,4 @@
-<template xmlns="http://www.w3.org/1999/html">
+<template>
   <div class="userGuide-top d-lg-flex align-items-center">
     <div class="userGuide-image d-flex">
       <img src="../assets/images/loner_image.png"/>
@@ -67,7 +67,6 @@ export default {
 .userGuide-top{
   width: 100%;
   height: 50vh;
-  border: 2px solid black;
 }
 
 .userGuide-image{
