@@ -3,6 +3,7 @@ import { ref, computed, isRef } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import TokenUtils from '../utils/TokenUtils'
+import Authority from '../utils/Authority'
 
 /**
  * 인증 정보와 관련 유틸 함수를 가진 store
@@ -42,7 +43,12 @@ export const useAuthManagerStore = defineStore('authManager', () => {
             TokenUtils.setAccessToken(res.data['accessToken']);
             TokenUtils.setRefreshToken(res.data['refreshToken']);
             initStates();
-            router.push('/');
+            
+            //임시로 권한에 따른 홈 페이지 리다이렉트 구현 
+
+            const redirectUrl = role.value == Authority.EXPERT ? "/expertPage" : "/"
+
+            router.push(redirectUrl);
         }).catch((error) => {
             console.log(error);
         })
