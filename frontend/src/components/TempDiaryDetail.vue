@@ -21,7 +21,7 @@
         <div class="comment-aria mt-4">
             <div class="comment-header mt-3">
                 <i class="fa-solid fa-comments"></i>
-                <span class="comment-total ms-3">1개</span>
+                <span class="comment-total ms-3">{{ `${comments.length}개` }}</span>
             </div>
 
             <!-- 코멘트 목록 v-for로 출력 -->

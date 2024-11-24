@@ -109,7 +109,20 @@ function onSubmit() {
         );
         modalManager.openModal(null, null);
     } else {
-        diaryManager.addDiary(title.value, content.value);
+        diaryManager.addDiary(title.value, content.value, 
+            () => {
+                modalManager.setModalText(
+                    "작성에 성공하였습니다.",
+                    "확인을 누르면 작성 목록으로 이동합니다.",
+                    "확인", "닫기"
+                );
+                modalManager.openModal(()=>{
+                    router.push("/diaries");
+                }, ()=>{
+                    router.go(0);
+                })
+            }
+        );
     }
     //
 }

@@ -51,7 +51,10 @@ export const useDiaryManagerStore = defineStore('diaryManager', ()=>{
      * @param {string} title 
      * @param {string} content 
      */
-    async function addDiary(title, content) {
+    async function addDiary(title, content, 
+        onSuccess = () => { alert('일기 작성에 성공하였습니다.'); router.push("/diaries"); },
+        onFailure = () => { alert('요청에 실패하였습니다. 잠시후 시도해 주세요.');}
+    ) {
         if(await authManager.checkTokens()) {
             const diary = {
                 title: title,
@@ -63,11 +66,18 @@ export const useDiaryManagerStore = defineStore('diaryManager', ()=>{
             await axios.post(diariesUrl, diary, {headers})
                 .then((res)=>{
                     console.log(res);
-                    alert('일기 작성에 성공하였습니다.');
-                    router.go(0);
+                    //alert('일기 작성에 성공하였습니다.');
+                    //router.go(0);
+                    onSuccess();
+
+                    return;
+
                 }).catch((error)=>{
                     console.log(error);
+                    onFailure();
                 })
+        } else {
+            onFailure();
         }
     }
 
