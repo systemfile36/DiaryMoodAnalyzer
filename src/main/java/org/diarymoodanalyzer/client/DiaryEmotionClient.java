@@ -3,6 +3,7 @@ package org.diarymoodanalyzer.client;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.diarymoodanalyzer.config.DiaryEmotionProperties;
 import org.diarymoodanalyzer.dto.ai.request.DiaryEmotionRequest;
 import org.diarymoodanalyzer.dto.ai.response.DiaryEmotionResponse;
 import org.springframework.http.HttpHeaders;
@@ -21,13 +22,17 @@ import org.springframework.web.server.ResponseStatusException;
 public class DiaryEmotionClient {
     private final WebClient webClient;
 
-    //서버의 base URL
-    private static final String SERVER_BASE_URL = "http://220.77.153.60:5000";
+    private final DiaryEmotionProperties diaryEmotionProperties;
 
     //자동으로 등록된 WebClient.Builder 를 주입받아서 구성한다.
-    public DiaryEmotionClient(WebClient.Builder webClientBuilder) {
+    public DiaryEmotionClient(WebClient.Builder webClientBuilder, DiaryEmotionProperties diaryEmotionProperties) {
+
+        //프로퍼티 클래스 초기화
+        this.diaryEmotionProperties = diaryEmotionProperties;
+
+        //프로퍼티에 설정된 url 사용
         this.webClient = webClientBuilder
-                .baseUrl(SERVER_BASE_URL)
+                .baseUrl(diaryEmotionProperties.getUrl())
                 //기본적으로 application/json 추가
                 .defaultHeaders(httpHeaders -> {
                     httpHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
