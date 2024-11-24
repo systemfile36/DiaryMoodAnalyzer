@@ -19,6 +19,7 @@ import TempTitle from "../components/TempTitle.vue";
 import UserGuide from "../components/UserGuide.vue";
 
 import Authority from "../utils/Authority";
+import TempLogin from "../components/TempLogin.vue";
 
 //router 인스턴스 생성 
 const router = createRouter({
@@ -48,6 +49,7 @@ const router = createRouter({
 
         { path: '/tempTitle', component: TempTitle, meta: { requireAuth: true} },
         { path: '/userGuide', name: 'UserGuide', component: UserGuide, meta: { requireAuth: true} },
+        { path: '/tempLogin', component: TempLogin, meta: { requireAuth: true} },
 
         { path: '/test', component: FrontPage }
     ]

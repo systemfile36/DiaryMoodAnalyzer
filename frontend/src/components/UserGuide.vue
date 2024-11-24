@@ -6,19 +6,18 @@
 
     <div class="userGuide-description d-flex flex-column">
       <h2 class = "user_guide_title">이용 안내</h2>
-      <h5 class = "user_guide_content">1. 다이어리 작성 후에 감정 분석을 진행해 주세요.</h5>
-      <h5 class = "user_guide_content">2. 다이어리를 작성 후 상담을 신청해주세요.</h5>
-      <h5 class = "user_guide_content">3. 상담이 확정되면 지정된 장소로 방문하여 상담을 받으시면 됩니다.</h5>
+      <h5>1. 다이어리 작성 후에 감정 분석을 진행해 주세요.</h5>
+      <h5>2. 다이어리를 작성 후 상담을 신청해주세요.</h5>
+      <h5>3. 상담이 확정되면 지정된 장소로 방문하여 상담을 받으시면 됩니다.</h5>
     </div>
 
     <div class="userGuide-target d-flex flex-column">
       <h2 class = "user_guide_title">지원 대상</h2>
-      <h5 class = "user_guide_content">- 진주시 거주 은둔형외톨이 당사자 및 가족</h5>
-      <h5 class = "user_guide_content">- 연령제한 없음</h5>
+      <h5>- 진주시 거주 은둔형외톨이 당사자 및 가족</h5>
+      <h5>- 연령제한 없음</h5>
       <h2 class = "user_guide_title">문의</h2>
-      <h5 class = "user_guide_content">- 전화 : 010-0000-0000</h5>
-      <h5 class = "user_guide_content">- 카카오톡 : @test1111</h5>
-      <h5 class = "user_guide_content">- email : test@gmail.com</h5>
+      <h5>- 전화 : 010-9480-2749</h5>
+      <h5>- email : chan941027@gnu.ac.kr</h5>
     </div>
   </div>
 
@@ -68,7 +67,6 @@ export default {
 .userGuide-top{
   width: 100%;
   height: 50vh;
-  background: bisque;
   border: 2px solid black;
 }
 
@@ -78,7 +76,6 @@ export default {
   margin: 2rem;
   border: 2px solid black;
   border-radius: 10px;
-  background: coral;
 }
 
 .userGuide-description{
@@ -88,7 +85,6 @@ export default {
   padding: 10px;
   border: 1px solid black;
   border-radius: 10px;
-  background: white;
 }
 
 .userGuide-target {
@@ -98,19 +94,12 @@ export default {
   padding: 10px;
   border: 1px solid black;
   border-radius: 10px;
-  background: white;
 }
 
 .user_guide_title{
   font-weight: bolder;
   margin-bottom: 10px;
-  color: orange;
-}
-
-.user_guide_content{
-  white-space: nowrap; /* 텍스트가 한 줄로 표시되게 함 */
-  overflow: hidden;    /* 텍스트가 넘칠 때 잘리게 함 */
-  text-overflow: ellipsis; /* 잘린 부분에 "..."을 표시 */
+  color: black;
 }
 
 .userGuide-bottom{
@@ -122,7 +111,6 @@ export default {
   width: 50%;
   height: 49vh;
   border: 2px solid black;
-  background: orange;
 }
 
 .destination-map{
