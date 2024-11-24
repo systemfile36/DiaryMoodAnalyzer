@@ -8,9 +8,9 @@
         <div class="ex-link-list d-lg-flex mt-5">
           <div class="card ex-link">
                 <div class="card-body d-flex flex-column align-items-center">
-                    <h5 class="card-title fw-bold">고립/은둔 자가진단 테스트</h5>
-                    <p class="card-text text-body-secondary">자가 테스트</p>
-                    <a href="http://seoulymind.org/hq-25/"
+                    <h5 class="card-title fw-bold">경상남도청 보건복지 사이트</h5>
+                    <p class="card-text text-body-secondary">복지 정보</p>
+                    <a href="https://www.gyeongnam.go.kr/board/list.gyeong?boardId=BBS_0000057&menuCd=DOM_000000144001000000&contentsSid=7247&cpath="
                     class="btn btn-outline-primary">
                         이동
                     </a>
@@ -28,9 +28,9 @@
             </div>
             <div class="card ex-link">
                 <div class="card-body d-flex flex-column align-items-center">
-                    <h5 class="card-title fw-bold">고립/은둔 자가진단 테스트</h5>
-                    <p class="card-text text-body-secondary">자가 테스트</p>
-                    <a href="http://seoulymind.org/hq-25/"
+                    <h5 class="card-title fw-bold">경상남도 청년정보플랫폼</h5>
+                    <p class="card-text text-body-secondary">복지 정보</p>
+                    <a href="https://youth.gyeongnam.go.kr/youth/"
                     class="btn btn-outline-primary">
                         이동
                     </a>
