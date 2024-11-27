@@ -9,6 +9,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Repository
 public interface DiaryRepository extends JpaRepository<Diary, Long> {
 
@@ -40,7 +44,47 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
     @Query("SELECT d.user.id FROM Diary d WHERE d.id = :id")
     Long findUserIdById(@Param("id") Long diaryId);
 
-/*
+
+    /**
+     * 사용자의 이메일을 받아서 해당 사용자가 작성한 Diary의
+     * 날짜별 depression level의 평균을 반환한다.
+     * @param email - 사용자의 이메일. Diary의 주인
+     * @return (날짜, 평균 depression_level)의 쌍을 담은 리스트
+     */
+    @Query( value = """
+            SELECT DATE(d.created_at) AS date, AVG(d.depression_level)
+            FROM diaries d
+            INNER JOIN users u
+            ON u.id = d.user_id
+            WHERE u.email = :email
+            GROUP BY DATE(d.created_at)
+            ORDER BY date ASC
+            """, nativeQuery = true) //네이티브 쿼리 사용
+    List<Object[]> findDailyDepressionLevelAvg(@Param("email") String email);
+
+    /**
+     * 사용자의 이메일을 받아서 해당 사용자가 작성한 Diary의
+     * 날짜별 depression level의 평균을 반환한다.
+     * 이때, 시작 날짜와 종료 날짜를 받아서, 해당 날짜 사이의 것만 리턴한다.
+     * @param email - 사용자의 이메일
+     * @param startDate - 시작 날짜
+     * @param endDate - 종료 날짜
+     * @return (날짜, 평균 depression_level)의 쌍을 담은 리스트
+     */
+    @Query(value = """
+            SELECT DATE(d.created_at) AS date, AVG(d.depression_level)
+            FROM diaries d
+            INNER JOIN users u
+            ON u.id = d.user_id
+            WHERE u.email = :email
+                AND d.created_at >= :startDate
+                AND d.created_at <= :endDate
+            GROUP BY DATE(d.created_at)
+            ORDER BY date ASC
+            """, nativeQuery = true) //네이티브 쿼리 사용
+    List<Object[]> findDailyDepressionLevelAvg(@Param("email")String email, LocalDate startDate, LocalDate endDate);
+
+    /*
 
     diaryId와 userId를 받아서 해당 다이어리의 소유자가 맞는지 여부를 반환한다.
     JPQL/SQL CASE 문을 사용한다. d.diaryId == && d.user.userId == userId 조건에 맞는 레코드의 개수를 세어서
