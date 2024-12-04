@@ -77,8 +77,8 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
             INNER JOIN users u
             ON u.id = d.user_id
             WHERE u.email = :email
-                AND d.created_at >= :startDate
-                AND d.created_at <= :endDate
+                AND DATE(d.created_at) >= :startDate
+                AND DATE(d.created_at) <= :endDate
             GROUP BY DATE(d.created_at)
             ORDER BY date ASC
             """, nativeQuery = true) //네이티브 쿼리 사용

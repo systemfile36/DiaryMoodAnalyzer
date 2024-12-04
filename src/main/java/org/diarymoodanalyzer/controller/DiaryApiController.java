@@ -3,10 +3,12 @@ package org.diarymoodanalyzer.controller;
 import lombok.RequiredArgsConstructor;
 import org.diarymoodanalyzer.dto.request.AddCommentRequest;
 import org.diarymoodanalyzer.dto.request.AddDiaryRequest;
+import org.diarymoodanalyzer.dto.request.GetDailyAvgDepressionLevelRequest;
 import org.diarymoodanalyzer.dto.request.GetDiaryByPageRequest;
 import org.diarymoodanalyzer.dto.response.*;
 import org.diarymoodanalyzer.service.CommentService;
 import org.diarymoodanalyzer.service.DiaryService;
+import org.diarymoodanalyzer.service.DiaryStatisticsService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +22,8 @@ import java.util.List;
 public class DiaryApiController {
 
     private final DiaryService diaryService;
+
+    private final DiaryStatisticsService diaryStatisticsService;
 
     private final CommentService commentService;
 
@@ -116,4 +120,17 @@ public class DiaryApiController {
 
         return ResponseEntity.ok().build();
     }
+
+    /* 통계 관련 엔드 포인트 */
+
+    @GetMapping("/api/diaries/statistics/average/depressionLevel/daily")
+    public ResponseEntity<GetAvgDepressionLevel> getDailyAverageDepressionLevel(
+            @ModelAttribute GetDailyAvgDepressionLevelRequest req //DTO 사용
+            ) {
+        //start와 end 둘 중 하나라도 null이면 전체 Diary에 대해, 둘 다 있으면 해당 범위 내의 Diary에 대해 일별 평균 계산
+        return ResponseEntity.ok((req.getStart() == null || req.getEnd() == null) ?
+                diaryStatisticsService.getDailyAvgDepressionLevel() : diaryStatisticsService.getDailyAvgDepressionLevel(req.getStart(), req.getEnd()));
+
+    }
+
 }
