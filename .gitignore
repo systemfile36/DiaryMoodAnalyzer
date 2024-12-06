@@ -43,3 +43,6 @@ bin/
 
 #ignore setting files
 application.yml
+
+#ignore backup directory
+h2_backup
