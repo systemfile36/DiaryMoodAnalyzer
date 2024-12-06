@@ -1,9 +1,16 @@
 <template>
     <div class="user-main d-flex flex-column align-items-center">
+
         <div class="chart-wrapper">
+          <select ref="selectDailyRange"
+          class="form-select mb-2" aria-label="SelectDailyRange"
+          @change="onChanged">
+            <option value="7" selected>최근 7일</option>
+            <option value="14">최근 14일</option>
+            <option value="30">최근 30일</option>
+          </select>
             <canvas ref="recentMoodChart"></canvas>
         </div>
-
 
         <div class="ex-link-list d-lg-flex mt-5">
           <div class="card ex-link">
@@ -46,35 +53,55 @@ import { ref, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router';
 import { useAuthManagerStore } from '../stores/AuthManager';
+import { useDiaryManagerStore } from '../stores/DiaryManager';
 
 import { Chart } from 'chart.js'
+import dayjs from 'dayjs';
 
 //템플릿 참조 
 const recentMoodChart = ref(null);
 
+//범위 선택 select 요소 템플릿 참조
+const selectDailyRange = ref(null);
+
+const chartInstance = ref(null);
+
 const authManager = useAuthManagerStore();
+
+const diaryManager = useDiaryManagerStore();
 
 const router = useRouter();
 
 onMounted(()=>{
+  drawRecentDepressionChart();
+});
 
-    //실제로는 최근의 7일간의 감정 수치를 로드해야 함 
-    const data = [];
+async function drawRecentDepressionChart() {
+  const data = await diaryManager.getRecentDailyAvgDepressionLevel(selectDailyRange.value.value);
+  
+  //key(날짜) 기준으로 정렬 
+  const labels = Object.keys(data).sort();
 
-    //테스트용 랜덤 값 
-    for(let i = 0; i < 7; i++) {
-        data.push(parseFloat((Math.random()*10).toFixed(1)));
-    }
+  //값들도 정렬된 key를 사용해서 매핑
+  const values = labels.map((key) => data[key]);
+  
+  drawDepressionChart(labels, values);
+}
 
-    const labels = getLast7Days();
+function drawDepressionChart(labels, data) {
 
-    new Chart(recentMoodChart.value, {
+  //이미 Chart 인스턴스가 존재한다면, 명시적으로 destoy 한다.
+  if(chartInstance.value) {
+    chartInstance.value.destroy();
+  }
+
+  chartInstance.value = new Chart(recentMoodChart.value, {
         type: "line", // 라인 차트
         data: {
           labels: labels,
           datasets: [
             {
-              label: "감정",
+              label: "우울 수치",
               data: data,
               borderColor: "rgba(75, 192, 192, 1)",
               backgroundColor: "rgba(75, 192, 192, 0.2)",
@@ -103,7 +130,7 @@ onMounted(()=>{
             y: {
               title: {
                 display: true,
-                text: "변화량",
+                text: "우울 수치",
               },
               min: 0.0,
               max: 10.0,
@@ -111,30 +138,11 @@ onMounted(()=>{
           },
         },
       });
-});
 
-function logoutHandler() {
-    authManager.logout();
-    
 }
 
-function getLast7Days() {
-    const dates = [];
-
-    //현재 날짜 
-    const today = new Date();
-
-    //현재 - 6일에서 현재 - 0일 까지 
-    for(let i = 6; i >= 0; i--) {
-        const date = new Date();
-        //날짜 세팅 
-        date.setDate(today.getDate()-i);
-
-        //날짜를 나타내는 문자열 추가 (MM-DD 형식)
-        dates.push(`${date.getMonth() + 1}-${date.getDate()}`);
-    }
-
-    return dates;
+function onChanged() {
+  drawRecentDepressionChart();
 }
 
 </script>
@@ -151,7 +159,7 @@ function getLast7Days() {
         width: 90%;
     }
 
-    .btn {
+    .card .btn {
         margin: 0px;
         width: 50%;
     }

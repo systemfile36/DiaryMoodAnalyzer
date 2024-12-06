@@ -16,9 +16,10 @@ import { useAuthManagerStore } from './AuthManager'
 export const useDiaryManagerStore = defineStore('diaryManager', ()=>{
     const diariesUrl = '/api/diaries';
     const diaryUrl = '/api/diary';
-    const diariesTitleUrl = '/api/diaries/title';
 
     const diariesForExpertUrl = '/api/expert/diaries';
+
+    const diariesStatisticsUrl = '/api/diaries/statistics';
 
     /**
      * 다이어리의 기본 날짜 포맷 형식 
@@ -163,34 +164,54 @@ export const useDiaryManagerStore = defineStore('diaryManager', ()=>{
         }
     }
 
-    /**
-     * 최근 {days}일 간의 
-     * @param {number} days 
-     * @returns 
-     */
-    async function getRecentDepressionLevels(days) {
+   /**
+    * start 에서 end 까지 작성한 Diary 들의 일별 depression level 평균을 
+    * 객체로 반환한다.
+    * 
+    * 주의! 정렬되어 있지 않음
+    * @param {string} start - 시작일 YYYY-MM-DD
+    * @param {string} end  - 종료일 YYYY-MM-DD
+    * @returns {Promise<object>}- 날짜를 key, 평균 depression level을 value로 가지는 객체
+    */
+    async function getDailyAvgDepressionLvel(start, end) {
 
-        //변경 전 페이징 변수 캐싱 
-        const before = getPagingParams();
+        const url = diariesStatisticsUrl + "/average/depressionLevel/daily";
 
-        //최근 {days}일 만큼의 Diary를 로드한다. 
-        setPagingParams({size: days, sort: DiaryColumns.CREATED, ascending: false});
-        await loadDiaries();
-
-        
-        const dates = [];
-        const depressionLevels = [];
-
-        diaries.value.forEach((value) => {
-            dates.push(value.createdAt);
-            depressionLevels.push(value.depressionLevel);
-        })
-
-        return {
-            dates: dates,
-            depressionLevels: depressionLevels
+        if(await authManager.checkTokens()){
+            return await axios.get(url, {
+                headers: authManager.getDefaultHeaders(),
+                params: {
+                    start: start,
+                    end: end
+                }
+            }).then((res) => {
+                return res.data.dailyAvg;
+            }).catch((error)=>{
+                console.log(error);
+                return undefined;
+            })
+        } else {
+            console.log("토큰 획득에 실패하였습니다.");
         }
 
+        return undefined;
+    }
+
+    /**
+     * 최근 n일간에 작성한 Diary의 일별 평균 depression level을 객체로 반환.
+     * 
+     * (현재 - days) 에서 현재까지의 범위를 가진다.
+     * 
+     * 주의! 정렬되어 있지 않음
+     * @param {number} days amount of time ('days')
+     * @returns {Promise<object>} - 날짜를 key, 평균 depression level을 value로 가지는 객체
+     */
+    async function getRecentDailyAvgDepressionLevel(days) {
+        const format = "YYYY-MM-DD";
+        const today = dayjs(new Date());
+        return getDailyAvgDepressionLvel(
+            today.add(-days, 'day').format(format), 
+            today.format(format));
     }
 
     /**
@@ -304,6 +325,8 @@ export const useDiaryManagerStore = defineStore('diaryManager', ()=>{
         deleteDiary,
         loadDiaries,
         loadDiariesForExpert,
+        getDailyAvgDepressionLvel,
+        getRecentDailyAvgDepressionLevel,
         formatDate,
         getTruncated,
         getDiaryById,
