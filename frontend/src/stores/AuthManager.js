@@ -13,6 +13,7 @@ export const useAuthManagerStore = defineStore('authManager', () => {
     const logoutUrl = '/api/logout'
     const signUpUrl = '/api/auth/signup'
     const refreshTokenUrl = '/api/token'
+    const expertPrefix = '/api/expert'
     const TOKEN_PREFIX = 'Bearer '
 
     //store에서 router를 사용하기 위함
@@ -92,6 +93,22 @@ export const useAuthManagerStore = defineStore('authManager', () => {
 
             //refresh page
             router.go(0);
+        })
+    }
+
+    /**
+     * 현재 접속중인 전문가가 관리하는 사용자 목록을 반환한다.
+     * @returns {Promise<Array<string>> | Promise<undefined>} - 관리하는 사용자들의 이메일. 오류 발생 시 undefined
+     */
+    async function getManagedUsers() {
+        return await axios.get(expertPrefix + "/managedUsers", {
+            headers: getDefaultHeaders()
+        }).then((res) => {
+            console.log(res);
+            return res.data;
+        }).catch((error) => {
+            console.log(error);
+            return undefined;
         })
     }
 
@@ -220,6 +237,7 @@ export const useAuthManagerStore = defineStore('authManager', () => {
         checkTokens,
         initStates,
         getDefaultHeaders,
+        getManagedUsers,
     }
 
 })

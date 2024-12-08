@@ -1,7 +1,14 @@
 <template>
   <div class="expert-top d-lg-flex mt-3">
-     <div class="user-chart d-flex">
-         <canvas ref="userMoodChart"></canvas>
+     <div class="user-chart">
+      <select ref="selectDailyRange"
+          class="form-select mb-2" aria-label="SelectDailyRange"
+          @change="onChanged">
+            <option value="7" selected>최근 7일</option>
+            <option value="14">최근 14일</option>
+            <option value="30">최근 30일</option>
+          </select>
+         <canvas ref="recentMoodChart"></canvas>
      </div>
      <div class="user-list d-flex">
         <table class="table table-striped">
@@ -10,181 +17,146 @@
           <tr>
             <th scope="col">No</th>
             <th scope="col">이름</th>
+            <th scope="col">변화량</th>
           </tr>
           </thead>
           <tbody>
-          <!--<tr v- for="(user, index) in userList" :key="index" @click="getDiaryList(user.email)" style="cursor: pointer;">-->
-<!--      <tr v-for="(user, index) in testList" :key="index">
-            <td>{{ index + 1 }}</td>
-            <td>{{ user.email }}</td>
-          </tr> -->
-          <!-- 테스트용으로 하드 코딩. 나중에 수정 예정 -->
-          <tr>
-            <td>1</td>
-            <td>
-              <router-link to="/expert/diaries/test@email.com"
-              style="text-decoration: none; color: black;"
-              data-bs-toggle="tooltip" data-bs-placement="top"
-              data-bs-title="해당 사용자의 Diary 리스트를 보려면 클릭하세요">
-                test@email.com
+          <tr v-for="(user, i) in managedUsers" :key="i" style="cursor: pointer;">
+              <td>{{ i + 1 }}</td>
+              <td>
+                <router-link :to="'/expert/diaries/' + user.email"
+              style="text-decoration: none; color: black;">
+                {{ user.email }}
               </router-link>
-            </td>
+              </td>
+              <td>
+                <a role="button" @click="onClickViewGraph(user.email)">
+                  보기
+                </a>
+              </td>
           </tr>
           </tbody>
         </table>
      </div>
    </div>
-
-<!--    <div class="expert-bottom d-lg-flex flex-column mt-5 align-items-center">
-     <div class = "user-diary"></div>
-   </div> -->
 </template>
 
-<script>
-import { Chart, registerables } from 'chart.js'
+<script setup>
+import { Chart } from 'chart.js'
 import axios from "axios";
 import dayjs from "dayjs";
 
-import { Tooltip } from 'bootstrap';
+import { useDiaryManagerStore } from '../stores/DiaryManager';
+import { useAuthManagerStore } from '../stores/AuthManager';
+import { onMounted, ref } from 'vue';
 
-Chart.register(...registerables)
+const diaryManager = useDiaryManagerStore();
 
-const getLast7Days = () => {
-    const dates = [];
+const authManager = useAuthManagerStore();
 
-    //현재 날짜 
-    const today = new Date();
+//차트 인스턴스 
+const chartInstance = ref(null);
 
-    //현재 - 6일에서 현재 - 0일 까지 
-    for(let i = 6; i >= 0; i--) {
-        const date = new Date();
-        //날짜 세팅 
-        date.setDate(today.getDate()-i);
+//템플릿 참조 
+const recentMoodChart = ref(null);
 
-        //날짜를 나타내는 문자열 추가 (MM-DD 형식)
-        dates.push(`${date.getMonth() + 1}-${date.getDate()}`);
-    }
+//범위 선택 select 요소 템플릿 참조
+const selectDailyRange = ref(null);
 
-    return dates;
-    };
+const managedUsers = ref([]);
 
-const generateRandomValue = () => {
-    let data = [];
-    for(let i = 0; i < 7; i++) {
-        data.push(parseFloat((Math.random()*10).toFixed(1)));
-    }
-    return data;
-}
+const currentSelectedUser = ref("");
 
-const dataset_date = getLast7Days();
+onMounted(async ()=>{
+  managedUsers.value = await authManager.getManagedUsers();
 
-const random_data = generateRandomValue();
-
-
-
-export default {
-  data:() => ({
-    testList : [
-      {email: 'test@gmail.com'},
-      {email: 'test12@gmail.com'},
-      {email: 'test34@gmail.com'}
-    ],
-    userList: [],
-    diaries: [],
-
-    data_line: {
-      labels: dataset_date,
-      datasets: [{
-        label: '11월',
-        data: random_data,
-        backgroundColor: [
-          'rgba(255, 99, 132, 0.2)'
-        ],
-        borderColor: [
-          'rgba(255, 99, 132, 1)'
-        ],
-        borderWidth: 1
-      }]
-    },
-    options_line: {
-      responsive: true,
-      plugins: {
-        legend: {
-          position: "top"
-        },
-        title: {
-          display: true,
-          text: "test@email.com 님의 최근 감정 통계(Day)",
-        }
-      },
-    }
-  }),
-  mounted(){
-    this.getManagedUsers()
-    this.createChart_line()
-
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new Tooltip(tooltipTriggerEl))
-  },
-  methods:{
-    getManagedUsers() {
-      axios.get('/api/expert/managedUsers', {
-        headers: {
-          'Authorization': 'Bearer ' + localStorage.getItem('accessToken'),
-          "Content-Type": 'application/json'
-        },
-      })
-          .then((response) => {
-            console.log('API Response:', response.data);
-            this.userList = response.data.content;
-            console.log(response.data)
-            console.log(response.data.content)
-          })
-          .catch((error) => {
-            console.error('사용자 목록을 가져오는 중 오류 발생:', error.response || error.message);
-          });
-    },
-    //getDiaryList(userEmail) {
-    //  axios.get('/api/expert/diaries', {
-    //    headers: {
-    //      'Authorization': 'Bearer ' + localStorage.getItem('accessToken'),
-    //      "Content-Type": 'application/json'
-    //    },
-//
-    //    params: {
-    //      ownerEmail: userEmail, // 조회하려는 다이어리 주인의 이메일
-    //      page: 0,
-    //      size: 10,
-    //    },
-    //  })
-    //      .then((response) => {
-    //        console.log('API Response:', response.data); // 전체 응답 로그 출력
-    //        this.diaries = response.data.content;
-    //        console.log(this.diaries)
-    //      })
-    //      .catch((error) => {
-    //        console.error('다이어리 목록을 가져오는 중 오류 발생:', error.response || error.message);
-    //      });
-    //},
-    createChart_line(){
-      const canvas = this.$refs.userMoodChart;
-      canvas.width = canvas.parentElement.offsetWidth;
-      canvas.height = canvas.parentElement.offsetHeight;
-
-      if (this.data_line.datasets[0].data.length > 0) {
-        new Chart(canvas, {
-          type: 'line',
-          data: this.data_line,
-          options: this.options_line
-        })
-      }
-    },
-    formatDate(date) {
-      return dayjs(date).format('YYYY-MM-DD HH:mm:ss'); // 날짜 포맷 설정
-    }
+  if(!managedUsers.value) {
+    console.log(managedUsers.value)
+    console.log("managedUsers 요청 실패!");
+    return;
   }
 
+  currentSelectedUser.value = managedUsers.value[0]['email'];
+
+  drawRecentDepressionChart(managedUsers.value[0]['email']);
+
+})
+
+async function drawRecentDepressionChart(targetEmail) {
+  const data = await diaryManager.getRecentDailyAvgDepressionLevel(selectDailyRange.value.value, targetEmail);
+  
+  //key(날짜) 기준으로 정렬 
+  const labels = Object.keys(data).sort();
+
+  //값들도 정렬된 key를 사용해서 매핑
+  const values = labels.map((key) => data[key]);
+  
+  drawDepressionChart(labels, values, targetEmail);
 }
+
+function drawDepressionChart(labels, data, targetEmail) {
+
+//이미 Chart 인스턴스가 존재한다면, 명시적으로 destoy 한다.
+if(chartInstance.value) {
+  chartInstance.value.destroy();
+}
+
+chartInstance.value = new Chart(recentMoodChart.value, {
+      type: "line", // 라인 차트
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: "우울 수치",
+            data: data,
+            borderColor: "rgba(255, 99, 132, 1)",
+            backgroundColor: "rgba(255, 99, 132, 0.2)",
+            borderWidth: 2,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        aspectRatio: 1.2, //해상도 고정 
+        plugins: {
+          title: {
+            display: true,
+            text: targetEmail + "님의 최근 감정 변화량", // 그래프 제목
+            font: {
+              size: 18,
+            },
+          },
+        },
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: "날짜",
+            },
+          },
+          y: {
+            title: {
+              display: true,
+              text: "우울 수치",
+            },
+            min: 0.0,
+            max: 10.0,
+          },
+        },
+      },
+    });
+
+}
+
+function onChanged() {
+  drawRecentDepressionChart(currentSelectedUser.value);
+}
+
+function onClickViewGraph(userEmail) {
+  currentSelectedUser.value = userEmail;
+  drawRecentDepressionChart(currentSelectedUser.value);
+}
+
 </script>
 
 <style scoped lang="scss">
@@ -194,9 +166,7 @@ export default {
 }
 
 .user-chart {
-  width: 70%;
-  height: auto;
-  margin: 1rem;
+  width: 90%;
 }
 
 canvas{

@@ -111,6 +111,7 @@ function drawDepressionChart(labels, data) {
         },
         options: {
           responsive: true,
+          aspectRatio: 1.2, //해상도 고정 
           plugins: {
             title: {
               display: true,

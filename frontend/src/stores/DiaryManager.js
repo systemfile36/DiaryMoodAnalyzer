@@ -171,19 +171,31 @@ export const useDiaryManagerStore = defineStore('diaryManager', ()=>{
     * 주의! 정렬되어 있지 않음
     * @param {string} start - 시작일 YYYY-MM-DD
     * @param {string} end  - 종료일 YYYY-MM-DD
+    * @param {string} target - 조회할 대상의 이메일. 대상이 본인일 경우 생략한다. @default undefined
     * @returns {Promise<object>}- 날짜를 key, 평균 depression level을 value로 가지는 객체
     */
-    async function getDailyAvgDepressionLvel(start, end) {
+    async function getDailyAvgDepressionLevel(start, end, target=undefined) {
 
-        const url = diariesStatisticsUrl + "/average/depressionLevel/daily";
+        const temp = "/average/depressionLevel/daily";
+
+        let url = diariesStatisticsUrl + temp;
+
+        //GET 요청으로 넘길 파라미터 
+        const params = {
+            start: start,
+            end: end
+        }
+
+        //대상이 지정되었을 경우, URL을 변경하고 파라미터에 조회할 대상의 이메일을 추가한다.
+        if(target) {
+            url = "/api/expert/diaries/statistics" + temp;
+            params['email'] = target;
+        }
 
         if(await authManager.checkTokens()){
             return await axios.get(url, {
                 headers: authManager.getDefaultHeaders(),
-                params: {
-                    start: start,
-                    end: end
-                }
+                params: params
             }).then((res) => {
                 return res.data.dailyAvg;
             }).catch((error)=>{
@@ -204,14 +216,15 @@ export const useDiaryManagerStore = defineStore('diaryManager', ()=>{
      * 
      * 주의! 정렬되어 있지 않음
      * @param {number} days amount of time ('days')
+     * @param {string} target - 조회할 대상의 이메일. 대상이 본인일 경우 생략한다. @default undefined
      * @returns {Promise<object>} - 날짜를 key, 평균 depression level을 value로 가지는 객체
      */
-    async function getRecentDailyAvgDepressionLevel(days) {
+    async function getRecentDailyAvgDepressionLevel(days, target=undefined) {
         const format = "YYYY-MM-DD";
         const today = dayjs(new Date());
-        return getDailyAvgDepressionLvel(
+        return getDailyAvgDepressionLevel(
             today.add(-days, 'day').format(format), 
-            today.format(format));
+            today.format(format), target);
     }
 
     /**
@@ -325,7 +338,7 @@ export const useDiaryManagerStore = defineStore('diaryManager', ()=>{
         deleteDiary,
         loadDiaries,
         loadDiariesForExpert,
-        getDailyAvgDepressionLvel,
+        getDailyAvgDepressionLevel,
         getRecentDailyAvgDepressionLevel,
         formatDate,
         getTruncated,
