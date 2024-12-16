@@ -1,7 +1,7 @@
 <template>
     <div class="user-main d-flex flex-column align-items-center">
 
-        <div class="chart-wrapper">
+        <div class="chart-wrapper d-flex flex-column align-items-center">
           <select ref="selectDailyRange"
           class="form-select mb-2" aria-label="SelectDailyRange"
           @change="onChanged">
@@ -158,6 +158,7 @@ function onChanged() {
     //차트 최대 크기 제한 
     .chart-wrapper {
         width: 90%;
+        height: 60%;
     }
 
     .card .btn {
