@@ -59,6 +59,12 @@ public class User extends BaseEntity implements UserDetails { //공통 컬럼 �
     @Enumerated(EnumType.STRING)
     private UserAuthority authority = UserAuthority.USER;
 
+    /**
+     * 받은 알림 목록 ( = targetUser가 해당 사용자인 알림 목록)
+     */
+    @OneToMany(mappedBy = "targetUser", cascade = CascadeType.ALL, orphanRemoval = true)
+    private final List<Notification> notifications = new ArrayList<>();
+
     /*
     User와 Diary 사이의 관계를 명확히 하기 위함이다.
     추가한 다이어리에 해당 다이어리의 주인을 추가해주어야 오류가 안생긴다.
