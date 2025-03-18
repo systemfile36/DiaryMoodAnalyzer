@@ -1,6 +1,7 @@
 package org.diarymoodanalyzer.domain;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -40,4 +41,10 @@ public class Notification extends BaseEntity {
 
     @Column(name = "is_read", nullable = false)
     private boolean isRead = false;
+
+    @Builder
+    public Notification(User targetUser, User senderUser, String type, String content, String refLink) {
+        this.targetUser = targetUser; this.senderUser = senderUser; this.type = type;
+        this.content = content; this.refLink = refLink;
+    }
 }
