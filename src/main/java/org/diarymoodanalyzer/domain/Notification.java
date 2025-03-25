@@ -21,12 +21,10 @@ public class Notification extends BaseEntity {
     private Long id;
 
     @ManyToOne
-    @Column
     @JoinColumn(name = "target_id", nullable = false)
     private User targetUser;
 
     @ManyToOne
-    @Column
     @JoinColumn(name = "sender_id")
     private User senderUser;
 
