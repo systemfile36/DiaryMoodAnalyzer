@@ -1,11 +1,30 @@
 /*
-전역 변수와 반응형 스타일을 정의함 
+전역 변수와 전역 스타일을 정의한 파일
 */
 
 $sidebar-width: 260px;
 $sidebar-trigger-attr: 'sidebar-on';
 
+//기본 색상 팔레트
+:root {
+    --sidebar-background-color: #f7f7f7;
+}
 
+//메인 화면 래퍼 
+#main {
+    //화면 가득 채우기
+    min-height: 100vh;
+    background-color: var(--bs-body-bg);
+}
+
+//다크 모드 색상 팔레트 
+[data-bs-theme=dark] {
+    color-scheme: dark;
+    //--bs-body-bg 보다 좀 더 진하게
+    --sidebar-background-color: #16181A;
+}
+
+//기본적으로 사이드바 토글 버튼은 꺼진 상태
 #sidebar-toggler {
     display: none;
 }
@@ -27,10 +46,12 @@ $sidebar-trigger-attr: 'sidebar-on';
         transition: transform .3s ease;
     }
 
+    //사이드바 토글 버튼 등장
     #sidebar-toggler {
         display: block;
     }
 
+    //상단 바 타이틀 제거
     #topbar-title {
         display: none;
     }
