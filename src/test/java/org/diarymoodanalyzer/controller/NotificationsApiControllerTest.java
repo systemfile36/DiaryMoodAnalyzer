@@ -3,6 +3,7 @@ package org.diarymoodanalyzer.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.diarymoodanalyzer.config.TokenAuthenticationFilter;
 import org.diarymoodanalyzer.config.jwt.TokenProvider;
+import org.diarymoodanalyzer.domain.BaseEntity;
 import org.diarymoodanalyzer.domain.Expert;
 import org.diarymoodanalyzer.domain.Notification;
 import org.diarymoodanalyzer.domain.User;
@@ -27,6 +28,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -195,7 +197,7 @@ public class NotificationsApiControllerTest {
 
     @DisplayName("updateAsRead: 알림을 읽음으로 표시할 수 있음")
     @Test
-    void updateAsRead() {
+    void updateAsRead() throws Exception {
         //Set test data
         final String url = "/api/notifications/{id}/read";
         final String senderEmail = "expert@email.com";
@@ -209,7 +211,7 @@ public class NotificationsApiControllerTest {
 
         User target = User.builder()
                 .email(targetEmail)
-                .password(senderPassword)
+                .password(targetPassword)
                 .build();
 
         sender.addManagedUser(target);
@@ -226,10 +228,143 @@ public class NotificationsApiControllerTest {
 
         notificationRepository.save(notification);
         
+        assertThat(notification.getId()).isNotNull();
+
+        String accessToken = tokenProvider.createToken(target, TokenProvider.ACCESS_EXPIRE);
+
+        assertThat(accessToken).isNotNull();
+        assertThat(tokenProvider.validateToken(accessToken)).isTrue();
+
+        String reqUrl = url.replace("{id}", String.valueOf(notification.getId()));
+
+        ResultActions result = mockMvc.perform(MockMvcRequestBuilders.patch(reqUrl)
+                .header("Authorization", "Bearer " + accessToken));
+
+        result.andExpect(MockMvcResultMatchers.status().isOk());
+
+        boolean isRead = notificationRepository.findById(notification.getId())
+                .orElseThrow().isRead();
+
+        assertThat(isRead).isTrue();
+    }
+
+    @DisplayName("deleteNotification: 알림을 삭제할 수 있다.")
+    @Test
+    void deleteNotification() throws Exception {
+
+        final String url = "/api/notifications/{id}";
+        final String senderEmail = "expert@email.com";
+        final String senderPassword = "test1234";
+
+        final String targetEmail = "test@email.com";
+        final String targetPassword = "test1234";
+
+        Expert sender = new Expert(senderEmail, senderPassword);
+        expertRepository.save(sender);
+
+        User target = User.builder()
+                .email(targetEmail)
+                .password(targetPassword)
+                .build();
+
+        sender.addManagedUser(target);
+
+        userRepository.save(target);
+
+        Notification notification = Notification.builder()
+                .targetUser(target)
+                .senderUser(sender)
+                .content("TestContent")
+                .refLink("/diaries/11")
+                .type("NEW_COMMENT")
+                .build();
+
+        notificationRepository.save(notification);
+
+        assertThat(notification.getId()).isNotNull();
+
+        String accessToken = tokenProvider.createToken(target, TokenProvider.ACCESS_EXPIRE);
+
+        assertThat(accessToken).isNotNull();
+        assertThat(tokenProvider.validateToken(accessToken)).isTrue();
+
+        String reqUrl = url.replace("{id}", String.valueOf(notification.getId()));
+
+        ResultActions result = mockMvc.perform(MockMvcRequestBuilders.delete(reqUrl)
+                .header("Authorization", "Bearer " + accessToken));
+
+        result.andExpect(MockMvcResultMatchers.status().isOk());
+
+        assertThat(notificationRepository.existsById(notification.getId())).isFalse();
 
     }
 
+    @DisplayName("sendNotification: 알림 전송 시, 알림 개수가 최대치를 초과하면 오래된 것부터 삭제한다.")
     @Test
-    void deleteNotification() {
+    void sendNotification_deleteOldest() throws Exception {
+
+        final String url = "/api/notifications";
+        final String senderEmail = "expert@email.com";
+        final String senderPassword = "test1234";
+
+        final String targetEmail = "test@email.com";
+        final String targetPassword = "test1234";
+
+        Expert sender = new Expert(senderEmail, senderPassword);
+        expertRepository.save(sender);
+
+        User target = User.builder()
+                .email(targetEmail)
+                .password(targetPassword)
+                .build();
+
+        sender.addManagedUser(target);
+
+        userRepository.save(target);
+
+        List<Notification> notifications = new ArrayList<>();
+
+        //최대치인 50개에 맞춰서 채운다.
+        for(int i = 0; i < 50; i++) {
+            Notification notification = Notification.builder()
+                    .senderUser(sender)
+                    .targetUser(target)
+                    .type("NEW_COMMENT")
+                    .content(String.valueOf(i))
+                    .refLink(String.format("/diaries/%d", i))
+                    .build();
+            notifications.add(notification);
+        }
+
+        notificationRepository.saveAll(notifications);
+
+        String accessToken = tokenProvider.createToken(target, TokenProvider.ACCESS_EXPIRE);
+
+        assertThat(accessToken).isNotNull();
+        assertThat(tokenProvider.validateToken(accessToken)).isTrue();
+
+        //Create notification for test
+        NotificationRequest req = new NotificationRequest();
+        req.setTargetEmail(targetEmail);
+        req.setContent("50");
+        req.setRefLink("/diaries/10");
+        req.setType("NEW_COMMENT");
+
+        String reqBody = objectMapper.writeValueAsString(req);
+
+        ResultActions result = mockMvc.perform(MockMvcRequestBuilders.post(url)
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(reqBody));
+
+        result.andExpect(MockMvcResultMatchers.status().isOk());
+
+        //알림을 전부 받아오고 최대치를 넘었는지 여부를 확인한다.
+        List<Notification> resultNotifications = notificationRepository.findByTargetUserEmail(targetEmail);
+        assertThat(resultNotifications.size()).isEqualTo(50);
+
+        //제대로 오래된 것부터 삭제했는지 확인
+        resultNotifications.sort(Comparator.comparing(BaseEntity::getCreatedAt));
+        assertThat(resultNotifications.get(resultNotifications.size() - 1).getContent()).isEqualTo(req.getContent());
     }
 }

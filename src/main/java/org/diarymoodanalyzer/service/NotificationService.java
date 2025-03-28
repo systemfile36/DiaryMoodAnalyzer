@@ -49,11 +49,37 @@ public class NotificationService {
     @Transactional
     public void updateAsRead(Long id) {
         //권한 확인 필요
+
+        //현재 유저 이메일 조회
+        String currentUserEmail = AuthenticationUtils.getCurrentUserEmail()
+                .orElseThrow(()-> new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid Authentication"));
+
+        Notification notification = notificationRepository.findById(id)
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no notification : " + id));
+
+        //해당 알림의 target이 현재 인증된 유저와 다를 경우, 예외 throw
+        if(!notification.getTargetUser().getEmail().equals(currentUserEmail)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You have not permission");
+        }
+
         notificationRepository.updateIsReadById(id, true);
     }
 
     public void deleteNotification(Long id) {
         //권한 확인 필요
+
+        //현재 유저 이메일 조회
+        String currentUserEmail = AuthenticationUtils.getCurrentUserEmail()
+                .orElseThrow(()-> new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid Authentication"));
+
+        Notification notification = notificationRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no notification : " + id));
+
+        //해당 알림의 target이 현재 인증된 유저와 다를 경우, 예외 throw
+        if(!notification.getTargetUser().getEmail().equals(currentUserEmail)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You have not permission");
+        }
+
         notificationRepository.deleteById(id);
     }
 
