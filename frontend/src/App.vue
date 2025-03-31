@@ -9,9 +9,14 @@ import { useRouter } from 'vue-router';
 import { useAuthManagerStore } from './stores/AuthManager';
 import { storeToRefs } from 'pinia';
 
+import { useThemeStore } from './stores/ThemeManager';
 
 const authManager = useAuthManagerStore();
 
+const themeManager = useThemeStore();
+
+//테마 초기화
+themeManager.initTheme();
 
 </script>
 
