@@ -70,7 +70,7 @@ const currentSelectedUser = ref("");
 onMounted(async ()=>{
   managedUsers.value = await authManager.getManagedUsers();
 
-  if(!managedUsers.value) {
+  if(!managedUsers.value || managedUsers.value.length == 0) {
     console.log(managedUsers.value)
     console.log("managedUsers 요청 실패!");
     return;
