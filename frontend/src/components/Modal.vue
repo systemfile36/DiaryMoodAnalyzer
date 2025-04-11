@@ -24,7 +24,7 @@
     </div>
 </template>
 <script setup>
-import { useModalManagerStore } from '../stores/ModalManager';
+import { useModalManagerStore } from '@/stores/ModalManager';
 import { storeToRefs } from 'pinia';
 
 const modalManager = useModalManagerStore();

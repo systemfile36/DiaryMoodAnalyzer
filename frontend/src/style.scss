@@ -8,13 +8,7 @@ $sidebar-trigger-attr: 'sidebar-on';
 //기본 색상 팔레트
 :root {
     --sidebar-background-color: #f7f7f7;
-}
-
-//메인 화면 래퍼 
-#main {
-    //화면 가득 채우기
-    min-height: 100vh;
-    background-color: var(--bs-body-bg);
+    --dropdown-active-bg: #0d6efd;
 }
 
 //다크 모드 색상 팔레트 
@@ -22,6 +16,16 @@ $sidebar-trigger-attr: 'sidebar-on';
     color-scheme: dark;
     //--bs-body-bg 보다 좀 더 진하게
     --sidebar-background-color: #16181A;
+    --dropdown-active-bg: #495057;
+}
+
+//메인 화면 래퍼 
+#main {
+    //화면 가득 채우기
+    min-height: 100vh;
+    background-color: var(--bs-body-bg);
+    //Navbar와의 거리 유지
+    margin-top: 1.0rem
 }
 
 //기본적으로 사이드바 토글 버튼은 꺼진 상태

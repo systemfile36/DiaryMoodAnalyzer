@@ -42,7 +42,7 @@ export const useThemeStore = defineStore('themeManager', () => {
      * @param {boolean} value - if true, on darkmode. otherwise, off
      */
     function setDarkmode(value) {
-        isDarkmode.value = value;
+        isDarkmode.value = JSON.parse(value);
     }
 
     //다크 모드 변수 감시
