@@ -62,12 +62,12 @@ import axios from 'axios'
 import { useRouter } from 'vue-router'
 import FormErrorText from './FormErrorText.vue'
 
-import Validator from '../utils/Validator';
-import ErrMessages from '../utils/ErrMessages';
-import Authority from '../utils/Authority';
-import { useFormValidation } from '../utils/FormValidation';
-import { useAuthManagerStore } from '../stores/AuthManager';
-import { useModalManagerStore } from '../stores/ModalManager';
+import Validator from '@/utils/Validator';
+import ErrMessages from '@/utils/ErrMessages';
+import Authority from '@/utils/Authority';
+import { useFormValidation } from '@/utils/FormValidation';
+import { useAuthManagerStore } from '@/stores/AuthManager';
+import { useModalManagerStore } from '@/stores/ModalManager';
 
 //setup 내에서 vue-router의 router를 사용하기 위함
 const router = useRouter();

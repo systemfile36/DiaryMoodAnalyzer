@@ -6,10 +6,10 @@ import Modal from './components/Modal.vue';
 
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router';
-import { useAuthManagerStore } from './stores/AuthManager';
+import { useAuthManagerStore } from '@/stores/AuthManager';
 import { storeToRefs } from 'pinia';
 
-import { useThemeStore } from './stores/ThemeManager';
+import { useThemeStore } from '@/stores/ThemeManager';
 
 const authManager = useAuthManagerStore();
 

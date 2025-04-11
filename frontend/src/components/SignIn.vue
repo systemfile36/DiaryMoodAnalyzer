@@ -37,10 +37,10 @@ import axios from 'axios'
 import { useRouter } from 'vue-router'
 import FormErrorText from './FormErrorText.vue';
 
-import { useAuthManagerStore } from '../stores/AuthManager';
-import Validator from '../utils/Validator';
-import ErrMessages from '../utils/ErrMessages';
-import { useFormValidation } from '../utils/FormValidation';
+import { useAuthManagerStore } from '@/stores/AuthManager';
+import Validator from '@/utils/Validator';
+import ErrMessages from '@/utils/ErrMessages';
+import { useFormValidation } from '@/utils/FormValidation';
 
 //setup 내에서 vue-router의 router를 사용하기 위함
 const router = useRouter();

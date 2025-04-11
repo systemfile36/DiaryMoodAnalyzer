@@ -46,8 +46,8 @@ import { Chart } from 'chart.js'
 import axios from "axios";
 import dayjs from "dayjs";
 
-import { useDiaryManagerStore } from '../stores/DiaryManager';
-import { useAuthManagerStore } from '../stores/AuthManager';
+import { useDiaryManagerStore } from '@/stores/DiaryManager';
+import { useAuthManagerStore } from '@/stores/AuthManager';
 import { onMounted, ref } from 'vue';
 
 const diaryManager = useDiaryManagerStore();

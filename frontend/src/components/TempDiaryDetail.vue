@@ -62,17 +62,17 @@
     </article>
 </template>
 <script setup>
-import { useDiaryManagerStore } from '../stores/DiaryManager';
-import { useAuthManagerStore } from '../stores/AuthManager';
-import { useModalManagerStore } from '../stores/ModalManager';
-import { useCommentManagerStore } from '../stores/CommentManager';
+import { useDiaryManagerStore } from '@/stores/DiaryManager';
+import { useAuthManagerStore } from '@/stores/AuthManager';
+import { useModalManagerStore } from '@/stores/ModalManager';
+import { useCommentManagerStore } from '@/stores/CommentManager';
 
 import { storeToRefs } from 'pinia';
 
 import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import Authority from '../utils/Authority'
+import Authority from '@/utils/Authority'
 
 
 const diaryManager = useDiaryManagerStore();

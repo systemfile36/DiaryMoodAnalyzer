@@ -52,8 +52,8 @@ import TempDiaryList from './TempDiaryList.vue';
 import { ref, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router';
-import { useAuthManagerStore } from '../stores/AuthManager';
-import { useDiaryManagerStore } from '../stores/DiaryManager';
+import { useAuthManagerStore } from '@/stores/AuthManager';
+import { useDiaryManagerStore } from '@/stores/DiaryManager';
 
 import { Chart } from 'chart.js'
 import dayjs from 'dayjs';

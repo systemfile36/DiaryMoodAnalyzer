@@ -7,7 +7,7 @@
     </div>
 </template>
 <script setup>
-import { useSideBarStore } from '../stores/SidebarManager';
+import { useSideBarStore } from '@/stores/SideBarManager';
 
 const sidebarStore = useSideBarStore(); 
 

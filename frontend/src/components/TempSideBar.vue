@@ -53,9 +53,9 @@
     </aside>
 </template>
 <script setup>
-import { useAuthManagerStore } from '../stores/AuthManager';
+import { useAuthManagerStore } from '@/stores/AuthManager';
 import { onMounted } from 'vue';
-import Authority from '../utils/Authority';
+import Authority from '@/utils/Authority';
 
 const authManager = useAuthManagerStore();
 

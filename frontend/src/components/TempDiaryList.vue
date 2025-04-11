@@ -64,13 +64,13 @@
 import { onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
-import { useDiaryManagerStore } from '../stores/DiaryManager';
-import { useAuthManagerStore } from '../stores/AuthManager';
+import { useDiaryManagerStore } from '@/stores/DiaryManager';
+import { useAuthManagerStore } from '@/stores/AuthManager';
 
-import Authority from '../utils/Authority';
+import Authority from '@/utils/Authority';
 
 //감정 분석 결과 수치와 상태, 아이콘을 매칭하기 위한 import 
-import DepressionLevel from '../utils/DepressionLevel';
+import DepressionLevel from '@/utils/DepressionLevel';
 
 const diaryManager = useDiaryManagerStore();
 

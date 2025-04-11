@@ -33,7 +33,7 @@
     </nav>
 </template>
 <script setup>
-import { useSideBarStore } from '../stores/SidebarManager';
+import { useSideBarStore } from '@/stores/SideBarManager';
 import { ref } from 'vue';
 
 //SideBar 관리를 위함

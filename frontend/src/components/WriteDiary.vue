@@ -47,12 +47,12 @@ import axios from 'axios'
 
 //form 유효성 검사를 위한 import
 import FormErrorText from './FormErrorText.vue';
-import Validator from '../utils/Validator';
+import Validator from '@/utils/Validator';
 import ErrMessages from '../utils/ErrMessages';
-import { useFormValidation } from '../utils/FormValidation';
+import { useFormValidation } from '@/utils/FormValidation';
 
-import { useDiaryManagerStore } from '../stores/DiaryManager';
-import { useModalManagerStore } from '../stores/ModalManager';
+import { useDiaryManagerStore } from '@/stores/DiaryManager';
+import { useModalManagerStore } from '@/stores/ModalManager';
 
 const router = useRouter();
 

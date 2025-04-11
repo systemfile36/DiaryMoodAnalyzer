@@ -28,10 +28,10 @@
     "@babel/helper-validator-identifier" "^7.24.7"
     to-fast-properties "^2.0.0"
 
-"@esbuild/win32-x64@0.21.5":
+"@esbuild/linux-x64@0.21.5":
   version "0.21.5"
-  resolved "https://registry.npmjs.org/@esbuild/win32-x64/-/win32-x64-0.21.5.tgz"
-  integrity sha512-tQd/1efJuzPC6rCFwEvLtci/xNFcTZknmXs98FYDfGE4wP9ClFV98nyKrzJKVPMhdDnjzLhdUyMX4PsQAPjwIw==
+  resolved "https://registry.npmjs.org/@esbuild/linux-x64/-/linux-x64-0.21.5.tgz"
+  integrity sha512-1rYdTpyv03iycF1+BhzrzQJCdOuAOtaqHTWJZCWvijKD2N5Xu0TtVC8/+1faWqcP9iBCWOmjmhoH94dH82BxPQ==
 
 "@jridgewell/sourcemap-codec@^1.5.0":
   version "1.5.0"
@@ -48,10 +48,15 @@
   resolved "https://registry.npmjs.org/@popperjs/core/-/core-2.11.8.tgz"
   integrity sha512-P1st0aksCrn9sGZhp8GMYwBnQsbvAWsZAX44oXNNvLHGqAOcoVxmjZiohstwQ7SqKnbR47akdNi+uleWD8+g6A==
 
-"@rollup/rollup-win32-x64-msvc@4.23.0":
+"@rollup/rollup-linux-x64-gnu@4.23.0":
   version "4.23.0"
-  resolved "https://registry.npmjs.org/@rollup/rollup-win32-x64-msvc/-/rollup-win32-x64-msvc-4.23.0.tgz"
-  integrity sha512-lqCK5GQC8fNo0+JvTSxcG7YB1UKYp8yrNLhsArlvPWN+16ovSZgoehlVHg6X0sSWPUkpjRBR5TuR12ZugowZ4g==
+  resolved "https://registry.npmjs.org/@rollup/rollup-linux-x64-gnu/-/rollup-linux-x64-gnu-4.23.0.tgz"
+  integrity sha512-I/eXsdVoCKtSgK9OwyQKPAfricWKUMNCwJKtatRYMmDo5N859tbO3UsBw5kT3dU1n6ZcM1JDzPRSGhAUkxfLxw==
+
+"@rollup/rollup-linux-x64-musl@4.23.0":
+  version "4.23.0"
+  resolved "https://registry.npmjs.org/@rollup/rollup-linux-x64-musl/-/rollup-linux-x64-musl-4.23.0.tgz"
+  integrity sha512-4ZoDZy5ShLbbe1KPSafbFh1vbl0asTVfkABC7eWqIs01+66ncM82YJxV2VtV3YVJTqq2P8HMx3DCoRSWB/N3rw==
 
 "@types/estree@1.0.6":
   version "1.0.6"

@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import path from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -8,6 +9,10 @@ export default defineConfig({
   //change build output path to Spring Boot resources directory
   build: {
     outDir: "../src/main/resources/static"
+  },
+
+  resolve: {
+    alias: [ {find: "@", replacement: path.resolve(__dirname, "./src")}]
   },
 
   //set proxy to run dev server
