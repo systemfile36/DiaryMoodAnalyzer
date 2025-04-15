@@ -34,6 +34,12 @@
                         <span>Diaries</span>
                     </router-link>
                 </li>
+                <li class="nav-item">
+                    <router-link to="/" class="nav-link">
+                        <i class="fa-solid fa-bell"></i>
+                        <span>Notifications</span>
+                    </router-link>
+                </li>
             </ul>
         </nav>
         <div class="sidebar-bottom d-flex flex-column flex-wrap align-item-center w-100 border-top">
