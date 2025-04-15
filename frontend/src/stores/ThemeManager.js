@@ -7,6 +7,8 @@ import { ref, watch } from "vue";
 export const useThemeStore = defineStore('themeManager', () => {
     const isDarkmode = ref(false);
 
+    const isInit = ref(false);
+
     //Constants
     const THEME_ATTR = "data-bs-theme";
     const DARK_MODE_VALUE = "dark";
@@ -23,11 +25,14 @@ export const useThemeStore = defineStore('themeManager', () => {
      */
     function initTheme() {
         const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-        if(saved !== null) {
+        console.log(saved);
+        if(saved) {
             isDarkmode.value = saved === DARK_MODE_VALUE;
         } else {
             isDarkmode.value = prefersDark;
         }
+        
+        isInit.value = true;
     }
 
     /**
@@ -48,6 +53,11 @@ export const useThemeStore = defineStore('themeManager', () => {
     //다크 모드 변수 감시
     watch(isDarkmode, (newVal) => {
         //변경된 값을 참조하여 다크 모드 적용
+
+        //immediate: true로 설정될 경우, useThemeSotre가 호출되는 시점에 즉시 본 함수가 실행되어 
+        //localStorage에서 테마를 읽어오는 작업이 정상적으로 작동하지 않는다. 이를 막기 위함이다.
+        if(!isInit.value) return;
+
         const currentTheme = newVal ? DARK_MODE_VALUE : LIGHT_MODE_VALUE;
 
         htmlNode.setAttribute(THEME_ATTR, currentTheme);
@@ -58,6 +68,7 @@ export const useThemeStore = defineStore('themeManager', () => {
 
     return {
         isDarkmode,
+        isInit,
         toggleDarkmode,
         setDarkmode, 
         initTheme
