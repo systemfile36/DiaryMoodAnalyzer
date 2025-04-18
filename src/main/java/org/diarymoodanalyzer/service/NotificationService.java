@@ -65,6 +65,34 @@ public class NotificationService {
         notificationRepository.updateIsReadById(id, true);
     }
 
+    /**
+     * is_read 필드를 true로 설정하여 읽음으로 표시
+     * @param ids 읽음으로 표시할 알림의 id 리스트
+     */
+    @Transactional
+    public void updateAsRead(List<Long> ids) {
+
+        String currentUserEmail = AuthenticationUtils.getCurrentUserEmail()
+                .orElseThrow(()-> new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid Authentication"));
+
+        List<Notification> notifications = notificationRepository.findAllById(ids);
+
+        //인자로 받은 모든 알림의 target과 현재 유저의 이메일이 일치하지 않을 시, 예외 throw
+        if(!notifications.stream().allMatch(
+                (value) -> value.getTargetUser().getEmail().equals(currentUserEmail)
+        )) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You have not permission");
+        } else if (notifications.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id list is empty");
+        }
+
+        notificationRepository.updateIsReadByIds(ids, true);
+    }
+
+    /**
+     * 알림을 삭제한다.
+     * @param id 삭제할 알림의 id
+     */
     public void deleteNotification(Long id) {
         //권한 확인 필요
 
@@ -81,6 +109,28 @@ public class NotificationService {
         }
 
         notificationRepository.deleteById(id);
+    }
+
+    /**
+     * 알림을 삭제한다.
+     * @param ids 삭제할 알림의 id 목록
+     */
+    public void deleteNotification(List<Long> ids) {
+
+        String currentUserEmail = AuthenticationUtils.getCurrentUserEmail()
+                .orElseThrow(()->new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid Authentication"));
+
+        List<Notification> notifications = notificationRepository.findAllById(ids);
+
+        if(!notifications.stream().allMatch(
+                (value) -> value.getTargetUser().getEmail().equals(currentUserEmail)
+        )) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You have not permission");
+        } else if (notifications.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id list is empty");
+        }
+
+        notificationRepository.deleteAllById(ids);
     }
 
     /**

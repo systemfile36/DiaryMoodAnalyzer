@@ -19,9 +19,24 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     @Query(value = "SELECT n FROM Notification n WHERE n.senderUser.email = :email")
     List<Notification> findBySenderUserEmail(@Param("email") String userEmail);
 
+    /**
+     * 인자의 id에 해당하는 단일 알림의 isRead 컬럼을 :isRead로 설정한다.
+     * @param id 읽음 설정을 변경할 알림의 ID
+     * @param isRead 설정할 읽음 설정
+     */
     @Modifying
     @Query(value="UPDATE Notification n SET n.isRead = :isRead WHERE n.id = :id")
-    int updateIsReadById(@Param("id") Long id, @Param("isRead") boolean isRead);
+    void updateIsReadById(@Param("id") Long id, @Param("isRead") boolean isRead);
+
+    /**
+     * ids에 해당하는 모든 알림의 isRead 컬럼을 :isRead로 설정한다.
+     * @param ids 읽음 상태를 변경할 알림의 ID
+     * @param isRead 설정할 읽음 설정
+     * @return 변경된 컬럼의 수
+     */
+    @Modifying
+    @Query(value="UPDATE Notification n SET n.isRead = :isRead WHERE n.id IN :ids")
+    int updateIsReadByIds(@Param("ids") List<Long> ids, @Param("isRead") boolean isRead);
 
     /**
      * 사용자의 알림 개수를 조회한다. 

@@ -35,9 +35,21 @@ public class NotificationsApiController {
         return ResponseEntity.ok().build();
     }
 
+    @PatchMapping("/read")
+    public ResponseEntity<Void> updateAsRead(@RequestBody List<Long> ids) {
+        notificationService.updateAsRead(ids);
+        return ResponseEntity.ok().build();
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteNotification(@PathVariable Long id) {
         notificationService.deleteNotification(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping
+    public ResponseEntity<Void> deleteNotification(@RequestBody List<Long> ids) {
+        notificationService.deleteNotification(ids);
         return ResponseEntity.ok().build();
     }
 }

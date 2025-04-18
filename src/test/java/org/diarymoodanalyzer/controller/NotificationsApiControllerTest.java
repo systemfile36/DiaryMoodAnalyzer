@@ -27,6 +27,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import javax.print.attribute.standard.Media;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -248,6 +249,63 @@ public class NotificationsApiControllerTest {
         assertThat(isRead).isTrue();
     }
 
+    @DisplayName("updateAsReadInBatch: 알림을 일괄적으로 읽음 표시할 수 있다.")
+    @Test
+    void updateAsReadInBatch() throws Exception {
+
+        final String url = "/api/notifications/read";
+        final String targetEmail = "test@email.com";
+        final String targetPassword = "test1234";
+        final int notificationCount = 20;
+
+        User targetUser = User.builder()
+                .email(targetEmail)
+                .password(targetPassword)
+                .build();
+
+        userRepository.save(targetUser);
+
+        List<Notification> notifications = new ArrayList<>(notificationCount);
+
+        for(int i = 0; i < notificationCount; i++) {
+            notifications.add(
+                    Notification.builder()
+                            .targetUser(targetUser)
+                            .type("NEW_TEST")
+                            .refLink("/")
+                            .content(String.format("TEST %d", i))
+                            .build()
+            );
+        }
+
+        notificationRepository.saveAll(notifications);
+
+        String accessToken = tokenProvider.createToken(targetUser, TokenProvider.ACCESS_EXPIRE);
+        assertThat(accessToken).isNotNull();
+        assertThat(tokenProvider.validateToken(accessToken)).isTrue();
+
+        List<Long> ids = notifications.stream().map(Notification::getId).toList();
+        assertThat(ids.size()).isEqualTo(notificationCount);
+
+        String reqBody = objectMapper.writeValueAsString(ids);
+
+        ResultActions result = mockMvc.perform(MockMvcRequestBuilders.patch(url)
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(reqBody));
+
+        result.andExpect(MockMvcResultMatchers.status().is2xxSuccessful());
+
+        List<Notification> resultNotifications =
+                notificationRepository.findBySenderUserEmail(targetEmail);
+
+        //전부 읽음으로 갱신되었는지 확인
+        assertThat(
+                resultNotifications.stream()
+                        .allMatch(Notification::isRead)
+        ).isTrue();
+    }
+
     @DisplayName("deleteNotification: 알림을 삭제할 수 있다.")
     @Test
     void deleteNotification() throws Exception {
@@ -296,6 +354,63 @@ public class NotificationsApiControllerTest {
         result.andExpect(MockMvcResultMatchers.status().isOk());
 
         assertThat(notificationRepository.existsById(notification.getId())).isFalse();
+
+    }
+
+    @DisplayName("deleteNotifications: 알림의 일괄 삭제가 가능하다. ")
+    @Test
+    void deleteNotifications() throws Exception {
+
+        final String url = "/api/notifications";
+        final String targetEmail = "test@email.com";
+        final String targetPassword = "test1234";
+        final int notificationCount = 20;
+
+        User targetUser = User.builder()
+                .email(targetEmail)
+                .password(targetPassword)
+                .build();
+
+        userRepository.save(targetUser);
+
+        List<Notification> notifications = new ArrayList<>(20);
+
+        for(int i = 0; i < notificationCount; i++) {
+            Notification temp = Notification.builder()
+                    .targetUser(targetUser)
+                    .type("NEW_TEST")
+                    .refLink("/")
+                    .content(String.format("TEST %d", i))
+                    .build();
+
+            notifications.add(temp);
+        }
+
+        notificationRepository.saveAll(notifications);
+
+        String accessToken = tokenProvider.createToken(targetUser, TokenProvider.ACCESS_EXPIRE);
+
+        assertThat(accessToken).isNotNull();
+        assertThat(tokenProvider.validateToken(accessToken)).isTrue();
+
+        List<Long> ids = notifications.stream().map(Notification::getId).toList();
+        assertThat(ids.size()).isEqualTo(notificationCount);
+
+        String reqBody = objectMapper.writeValueAsString(ids);
+
+        ResultActions result = mockMvc.perform(MockMvcRequestBuilders.delete(url)
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(reqBody)
+        );
+
+        result.andExpect(MockMvcResultMatchers.status().is2xxSuccessful());
+
+        //삭제한 알림들이 실제로 리포지토리에 존재하지 않는지 noneMatch로 검증
+        assertThat(
+                ids.stream()
+                        .noneMatch(value -> notificationRepository.existsById(value))
+        ).isTrue();
 
     }
 
