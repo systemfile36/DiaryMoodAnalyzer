@@ -65,6 +65,12 @@ public class User extends BaseEntity implements UserDetails { //공통 컬럼 �
     @OneToMany(mappedBy = "targetUser", cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<Notification> notifications = new ArrayList<>();
 
+    /**
+     * 알림 설정 목록 (사용자, 알림 타입)
+     */
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private final List<UserNotificationSetting> notificationSettings = new ArrayList<>();
+
     /*
     User와 Diary 사이의 관계를 명확히 하기 위함이다.
     추가한 다이어리에 해당 다이어리의 주인을 추가해주어야 오류가 안생긴다.

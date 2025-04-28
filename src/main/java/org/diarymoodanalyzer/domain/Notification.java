@@ -20,16 +20,17 @@ public class Notification extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "target_id", nullable = false)
     private User targetUser;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sender_id")
     private User senderUser;
 
-    @Column(name = "type", nullable = false)
-    private String type;
+    @ManyToOne //타입은 참조할 일이 많고, 가벼우므로 EAGER 로딩 사용 (기본값)
+    @JoinColumn(name = "notification_type_id", nullable = false)
+    private NotificationType notificationType;
 
     @Column(name = "content", columnDefinition = "TEXT")
     private String content;
@@ -41,8 +42,8 @@ public class Notification extends BaseEntity {
     private boolean isRead = false;
 
     @Builder
-    public Notification(User targetUser, User senderUser, String type, String content, String refLink) {
-        this.targetUser = targetUser; this.senderUser = senderUser; this.type = type;
+    public Notification(User targetUser, User senderUser, NotificationType type, String content, String refLink) {
+        this.targetUser = targetUser; this.senderUser = senderUser; this.notificationType = type;
         this.content = content; this.refLink = refLink;
     }
 }

@@ -1,0 +1,55 @@
+package org.diarymoodanalyzer.domain;
+
+import jakarta.persistence.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+/**
+ * 알림 타입 저장 엔티티
+ *
+ */
+@NoArgsConstructor
+@Getter
+@Setter
+@Table(name = "notification_types")
+public class NotificationType {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "name", nullable = false, length = 50, unique = true)
+    private String name;
+
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
+
+    @Column(name = "default_notify_enabled")
+    private boolean defaultNotifyEnabled = true;
+
+    @Column(name = "default_email_enabled")
+    private boolean defaultEmailEnabled = true;
+
+    @Column(name = "default_web_enabled")
+    private boolean defaultWebEnabled = true;
+
+    @Builder
+    public NotificationType(String name, String description,
+                            boolean defaultNotifyEnabled, boolean defaultWebEnabled, boolean defaultEmailEnabled) {
+        this.name = name; this.description = description;
+        this.defaultNotifyEnabled = defaultNotifyEnabled; this.defaultWebEnabled = defaultWebEnabled; this.defaultEmailEnabled = defaultEmailEnabled;
+    }
+}
+
+/*
+CREATE TABLE notification_types (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) UNIQUE NOT NULL,
+    default_notify_enabled BOOLEAN,
+    default_email_enabled BOOLEAN,
+    default_web_enabled BOOLEAN,
+    description TEXT
+);
+*/
