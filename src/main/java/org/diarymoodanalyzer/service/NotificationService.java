@@ -5,10 +5,16 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.diarymoodanalyzer.domain.Notification;
+import org.diarymoodanalyzer.domain.NotificationType;
 import org.diarymoodanalyzer.domain.User;
+import org.diarymoodanalyzer.domain.UserNotificationSetting;
 import org.diarymoodanalyzer.dto.request.NotificationRequest;
+import org.diarymoodanalyzer.dto.request.NotificationSettingRequest;
+import org.diarymoodanalyzer.dto.request.NotificationTypeRequest;
 import org.diarymoodanalyzer.dto.response.NotificationResponse;
 import org.diarymoodanalyzer.repository.NotificationRepository;
+import org.diarymoodanalyzer.repository.NotificationTypeRepository;
+import org.diarymoodanalyzer.repository.UserNotificationSettingRepository;
 import org.diarymoodanalyzer.repository.UserRepository;
 import org.diarymoodanalyzer.util.AuthenticationUtils;
 import org.springframework.data.domain.PageRequest;
@@ -24,12 +30,18 @@ public class NotificationService {
 
     private final NotificationRepository notificationRepository;
 
+    private final NotificationTypeRepository notificationTypeRepository;
+
+    private final UserNotificationSettingRepository notificationSettingRepository;
+
     private final UserRepository userRepository;
 
     @PersistenceContext
     private final EntityManager entityManager;
 
     private static final int MAX_NOTIFICATIONS_PER_USER = 50;
+
+    // Notification methods
 
     public List<NotificationResponse> getNotificationsForTarget() {
 
@@ -171,7 +183,7 @@ public class NotificationService {
         Notification notification = Notification.builder()
                 .senderUser(senderRef)
                 .targetUser(targetRef)
-                .type(req.getType())
+                .type(req.getNotificationType())
                 .content(req.getContent())
                 .refLink(req.getRefLink())
                 .build();
@@ -180,6 +192,90 @@ public class NotificationService {
 
         deleteOldestNotifications(req.getTargetEmail());
     }
+
+
+    // NotificationType methods
+
+    public List<NotificationType> getAllNotificationTypes() {
+        return notificationTypeRepository.findAll();
+    }
+
+    public NotificationType getNotificationType(String typeName) {
+        return notificationTypeRepository.findByName(typeName).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no notification " + typeName)
+        );
+    }
+
+    public NotificationType addNotificationType(NotificationTypeRequest req) {
+        return notificationTypeRepository.save(req.toNotificationType());
+    }
+
+    public void deleteNotificationType(Long typeId) {
+        notificationTypeRepository.deleteById(typeId);
+    }
+
+    public void deleteNotificationType(String typeName) {
+        notificationTypeRepository.deleteByName(typeName);
+    }
+
+    public void updateNotificationType(Long typeId, String description) {
+        notificationTypeRepository.updateDescriptionById(typeId, description);
+    }
+
+    public void updateNotificationType(String typeName, String description) {
+        updateNotificationType(
+                notificationTypeRepository.findIdByName(typeName), description
+        );
+    }
+
+    // UserNotificationSetting methods
+
+    public List<UserNotificationSetting> getUserNotificationSettings() {
+
+        String currentUserEmail = AuthenticationUtils.getCurrentUserEmail()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid Authentication"));
+
+        return getUserNotificationSettings(currentUserEmail);
+    }
+
+    public List<UserNotificationSetting> getUserNotificationSettings(String userEmail) {
+        return notificationSettingRepository.findByUserEmail(userEmail);
+    }
+
+    public UserNotificationSetting getUserNotificationSetting(String typeName) {
+
+        String currentUserEmail = AuthenticationUtils.getCurrentUserEmail()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid Authentication"));
+
+        return getUserNotificationSetting(currentUserEmail, typeName);
+    }
+
+    public UserNotificationSetting getUserNotificationSetting(String userEmail, String typeName) {
+        return notificationSettingRepository.findByUserEmailAndTypeName(userEmail, typeName);
+    }
+
+    public void updateUserNotificationSetting(String userEmail, NotificationSettingRequest req) {
+
+        //변경 감지(Dirty Check)를 사용하기 위해 조회해서 영속 상태(Persistence)로 만든다.
+        UserNotificationSetting setting
+                = notificationSettingRepository.findByUserEmailAndTypeName(userEmail, req.getTypeName());
+
+        //알림 설정을 DTO의 값으로 업데이트
+        req.updateNotificationSetting(setting);
+
+        //
+        notificationSettingRepository.save(setting);
+    }
+
+    public void updateUserNotificationSetting(NotificationSettingRequest req) {
+
+        String currentUserEmail = AuthenticationUtils.getCurrentUserEmail()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid Authentication"));
+
+        updateUserNotificationSetting(currentUserEmail, req);
+    }
+
+
 
     /**
      * 현재 알림 개수가 최대 알림 개수를 초과할 경우, 가장 오래된 것 부터 삭제한다.
