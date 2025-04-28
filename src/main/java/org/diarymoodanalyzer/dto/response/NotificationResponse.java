@@ -4,8 +4,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.diarymoodanalyzer.domain.Notification;
-
-import java.util.Optional;
+import org.diarymoodanalyzer.domain.NotificationType;
 
 @NoArgsConstructor
 @Setter
@@ -13,7 +12,7 @@ import java.util.Optional;
 public class NotificationResponse extends TimeStampedResponse{
     private Long id;
     private String senderEmail;
-    private String type;
+    private NotificationType notificationType;
     private String content;
     private String refLink;
     private boolean isRead;
@@ -23,7 +22,7 @@ public class NotificationResponse extends TimeStampedResponse{
         this.id = notification.getId();
         this.senderEmail =
                 notification.getSenderUser() == null ? null : notification.getSenderUser().getEmail();
-        this.type = notification.getType(); this.content = notification.getContent();
+        this.notificationType = notification.getNotificationType(); this.content = notification.getContent();
         this.refLink = notification.getRefLink(); this.isRead = notification.isRead();
         this.setCreatedAt(notification.getCreatedAt());
         this.setUpdatedAt(notification.getUpdatedAt());
