@@ -1,7 +1,9 @@
 package org.diarymoodanalyzer.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.diarymoodanalyzer.domain.UserNotificationSetting;
 import org.diarymoodanalyzer.dto.request.NotificationRequest;
+import org.diarymoodanalyzer.dto.request.NotificationSettingRequest;
 import org.diarymoodanalyzer.dto.response.NotificationResponse;
 import org.diarymoodanalyzer.service.NotificationService;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,8 @@ public class NotificationsApiController {
 
     private final NotificationService notificationService;
 
+    // Notification Endpoints
+
     @GetMapping
     public ResponseEntity<List<NotificationResponse>> getNotifications() {
         return ResponseEntity.ok().body(notificationService.getNotificationsForTarget());
@@ -25,7 +29,7 @@ public class NotificationsApiController {
     public ResponseEntity<Void> sendNotification(
             @RequestBody NotificationRequest req
     ) {
-        notificationService.sendNotification(req);
+        notificationService.sendNotificationWithAuth(req);
         return ResponseEntity.ok().build();
     }
 
@@ -41,6 +45,12 @@ public class NotificationsApiController {
         return ResponseEntity.ok().build();
     }
 
+    @PatchMapping("/read/all")
+    public ResponseEntity<Void> updateAllAsRead() {
+        notificationService.updateAllAsRead();
+        return ResponseEntity.ok().build();
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteNotification(@PathVariable Long id) {
         notificationService.deleteNotification(id);
@@ -52,4 +62,28 @@ public class NotificationsApiController {
         notificationService.deleteNotification(ids);
         return ResponseEntity.ok().build();
     }
+
+    @DeleteMapping("/all")
+    public ResponseEntity<Void> deleteNotification() {
+        notificationService.deleteAllNotification();
+        return ResponseEntity.ok().build();
+    }
+
+    // UserNotificationSetting Endpoints
+
+    @GetMapping("/settings")
+    public ResponseEntity<List<UserNotificationSetting>> getUserNotificationSettings() {
+        return ResponseEntity.ok().body(
+                notificationService.getUserNotificationSettings()
+        );
+    }
+
+    @PatchMapping("/settings")
+    public ResponseEntity<Void> updateUserNotificationSetting(
+            @RequestBody NotificationSettingRequest req
+    ) {
+        notificationService.updateUserNotificationSetting(req);
+        return ResponseEntity.ok().build();
+    }
+
 }
