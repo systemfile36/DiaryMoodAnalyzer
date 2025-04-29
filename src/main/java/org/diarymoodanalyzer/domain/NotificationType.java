@@ -35,10 +35,16 @@ public class NotificationType {
     @Column(name = "default_web_enabled")
     private boolean defaultWebEnabled = true;
 
+    /**
+     * 알림 표시를 위한 기본 템플릿. e.g., {expert} 님의 새 코멘트, ...
+     */
+    @Column(name = "default_template", nullable = false, columnDefinition = "TEXT")
+    private String defaultTemplate;
+
     @Builder
-    public NotificationType(String name, String description,
+    public NotificationType(String name, String description, String defaultTemplate,
                             boolean defaultNotifyEnabled, boolean defaultWebEnabled, boolean defaultEmailEnabled) {
-        this.name = name; this.description = description;
+        this.name = name; this.description = description; this.defaultTemplate = defaultTemplate;
         this.defaultNotifyEnabled = defaultNotifyEnabled; this.defaultWebEnabled = defaultWebEnabled; this.defaultEmailEnabled = defaultEmailEnabled;
     }
 }
@@ -50,6 +56,7 @@ CREATE TABLE notification_types (
     default_notify_enabled BOOLEAN,
     default_email_enabled BOOLEAN,
     default_web_enabled BOOLEAN,
-    description TEXT
+    description TEXT,
+    default_template TEXT
 );
 */

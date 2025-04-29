@@ -1,23 +1,8 @@
-INSERT INTO users(email, password, created_at, updated_at) VALUES ('arisu@gmail.com', 'password', NOW(), NOW());
-INSERT INTO users(email, password, created_at, updated_at) VALUES ('yuzu@gmail.com', 'password', NOW(), NOW());
-INSERT INTO users(email, password, created_at, updated_at) VALUES ('momo@gmail.com', 'password', NOW(), NOW());
-INSERT INTO users(email, password, created_at, updated_at) VALUES ('mido@gmail.com', 'password', NOW(), NOW());
+-- Insert default notification type records
+INSERT INTO notification_types(name, description, default_template, default_notify_enabled, default_email_enabled, default_web_enabled)
+VALUES ("NEW_COMMENT", "New comment has added to own diary", "{expert}님의 새 코멘트가 작성되었습니다.", true, true, true),
+    ("DANGER_DEPRESSION", "There is User managed by you depression level is too low", "{user}님의 우울 수치가 위험 단계입니다.", true, true, true),
+    ("NEW_DIARY", "User managed by you write new diary.", "{user}님의 새 Diary가 작성되었습니다.", true, false, true),
+    ("WEB_TEST", "For test of web notification", "{Test} Test", true, false, true),
+    ("EMAIL_TEST", "For test of email notification", "{Test} Test", true, true, false);
 
-INSERT INTO diaries(user_id, title, content, created_at, updated_at) VALUES (1, 'Test1', 'TestContent', NOW(), NOW());
-INSERT INTO diaries(user_id, title, content, created_at, updated_at) VALUES (1, 'Test3', 'TestContent', NOW(), NOW());
-INSERT INTO diaries(user_id, title, content, created_at, updated_at) VALUES (1, 'Test3', 'TestContent', NOW(), NOW());
-INSERT INTO diaries(user_id, title, content, created_at, updated_at) VALUES (1, 'Test4', 'TestContent', NOW(), NOW());
-INSERT INTO diaries(user_id, title, content, created_at, updated_at) VALUES (1, 'Test5', 'TestContent', NOW(), NOW());
-INSERT INTO diaries(user_id, title, content, created_at, updated_at) VALUES (1, 'Test6', 'TestContent', NOW(), NOW());
-INSERT INTO diaries(user_id, title, content, created_at, updated_at) VALUES (1, 'Test7', 'TestContent', NOW(), NOW());
-INSERT INTO diaries(user_id, title, content, created_at, updated_at) VALUES (1, 'Test8', 'TestContent', NOW(), NOW());
-INSERT INTO diaries(user_id, title, content, created_at, updated_at) VALUES (1, 'Test9', 'TestContent', NOW(), NOW());
-INSERT INTO diaries(user_id, title, content, created_at, updated_at) VALUES (1, 'Test10', 'TestContent', NOW(), NOW());
-INSERT INTO diaries(user_id, title, content, created_at, updated_at) VALUES (1, 'Test11', 'TestContent', NOW(), NOW());
-INSERT INTO diaries(user_id, title, content, created_at, updated_at) VALUES (1, 'Test12', 'TestContent', NOW(), NOW());
-INSERT INTO diaries(user_id, title, content, created_at, updated_at) VALUES (1, 'Test13', 'TestContent', NOW(), NOW());
-INSERT INTO diaries(user_id, title, content, created_at, updated_at) VALUES (1, 'Test14', 'TestContent', NOW(), NOW());
-INSERT INTO diaries(user_id, title, content, created_at, updated_at) VALUES (1, 'Test15', 'TestContent', NOW(), NOW());
-
-INSERT INTO diaries(user_id, title, content, created_at, updated_at) VALUES (2, 'Test15', 'TestContent', NOW(), NOW());
-INSERT INTO diaries(user_id, title, content, created_at, updated_at) VALUES (3, 'Test15', 'TestContent', NOW(), NOW());

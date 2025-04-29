@@ -13,6 +13,8 @@ public class NotificationTypeRequest {
     private String name;
     private String description = "";
 
+    private String defaultTemplate;
+
     private boolean defaultNotifyEnabled;
 
     private boolean defaultWebEnabled;
@@ -20,9 +22,9 @@ public class NotificationTypeRequest {
     private boolean defaultEmailEnabled;
 
     @Builder
-    public NotificationTypeRequest(String name, String description,
+    public NotificationTypeRequest(String name, String description, String defaultTemplate,
                                    boolean defaultNotifyEnabled, boolean defaultWebEnabled, boolean defaultEmailEnabled) {
-       this.name = name; this.description = description;
+       this.name = name; this.description = description; this.defaultTemplate = defaultTemplate;
        this.defaultNotifyEnabled = defaultNotifyEnabled; this.defaultWebEnabled = defaultWebEnabled; this.defaultEmailEnabled = defaultEmailEnabled;
     }
 
@@ -34,6 +36,7 @@ public class NotificationTypeRequest {
         return NotificationType.builder()
                 .name(this.name)
                 .description(this.description)
+                .defaultTemplate(this.defaultTemplate)
                 .defaultNotifyEnabled(this.defaultNotifyEnabled)
                 .defaultWebEnabled(this.defaultWebEnabled)
                 .defaultEmailEnabled(this.defaultEmailEnabled)
