@@ -22,6 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -102,6 +103,27 @@ public class NotificationService {
     }
 
     /**
+     * 현재 인증된 사용자의 모든 알림을 읽음으로 처리
+     */
+    @Transactional
+    public void updateAllAsRead() {
+
+        String currentUserEmail = AuthenticationUtils.getCurrentUserEmail()
+                .orElseThrow(()-> new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid Authentication"));
+        
+       updateAllAsRead(currentUserEmail);
+    }
+
+    /**
+     * userEmail에 해당하는 사용자의 모든 알림을 읽음으로 처리
+     * @param userEmail
+     */
+    @Transactional
+    public void updateAllAsRead(String userEmail) {
+        notificationRepository.updateIsReadByTargetUserEmail(userEmail, true);
+    }
+
+    /**
      * 알림을 삭제한다.
      * @param id 삭제할 알림의 id
      */
@@ -146,15 +168,43 @@ public class NotificationService {
     }
 
     /**
+     * 현재 인증된 사용자의 모든 알림을 삭제한다.
+     */
+    public void deleteAllNotification() {
+
+        String currentUserEmail = AuthenticationUtils.getCurrentUserEmail()
+                .orElseThrow(()->new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid Authentication"));
+
+        deleteAllNotification(currentUserEmail);
+    }
+
+    /**
+     * userEmail에 해당하는 사용자의 모든 알림을 삭제한다.
+     * @param userEmail 알림을 삭제할 사용자의 이메일
+     */
+    public void deleteAllNotification(String userEmail) {
+        notificationRepository.deleteAllByTargetUserEmail(userEmail);
+    }
+
+    /**
      * 알림을 보낸다. 보낸 이는 현재 인증된 유저로 설정된다.
      * @param req 알림에 필요한 정보를 담은 DTO
      */
-    public void sendNotification(NotificationRequest req) {
+    public void sendNotificationWithAuth(NotificationRequest req) {
 
         String currentUserEmail = AuthenticationUtils.getCurrentUserEmail()
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid Authentication"));
 
         sendNotification(currentUserEmail, req);
+    }
+
+    /**
+     * 알림을 보낸다. 보낸 이는 null로 설정된다.
+     * @param req
+     */
+    public void sendNotification(NotificationRequest req) {
+        Long targetId = userRepository.findIdByEmail(req.getTargetEmail());
+        sendNotification(targetId, req);
     }
 
     /**
@@ -180,15 +230,53 @@ public class NotificationService {
         User senderRef = entityManager.getReference(User.class, senderId);
         User targetRef = entityManager.getReference(User.class, targetId);
 
+        sendNotification(senderRef, targetRef, req);
+    }
+
+    /**
+     * 알림을 보낸다.
+     * @param targetId 받는 이의 id
+     * @param req 알림에 필요한 정보를 담은 DTO
+     */
+    public void sendNotification(Long targetId, NotificationRequest req) {
+
+        User targetRef = entityManager.getReference(User.class, targetId);
+
+        sendNotification(null, targetRef, req);
+    }
+
+    /**
+     * 알림을 보낸다. 공통 로직
+     * @param senderRef 보낸 이의 엔티티 참조 (nullable)
+     * @param targetRef 받는 이의 엔티티 참조
+     * @param req 알림에 필요한 정보를 담은 DTO
+     */
+    @Transactional
+    public void sendNotification(User senderRef, User targetRef, NotificationRequest req) {
+
+        //사용자와 알림 타입 이름으로 설정 조회
+        UserNotificationSetting setting =
+                notificationSettingRepository.findByUserEmailAndTypeName(targetRef.getEmail(), req.getNotificationTypeName());
+
+        //해당 알림이 꺼져 있다면 알림을 생성하지 않고 종료한다.
+        //Check Notification of this type is enabled
+        if(!setting.isNotifyEnabled()) {
+            return;
+        }
+
         Notification notification = Notification.builder()
                 .senderUser(senderRef)
                 .targetUser(targetRef)
-                .type(req.getNotificationType())
+                .type(getNotificationType(req.getNotificationTypeName()))
                 .content(req.getContent())
                 .refLink(req.getRefLink())
                 .build();
 
         notificationRepository.save(notification);
+
+        if(setting.isEmailEnabled()) {
+            //이메일 보내기 처리 
+        }
 
         deleteOldestNotifications(req.getTargetEmail());
     }
@@ -196,6 +284,10 @@ public class NotificationService {
 
     // NotificationType methods
 
+    /**
+     * 모든 알림 타입을 가져온다. 
+     * @return 모든 알림 타입 리스트 
+     */
     public List<NotificationType> getAllNotificationTypes() {
         return notificationTypeRepository.findAll();
     }
@@ -206,22 +298,46 @@ public class NotificationService {
         );
     }
 
+    /**
+     * 새로운 알림 타입을 추가한다. 
+     * @param req 추가할 알림의 정보를 담은 DTO
+     * @return 추가된 알림 타입 엔티티 
+      */
+    @Transactional
     public NotificationType addNotificationType(NotificationTypeRequest req) {
         return notificationTypeRepository.save(req.toNotificationType());
     }
 
+    /**
+     * 알림 타입을 삭제한다. 
+     * @param typeId 삭제할 알림 타입의 id
+     */
     public void deleteNotificationType(Long typeId) {
         notificationTypeRepository.deleteById(typeId);
     }
 
+    /**
+     * 알림 타입을 삭제한다. 
+     * @param typeName 삭제할 알림 타입의 name 컬럼
+     */
     public void deleteNotificationType(String typeName) {
         notificationTypeRepository.deleteByName(typeName);
     }
 
+    /**
+     * 알림 타입의 description을 엄데이트한다.
+     * @param typeId 업데이트할 알림 타입의 id
+     * @param description 업데이트할 description 내용
+     */
     public void updateNotificationType(Long typeId, String description) {
         notificationTypeRepository.updateDescriptionById(typeId, description);
     }
 
+    /**
+     * 알림 타입의 description을 엄데이트한다.
+     * @param typeName 업데이트할 알림 타입의 name 컬럼
+     * @param description 업데이트할 description 내용
+     */
     public void updateNotificationType(String typeName, String description) {
         updateNotificationType(
                 notificationTypeRepository.findIdByName(typeName), description
@@ -230,6 +346,10 @@ public class NotificationService {
 
     // UserNotificationSetting methods
 
+    /**
+     * 현재 인증된 사용자의 모든 알림 설정을 반환한다.
+     * @return 알림 설정 리스트
+     */
     public List<UserNotificationSetting> getUserNotificationSettings() {
 
         String currentUserEmail = AuthenticationUtils.getCurrentUserEmail()
@@ -238,10 +358,20 @@ public class NotificationService {
         return getUserNotificationSettings(currentUserEmail);
     }
 
+    /**
+     * userEmail에 해당하는 사용자의 모든 알림 설정을 반환한다.
+     * @param userEmail 알림 설정을 조회할 사용자의 이메일
+     * @return 알림 설정 리스트
+     */
     public List<UserNotificationSetting> getUserNotificationSettings(String userEmail) {
         return notificationSettingRepository.findByUserEmail(userEmail);
     }
 
+    /**
+     * 현재 인증된 사용자의 지정된 알림 타입에 대한 알림 설정을 반환한다.
+     * @param typeName 지정할 알림 타입
+     * @return 알림 설정 엔티티
+     */
     public UserNotificationSetting getUserNotificationSetting(String typeName) {
 
         String currentUserEmail = AuthenticationUtils.getCurrentUserEmail()
@@ -250,10 +380,22 @@ public class NotificationService {
         return getUserNotificationSetting(currentUserEmail, typeName);
     }
 
+    /**
+     * userEmail에 해당하는 사용자의 지정된 알림 타입에 대한 알림 설정을 반환한다.
+     * @param userEmail 사용자의 이메일
+     * @param typeName 지정할 알림 타입
+     * @return 알림 설정 엔티티
+     */
     public UserNotificationSetting getUserNotificationSetting(String userEmail, String typeName) {
         return notificationSettingRepository.findByUserEmailAndTypeName(userEmail, typeName);
     }
 
+    /**
+     * 알림 설정을 업데이트 한다.
+     * @param userEmail 알림 설정을 갱신할 사용자의 이메일
+     * @param req 알림 설정 정보를 가진 DTO
+     */
+    @Transactional
     public void updateUserNotificationSetting(String userEmail, NotificationSettingRequest req) {
 
         //변경 감지(Dirty Check)를 사용하기 위해 조회해서 영속 상태(Persistence)로 만든다.
@@ -267,6 +409,11 @@ public class NotificationService {
         notificationSettingRepository.save(setting);
     }
 
+    /**
+     * 현재 인증된 사용자의 알림 설정을 업데이트 한다.
+     * @param req 알림 설정 정보를 가진 DTO
+     */
+    @Transactional
     public void updateUserNotificationSetting(NotificationSettingRequest req) {
 
         String currentUserEmail = AuthenticationUtils.getCurrentUserEmail()
@@ -275,7 +422,41 @@ public class NotificationService {
         updateUserNotificationSetting(currentUserEmail, req);
     }
 
+    /**
+     * 인자로 받은 유저에 알림 설정을 모두 기본값으로 초기화한다. (유저 초기 생성 시 사용)
+     * @param user 알림을 초기화할 User 엔티티 또는 프록시 엔티티
+     */
+    @Transactional
+    public void initializeDefaultNotificationSettings(User user) {
 
+        List<NotificationType> types = getAllNotificationTypes();
+
+        List<UserNotificationSetting> settings = new ArrayList<>();
+
+        //Init notification settings for all notification types by default setting
+        types.forEach((value) -> {
+            settings.add(UserNotificationSetting.builder()
+                    .user(user)
+                    .notificationType(value)
+                    .isEmailEnabled(value.isDefaultEmailEnabled())
+                    .isNotifyEnabled(value.isDefaultNotifyEnabled())
+                    .isWebEnabled(value.isDefaultWebEnabled())
+                    .build());
+        });
+
+        notificationSettingRepository.saveAll(settings);
+    }
+
+    /**
+     * 인자로 받은 유저에 알림 설정을 모두 기본값으로 초기화한다. (유저 초기 생성 시 사용)
+     * @param userEmail 알림을 초기화할 User의 이메일
+     */
+    @Transactional
+    public void initializeDefaultNotificationSettings(String userEmail) {
+        initializeDefaultNotificationSettings(
+                entityManager.getReference(User.class, userRepository.findIdByEmail(userEmail))
+        );
+    }
 
     /**
      * 현재 알림 개수가 최대 알림 개수를 초과할 경우, 가장 오래된 것 부터 삭제한다.

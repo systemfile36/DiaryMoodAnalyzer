@@ -39,6 +39,23 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     int updateIsReadByIds(@Param("ids") List<Long> ids, @Param("isRead") boolean isRead);
 
     /**
+     * userEmail에 해당하는 사용자의 모든 알림의 isRead 컬럼을 :isRead로 설정한다. 
+     * @param userEmail 지정할 사용자의 이메일
+     * @param isRead 설정할 읽음 설정
+     */
+    @Modifying
+    @Query(value="UPDATE Notification n SET n.isRead = :isRead WHERE n.targetUser.email = :email")
+    void updateIsReadByTargetUserEmail(@Param("email") String userEmail, boolean isRead);
+
+    /**
+     * userEmail에 해당하는 사용자의 모든 알림을 삭제한다.
+     * @param userEmail
+     */
+    @Modifying
+    @Query(value="DELETE FROM Notification n WHERE n.targetUser.email = :email")
+    void deleteAllByTargetUserEmail(@Param("email") String userEmail);
+
+    /**
      * 사용자의 알림 개수를 조회한다. 
      * @param targetUserEmail 알림 개수를 조회할 사용자 
      * @return 해당 사용자가 target인 알림의 개수

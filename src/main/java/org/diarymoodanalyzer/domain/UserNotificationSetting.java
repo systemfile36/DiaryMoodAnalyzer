@@ -1,6 +1,7 @@
 package org.diarymoodanalyzer.domain;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -35,6 +36,13 @@ public class UserNotificationSetting {
 
     @Column(name="is_email_enabled", nullable = false)
     private boolean isEmailEnabled;
+
+    @Builder
+    public UserNotificationSetting(User user, NotificationType notificationType,
+                                   boolean isNotifyEnabled, boolean isWebEnabled, boolean isEmailEnabled) {
+        this.user = user; this.notificationType = notificationType;
+        this.isEmailEnabled = isEmailEnabled; this.isNotifyEnabled = isNotifyEnabled; this.isWebEnabled = isWebEnabled;
+    }
 
 }
 
