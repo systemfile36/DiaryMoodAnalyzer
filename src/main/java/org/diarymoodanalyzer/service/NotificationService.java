@@ -12,6 +12,7 @@ import org.diarymoodanalyzer.dto.request.NotificationRequest;
 import org.diarymoodanalyzer.dto.request.NotificationSettingRequest;
 import org.diarymoodanalyzer.dto.request.NotificationTypeRequest;
 import org.diarymoodanalyzer.dto.response.NotificationResponse;
+import org.diarymoodanalyzer.dto.response.UserNotificationSettingResponse;
 import org.diarymoodanalyzer.repository.NotificationRepository;
 import org.diarymoodanalyzer.repository.NotificationTypeRepository;
 import org.diarymoodanalyzer.repository.UserNotificationSettingRepository;
@@ -348,14 +349,18 @@ public class NotificationService {
 
     /**
      * 현재 인증된 사용자의 모든 알림 설정을 반환한다.
-     * @return 알림 설정 리스트
+     * DTO로 necessary 정보만 반환한다.
+     * @return 알림 설정 DTO 리스트
      */
-    public List<UserNotificationSetting> getUserNotificationSettings() {
+    public List<UserNotificationSettingResponse> getUserNotificationSettings() {
 
         String currentUserEmail = AuthenticationUtils.getCurrentUserEmail()
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid Authentication"));
 
-        return getUserNotificationSettings(currentUserEmail);
+        List<UserNotificationSetting> result = getUserNotificationSettings(currentUserEmail);
+
+        // Mapping to DTO
+        return result.stream().map(UserNotificationSettingResponse::new).toList();
     }
 
     /**

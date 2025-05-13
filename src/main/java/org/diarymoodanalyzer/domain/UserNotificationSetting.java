@@ -13,6 +13,7 @@ import lombok.Setter;
         //사용자와 알림 타입 당 유일하게 존재하도록 설정
     @UniqueConstraint(columnNames = { "user_id", "notification_type_id" })
 })
+@Entity
 public class UserNotificationSetting {
 
     @Id

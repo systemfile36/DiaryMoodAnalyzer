@@ -6,37 +6,60 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <a id="topbar-title" class="navbar-brand" href="#">DiaryMoodAnalyzer</a>
+            <!--우상단 기능 래퍼-->
             <div id="features-wrapper" class="d-flex align-items-center">
-                <div id="notification-menu" class="nav-item dropdown">
+                <div id="notification-menu" ref="notiMenuRef" class="nav-item dropdown">
                     <button class="btn btn-link nav-link dropdown-toggle d-flex align-items-center"
-                    type="button" data-bs-toggle="dropdown" data-bs-display="static">
+                    type="button" data-bs-toggle="dropdown" data-bs-display="static"
+                    :aria-expanded="isNotiMenuExpanded.toString()"
+                    @click="toggleNotifiMenu">
+                        <div class="notify-dot"
+                        :class="notificationStore.notifications.length > 0 ? 'd-block' : 'd-none'"></div>
                         <i class="fa-solid fa-bell"></i>
                     </button>
-                    <div class="dropdown-menu dropdown-menu-end show">
-                        <div id="notification-header" 
-                        class="d-flex justify-content-between align-items-center 
-                        border-bottom pb-2 px-3">
+                    <div class="dropdown-menu dropdown-menu-end"
+                    :class="isNotiMenuExpanded ? 'show' : ''">
+                        <div class="notification-header 
+                        d-flex justify-content-between align-items-center px-3">
                             <span class="">알림</span>
                             <button class="" type="button">
                                 <i class="fa-solid fa-gear"></i>
                             </button>
                         </div>
-                        <div class="dropdown-item">
-                            <span>test</span>
+                        <div class="dropdown-divider"></div>
+                        <ul class="notification-wrapper">
+                            <li class="notification-item dropdown-item d-flex flex-column text-break">
+                                <router-link class="text-clip-2 content">
+                                        Lorem ipsum dolor sit amet,consectetur adipiscing elit. Suspendisse rutrum ex quis lorem porta, porttitor lacinia mauris placerat. Nullam fringilla consectetur mi a porttitor.
+                                </router-link>
+                                <span class="time-ago">16시간 전</span>
+                            </li>
+                            <li class="notification-item dropdown-item d-flex flex-column text-break">
+                                <router-link class="text-clip-2 content">
+                                        Lorem ipsum dolor sit amet,consectetur adipiscing elit. Suspendisse rutrum ex quis lorem porta, porttitor lacinia mauris placerat. Nullam fringilla consectetur mi a porttitor.
+                                </router-link>
+                                <span class="time-ago">16시간 전</span>
+                            </li>
+                        </ul>
+                        <div class="dropdown-divider"></div>
+                        <div class="notification-footer d-block text-center">
+                            <router-link>
+                                전체 보기
+                            </router-link>
                         </div>
                     </div>
                 </div>
-                <div id="darkmode-menu" ref="dropdownRef" class="nav-item dropdown">
+                <div id="darkmode-menu" ref="darkmodeMenuRef" class="nav-item dropdown">
                     <button 
                     class="btn btn-link nav-link dropdown-toggle
                     d-flex align-items-center" type="button"
                     data-bs-toggle="dropdown" data-bs-display="static" 
-                    :aria-expanded="isDropdownExpanded.toString()"
-                    @click="toggleDropdown">
+                    :aria-expanded="isDarkmodeMenuExpanded.toString()"
+                    @click="toggleDarkmodeMenu">
                         <i :class="themeStore.isDarkmode ? 'fa-solid fa-moon' : 'fa-regular fa-sun'"></i>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end" 
-                    :class="isDropdownExpanded ? 'show' : ''">
+                    :class="isDarkmodeMenuExpanded ? 'show' : ''">
                         <li>
                             <button class="dropdown-item d-flex align-items-center" 
                             :class="themeStore.isDarkmode ? '' : 'active'"
@@ -71,6 +94,9 @@
 <script setup>
 import { useSideBarStore } from '@/stores/SideBarManager';
 import { useThemeStore } from '@/stores/ThemeManager';
+
+import { useNotificationManagerStore } from '@/stores/NotificationManager';
+
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 
 //SideBar 관리를 위함
@@ -79,32 +105,53 @@ const sidebarStore = useSideBarStore();
 //For manage Theme
 const themeStore = useThemeStore();
 
-//Dropdown template ref
-const dropdownRef = ref(null);
+//For manage notifications
+const notificationStore = useNotificationManagerStore();
 
-//드롭다운 확장 여부 
-const isDropdownExpanded = ref(false);
+//darkmode-menu template ref
+const darkmodeMenuRef = ref(null);
 
-function toggleDropdown() {
-    isDropdownExpanded.value = !isDropdownExpanded.value;
+//notification-menu template ref
+const notiMenuRef = ref(null);
+
+//다크 모드 메뉴 확장 여부 
+const isDarkmodeMenuExpanded = ref(false);
+
+//알림 메뉴 확장 여부
+const isNotiMenuExpanded = ref(false);
+
+function toggleDarkmodeMenu() {
+    isDarkmodeMenuExpanded.value = !isDarkmodeMenuExpanded.value;
+}
+
+function toggleNotifiMenu() {
+    isNotiMenuExpanded.value = !isNotiMenuExpanded.value;
 }
 
 //선택 후, 드롭다운을 닫는다.
 function setDarkMode(event) {
     themeStore.setDarkmode(event.target.value);
-    toggleDropdown();
+    toggleDarkmodeMenu();
 }
 
-//클릭된 지점이 드롭다운 메뉴가 아닐 경우, 드롭다운을 닫는다.
+//클릭된 지점이 드롭다운 메뉴가 아닐 경우, 모든 드롭다운을 닫는다.
 function onDocumentClick(event) {
-    if(dropdownRef.value && !dropdownRef.value.contains(event.target)) {
-        isDropdownExpanded.value = false
+    if(darkmodeMenuRef.value && !darkmodeMenuRef.value.contains(event.target)) {
+        isDarkmodeMenuExpanded.value = false
+    }
+
+    if(notiMenuRef.value && !notiMenuRef.value.contains(event.target)) {
+        isNotiMenuExpanded.value = false;
     }
 }
 
 //마운트 시점에 따라 이벤트 추가/삭제
 onMounted(() => {
     document.addEventListener('click', onDocumentClick);
+
+    //for test
+    //Load notifications 
+    notificationStore.loadNotifications();
 })
 
 onBeforeUnmount(()=>{
@@ -117,6 +164,12 @@ onBeforeUnmount(()=>{
 
 #sidebar-toggler {
     border: none;
+}
+
+//상단바를 뷰포트 상단에 고정하기 위함
+#topbar {
+    position: sticky;
+    top: 0;
 }
 
 #darkmode-menu {
@@ -144,7 +197,7 @@ onBeforeUnmount(()=>{
     .dropdown-item {
         border-radius: var(--bs-dropdown-border-radius);
 
-        &.active {
+        &.active, &:active {
             background-color: var(--dropdown-active-bg);
         }
         
@@ -156,6 +209,20 @@ onBeforeUnmount(()=>{
 
 //알림 메뉴
 #notification-menu {
+
+    //알림 표시용 우상단 붉은 점
+    .notify-dot {
+        background-color: red;
+        //부모에 대해 절대 위치 
+        position: absolute;
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        margin-right: 1rem;
+        margin-top: 0.4rem;
+        top: 0;
+        right: 0;
+    }
 
     .dropdown-menu-end {
         right: 0;
@@ -169,7 +236,38 @@ onBeforeUnmount(()=>{
         max-width: 480px;
     }
 
-    #notification-header {
+    //알림 리스트 래퍼
+    .notification-wrapper {
+        //y축 방향으로 늘 경우 스크롤 
+        overflow-y: auto;
+        
+        padding-left: 0;
+
+        min-height: 30vh;
+    }
+
+    //알림 요소 
+    .notification-item {
+        //margin-top: 0.25rem;
+
+        //.dropdown-item의 white-space: nowrap; 을 덮어쓴다.
+        white-space: normal;
+
+        //알림 본문
+        .content {
+            color: inherit;
+            text-decoration: none;
+            word-break: break-all;
+        }
+
+        .time-ago {
+            color: var(--bs-secondary-color);
+            font-size: 0.9rem;
+        }
+
+    }
+
+    .notification-header {
 
         //Setting 버튼 커스터마이징
         button {
@@ -184,7 +282,24 @@ onBeforeUnmount(()=>{
             }
         }
     }
+
+    .notification-footer {
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+    }
 }
 
+//두 줄을 넘는 콘텐츠 텍스트는 ...으로 truncated 한다.
+//webkit을 사용한다. 
+.text-clip-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    line-clamp: 2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 
 </style>

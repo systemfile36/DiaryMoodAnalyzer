@@ -1,10 +1,12 @@
 package org.diarymoodanalyzer.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.diarymoodanalyzer.domain.NotificationType;
 import org.diarymoodanalyzer.domain.UserNotificationSetting;
 import org.diarymoodanalyzer.dto.request.NotificationRequest;
 import org.diarymoodanalyzer.dto.request.NotificationSettingRequest;
 import org.diarymoodanalyzer.dto.response.NotificationResponse;
+import org.diarymoodanalyzer.dto.response.UserNotificationSettingResponse;
 import org.diarymoodanalyzer.service.NotificationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -72,7 +74,7 @@ public class NotificationsApiController {
     // UserNotificationSetting Endpoints
 
     @GetMapping("/settings")
-    public ResponseEntity<List<UserNotificationSetting>> getUserNotificationSettings() {
+    public ResponseEntity<List<UserNotificationSettingResponse>> getUserNotificationSettings() {
         return ResponseEntity.ok().body(
                 notificationService.getUserNotificationSettings()
         );

@@ -39,6 +39,8 @@ public class AuthService {
 
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
+    private final NotificationService notificationService;
+
     @Transactional
     public LoginResponse login(LoginRequest req) throws IllegalArgumentException {
 
@@ -97,6 +99,9 @@ public class AuthService {
 
             userRepository.save(user);
         }
+
+        // 알림 설정을 기본으로 초기화
+        notificationService.initializeDefaultNotificationSettings(req.getEmail());
     }
 
     public void logout() throws ResponseStatusException {

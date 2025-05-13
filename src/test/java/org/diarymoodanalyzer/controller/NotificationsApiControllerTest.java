@@ -3,14 +3,11 @@ package org.diarymoodanalyzer.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.diarymoodanalyzer.config.TokenAuthenticationFilter;
 import org.diarymoodanalyzer.config.jwt.TokenProvider;
-import org.diarymoodanalyzer.domain.BaseEntity;
-import org.diarymoodanalyzer.domain.Expert;
-import org.diarymoodanalyzer.domain.Notification;
-import org.diarymoodanalyzer.domain.User;
+import org.diarymoodanalyzer.domain.*;
 import org.diarymoodanalyzer.dto.request.NotificationRequest;
-import org.diarymoodanalyzer.repository.ExpertRepository;
-import org.diarymoodanalyzer.repository.NotificationRepository;
-import org.diarymoodanalyzer.repository.UserRepository;
+import org.diarymoodanalyzer.repository.*;
+import org.diarymoodanalyzer.service.NotificationService;
+import org.diarymoodanalyzer.util.SimpleTemplateRenderer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,12 +24,10 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import javax.print.attribute.standard.Media;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -62,6 +57,15 @@ public class NotificationsApiControllerTest {
     private NotificationRepository notificationRepository;
 
     @Autowired
+    private NotificationTypeRepository notificationTypeRepository;
+
+    @Autowired
+    private UserNotificationSettingRepository notificationSettingRepository;
+
+    @Autowired
+    private NotificationService notificationService;
+
+    @Autowired
     private TokenProvider tokenProvider;
 
     /**
@@ -73,6 +77,11 @@ public class NotificationsApiControllerTest {
         this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
                 .addFilter(new TokenAuthenticationFilter(tokenProvider)) //인증 구현을 위한 수동 필터 추가
                 .build();
+
+        userRepository.deleteAll();
+        expertRepository.deleteAll();
+        notificationRepository.deleteAll();
+        notificationSettingRepository.deleteAll();
     }
 
     @DisplayName("getNotifications: target 사용자가 자신의 알림을 조회할 수 있다.")
@@ -86,6 +95,8 @@ public class NotificationsApiControllerTest {
 
         final String targetEmail = "test@email.com";
         final String targetPassword = "test1234";
+
+        final String notificationTypeName = "WEB_TEST";
 
         //Set sender
         Expert sender = new Expert(senderEmail, senderPassword);
@@ -104,14 +115,24 @@ public class NotificationsApiControllerTest {
 
         List<Notification> notifications = new ArrayList<>();
 
+        //Load NotificationType from repository
+        NotificationType notificationType = notificationTypeRepository.findByName(notificationTypeName)
+                .orElse(null);
+
+        assertThat(notificationType).isNotNull();
+
         //Create test data
         for(int i = 0; i < 10; i++) {
+            String content = SimpleTemplateRenderer.render(
+                    notificationType.getDefaultTemplate(),
+                    Map.of("Test", "Test_" + i)
+            );
             notifications.add(
                     Notification.builder()
                             .senderUser(sender)
                             .targetUser(target)
-                            .content(String.format("TestNotification %d", i))
-                            .type("NEW_COMMENT")
+                            .content(content)
+                            .type(notificationType)
                             .refLink(String.format("/diaries/%d", i))
                             .build()
             );
@@ -125,6 +146,7 @@ public class NotificationsApiControllerTest {
         assertThat(accessToken).isNotNull();
         assertThat(tokenProvider.validateToken(accessToken)).isTrue();
 
+        //Perform test
         ResultActions result = mockMvc.perform(MockMvcRequestBuilders.get(url)
                 .header("Authorization", "Bearer " + accessToken)
                 .contentType(MediaType.APPLICATION_JSON_VALUE));
@@ -134,8 +156,8 @@ public class NotificationsApiControllerTest {
 
         result.andDo(MockMvcResultHandlers.print());
 
+        //Check result length
         result.andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(10));
-
     }
 
     @DisplayName("sendNotification: target 사용자에게 알림을 보낼 수 있다.")
@@ -148,6 +170,8 @@ public class NotificationsApiControllerTest {
 
         final String targetEmail = "test@email.com";
         final String targetPassword = "test1234";
+
+        final String notificationTypeName = "WEB_TEST";
 
         Expert sender = new Expert(senderEmail, senderPassword);
         expertRepository.save(sender);
@@ -173,7 +197,7 @@ public class NotificationsApiControllerTest {
         req.setTargetEmail(targetEmail);
         req.setContent("TestNotification");
         req.setRefLink("/diaries/10");
-        req.setType("NEW_COMMENT");
+        req.setNotificationTypeName(notificationTypeName);
 
         //convert to request body
         String reqBody = objectMapper.writeValueAsString(req);
@@ -194,6 +218,12 @@ public class NotificationsApiControllerTest {
         assertThat(notifications.get(0).getContent()).isEqualTo(req.getContent());
         assertThat(notifications.get(0).getTargetUser().getEmail()).isEqualTo(targetEmail);
 
+        //Check NotificationType name
+        assertThat(notifications.stream().allMatch((value) -> {
+            NotificationType temp = value.getNotificationType();
+            return temp.getName().equals(notificationTypeName);
+        })).isTrue();
+
     }
 
     @DisplayName("updateAsRead: 알림을 읽음으로 표시할 수 있음")
@@ -207,6 +237,8 @@ public class NotificationsApiControllerTest {
         final String targetEmail = "test@email.com";
         final String targetPassword = "test1234";
 
+        final String notificationTypeName = "WEB_TEST";
+
         Expert sender = new Expert(senderEmail, senderPassword);
         expertRepository.save(sender);
 
@@ -219,18 +251,26 @@ public class NotificationsApiControllerTest {
 
         userRepository.save(target);
 
+        // Get NotificationType entity
+        NotificationType notificationType = notificationTypeRepository.findByName(notificationTypeName)
+                .orElse(null);
+
+        assertThat(notificationType).isNotNull();
+
+        // Create single notification entity
         Notification notification = Notification.builder()
                 .senderUser(sender)
                 .targetUser(target)
                 .content("TestNotification")
                 .refLink("/diaries/10")
-                .type("NEW_COMMENT")
+                .type(notificationType)
                 .build();
 
         notificationRepository.save(notification);
         
         assertThat(notification.getId()).isNotNull();
 
+        //Create token
         String accessToken = tokenProvider.createToken(target, TokenProvider.ACCESS_EXPIRE);
 
         assertThat(accessToken).isNotNull();
@@ -241,8 +281,10 @@ public class NotificationsApiControllerTest {
         ResultActions result = mockMvc.perform(MockMvcRequestBuilders.patch(reqUrl)
                 .header("Authorization", "Bearer " + accessToken));
 
+        //Check status code
         result.andExpect(MockMvcResultMatchers.status().isOk());
 
+        //Check isRead from repository
         boolean isRead = notificationRepository.findById(notification.getId())
                 .orElseThrow().isRead();
 
@@ -252,11 +294,13 @@ public class NotificationsApiControllerTest {
     @DisplayName("updateAsReadInBatch: 알림을 일괄적으로 읽음 표시할 수 있다.")
     @Test
     void updateAsReadInBatch() throws Exception {
-
+        //Set test data
         final String url = "/api/notifications/read";
         final String targetEmail = "test@email.com";
         final String targetPassword = "test1234";
         final int notificationCount = 20;
+
+        final String notificationTypeName = "WEB_TEST";
 
         User targetUser = User.builder()
                 .email(targetEmail)
@@ -265,13 +309,18 @@ public class NotificationsApiControllerTest {
 
         userRepository.save(targetUser);
 
+        NotificationType notificationType = notificationTypeRepository.findByName(notificationTypeName)
+                .orElse(null);
+
+        assertThat(notificationType).isNotNull();
+
         List<Notification> notifications = new ArrayList<>(notificationCount);
 
         for(int i = 0; i < notificationCount; i++) {
             notifications.add(
                     Notification.builder()
                             .targetUser(targetUser)
-                            .type("NEW_TEST")
+                            .type(notificationType)
                             .refLink("/")
                             .content(String.format("TEST %d", i))
                             .build()
@@ -284,9 +333,11 @@ public class NotificationsApiControllerTest {
         assertThat(accessToken).isNotNull();
         assertThat(tokenProvider.validateToken(accessToken)).isTrue();
 
+        //Get ids
         List<Long> ids = notifications.stream().map(Notification::getId).toList();
         assertThat(ids.size()).isEqualTo(notificationCount);
 
+        //ids to json
         String reqBody = objectMapper.writeValueAsString(ids);
 
         ResultActions result = mockMvc.perform(MockMvcRequestBuilders.patch(url)
@@ -299,7 +350,7 @@ public class NotificationsApiControllerTest {
         List<Notification> resultNotifications =
                 notificationRepository.findBySenderUserEmail(targetEmail);
 
-        //전부 읽음으로 갱신되었는지 확인
+        //Check all notification's isRead field is set to true
         assertThat(
                 resultNotifications.stream()
                         .allMatch(Notification::isRead)
@@ -317,6 +368,8 @@ public class NotificationsApiControllerTest {
         final String targetEmail = "test@email.com";
         final String targetPassword = "test1234";
 
+        final String notificationTypeName = "WEB_TEST";
+
         Expert sender = new Expert(senderEmail, senderPassword);
         expertRepository.save(sender);
 
@@ -329,12 +382,17 @@ public class NotificationsApiControllerTest {
 
         userRepository.save(target);
 
+        NotificationType notificationType = notificationTypeRepository.findByName(notificationTypeName)
+                .orElse(null);
+
+        assertThat(notificationType).isNotNull();
+
         Notification notification = Notification.builder()
                 .targetUser(target)
                 .senderUser(sender)
                 .content("TestContent")
                 .refLink("/diaries/11")
-                .type("NEW_COMMENT")
+                .type(notificationType)
                 .build();
 
         notificationRepository.save(notification);
@@ -366,6 +424,8 @@ public class NotificationsApiControllerTest {
         final String targetPassword = "test1234";
         final int notificationCount = 20;
 
+        final String notificationTypeName = "WEB_TEST";
+
         User targetUser = User.builder()
                 .email(targetEmail)
                 .password(targetPassword)
@@ -373,12 +433,17 @@ public class NotificationsApiControllerTest {
 
         userRepository.save(targetUser);
 
+        NotificationType notificationType = notificationTypeRepository.findByName(notificationTypeName)
+                .orElse(null);
+
+        assertThat(notificationType).isNotNull();
+
         List<Notification> notifications = new ArrayList<>(20);
 
         for(int i = 0; i < notificationCount; i++) {
             Notification temp = Notification.builder()
                     .targetUser(targetUser)
-                    .type("NEW_TEST")
+                    .type(notificationType)
                     .refLink("/")
                     .content(String.format("TEST %d", i))
                     .build();
@@ -406,7 +471,7 @@ public class NotificationsApiControllerTest {
 
         result.andExpect(MockMvcResultMatchers.status().is2xxSuccessful());
 
-        //삭제한 알림들이 실제로 리포지토리에 존재하지 않는지 noneMatch로 검증
+        //Check all Notifications deleted
         assertThat(
                 ids.stream()
                         .noneMatch(value -> notificationRepository.existsById(value))
@@ -425,6 +490,8 @@ public class NotificationsApiControllerTest {
         final String targetEmail = "test@email.com";
         final String targetPassword = "test1234";
 
+        final String notificationTypeName = "WEB_TEST";
+
         Expert sender = new Expert(senderEmail, senderPassword);
         expertRepository.save(sender);
 
@@ -437,6 +504,11 @@ public class NotificationsApiControllerTest {
 
         userRepository.save(target);
 
+        NotificationType notificationType = notificationTypeRepository.findByName(notificationTypeName)
+                .orElse(null);
+
+        assertThat(notificationType).isNotNull();
+
         List<Notification> notifications = new ArrayList<>();
 
         //최대치인 50개에 맞춰서 채운다.
@@ -444,7 +516,7 @@ public class NotificationsApiControllerTest {
             Notification notification = Notification.builder()
                     .senderUser(sender)
                     .targetUser(target)
-                    .type("NEW_COMMENT")
+                    .type(notificationType)
                     .content(String.valueOf(i))
                     .refLink(String.format("/diaries/%d", i))
                     .build();
@@ -463,7 +535,7 @@ public class NotificationsApiControllerTest {
         req.setTargetEmail(targetEmail);
         req.setContent("50");
         req.setRefLink("/diaries/10");
-        req.setType("NEW_COMMENT");
+        req.setNotificationTypeName(notificationTypeName);
 
         String reqBody = objectMapper.writeValueAsString(req);
 

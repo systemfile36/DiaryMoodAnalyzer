@@ -14,6 +14,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Table(name = "notification_types")
+@Entity
 public class NotificationType {
 
     @Id
