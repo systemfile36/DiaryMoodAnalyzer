@@ -18,6 +18,7 @@ import org.diarymoodanalyzer.repository.NotificationTypeRepository;
 import org.diarymoodanalyzer.repository.UserNotificationSettingRepository;
 import org.diarymoodanalyzer.repository.UserRepository;
 import org.diarymoodanalyzer.util.AuthenticationUtils;
+import org.diarymoodanalyzer.util.SimpleTemplateRenderer;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @RequiredArgsConstructor
 @Service
@@ -265,11 +268,24 @@ public class NotificationService {
             return;
         }
 
+        // 템플릿 처리를 위한 캐싱
+        String content = req.getContent();
+        NotificationType notificationType = getNotificationType(req.getNotificationTypeName());
+
+        // Apply default template when content is null or empty string
+        // otherwise, apply content as template
+        if(Objects.isNull(content) || content.isEmpty()) {
+            content = SimpleTemplateRenderer.render(notificationType.getDefaultTemplate(), req.getValues().split(","));
+        } else {
+            content = SimpleTemplateRenderer.render(content, req.getValues().split(","));
+        }
+
+
         Notification notification = Notification.builder()
                 .senderUser(senderRef)
                 .targetUser(targetRef)
-                .type(getNotificationType(req.getNotificationTypeName()))
-                .content(req.getContent())
+                .type(notificationType)
+                .content(content)
                 .refLink(req.getRefLink())
                 .build();
 
