@@ -1,18 +1,22 @@
 package org.diarymoodanalyzer.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.diarymoodanalyzer.domain.*;
+import org.diarymoodanalyzer.dto.request.NotificationRequest;
 import org.diarymoodanalyzer.dto.response.GetCommentByDiaryIdResponse;
 import org.diarymoodanalyzer.repository.CommentRepository;
 import org.diarymoodanalyzer.repository.DiaryRepository;
 import org.diarymoodanalyzer.repository.ExpertRepository;
 import org.diarymoodanalyzer.repository.UserRepository;
 import org.diarymoodanalyzer.util.AuthenticationUtils;
+import org.diarymoodanalyzer.util.SimpleTemplateRenderer;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @Service
@@ -25,6 +29,11 @@ public class CommentService {
     private final CommentRepository commentRepository;
 
     private final ExpertRepository expertRepository;
+
+    /**
+     * 알림 전송을 위한 Service class injection
+     */
+    private final NotificationService notificationService;
 
     /**
      * Diary의 id와 소유자 이메일을 받아서 Comment 목록을 반환한다. <br>
@@ -97,6 +106,7 @@ public class CommentService {
      * @param content 추가할 코멘트의 본문
      * @throws ResponseStatusException 찾지 못했거나 권한이 없을 때 throw
      */
+    @Transactional //For Persistence Context caching
     public void addCommentToDiary(Long diaryId, String content) throws ResponseStatusException{
 
         String currentUserEmail = AuthenticationUtils.getCurrentUserEmail()
@@ -120,6 +130,15 @@ public class CommentService {
 
             //저장
             commentRepository.save(comment);
+
+            //알림 전송
+            notificationService.sendNotification(currentUserEmail, NotificationRequest.builder()
+                    .notificationTypeName("NEW_COMMENT")
+                    .content("") // Use Default template
+                    .values(currentUserEmail)
+                    .refLink("/diaries/" + diary.getId())
+                    .targetEmail(diary.getUser().getEmail()) // Persistence context caching
+                    .build());
         } else {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You have no permission");
         }

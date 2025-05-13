@@ -7,10 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.diarymoodanalyzer.domain.Diary;
 import org.diarymoodanalyzer.domain.User;
 import org.diarymoodanalyzer.domain.UserAuthority;
-import org.diarymoodanalyzer.dto.request.AddDiaryRequest;
-import org.diarymoodanalyzer.dto.request.GetDiaryByPageRequest;
-import org.diarymoodanalyzer.dto.request.GetDiaryByPageForExpertRequest;
-import org.diarymoodanalyzer.dto.request.GetDiaryForExpertRequest;
+import org.diarymoodanalyzer.dto.request.*;
 import org.diarymoodanalyzer.dto.response.AddDiaryResponse;
 import org.diarymoodanalyzer.dto.response.GetDiaryByIdResponse;
 import org.diarymoodanalyzer.dto.response.GetDiaryByPageResponse;
@@ -37,6 +34,8 @@ public class DiaryService {
 
     private final DiaryEmotionService diaryEmotionService;
 
+    private final NotificationService notificationService;
+
     @PersistenceContext
     private final EntityManager entityManager;
 
@@ -50,20 +49,13 @@ public class DiaryService {
         String currentUserEmail = AuthenticationUtils.getCurrentUserEmail()
                 .orElseThrow(()->new ResponseStatusException(HttpStatus.FORBIDDEN, "There is no Authentication"));
 
-        //이메일을 통해 User의 아이디 값만 받아온다.
-        Long userId = userRepository.findIdByEmail(currentUserEmail);
-
-        //못 찾으면 예외
-        if(userId == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "not found user with email : " + currentUserEmail);
-        }
-
-        //프록시 객체로 받아온다. 실제로 엔티티에 접근하기 전에는 DB에 쿼리하지 않는다.
-        User userRef = entityManager.getReference(User.class, userId);
+        //Get User Entity by email
+        User user = userRepository.findByEmail(currentUserEmail)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "not found user with email : " + currentUserEmail));
 
         //빌더로 엔티티의 인스턴스 생성
         Diary diary = Diary.builder()
-                .user(userRef)
+                .user(user)
                 .title(dto.getTitle())
                 .content(dto.getContent())
                 .build();
@@ -77,6 +69,14 @@ public class DiaryService {
         //비동기로 실행되며, 분석이 완료되면 DB에 반영 될것이다.
         diaryEmotionService.submitTask(new DiaryEmotionTask(savedDiary));
 
+        //알림 전송
+        notificationService.sendNotification(currentUserEmail, NotificationRequest.builder()
+                .notificationTypeName("NEW_DIARY")
+                .content("")
+                .values(currentUserEmail)
+                .refLink("/diaries" + savedDiary.getId())
+                .targetEmail(user.getExpert().getEmail()) // Set target
+                .build());
 
         return new AddDiaryResponse(savedDiary.getId(), currentUserEmail, dto.getTitle());
 
