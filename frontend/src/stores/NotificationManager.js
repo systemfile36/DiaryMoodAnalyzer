@@ -12,10 +12,6 @@ export const useNotificationManagerStore = defineStore('notificationManager', ()
 
     const DATETIME_FORMAT = "MM-DD HH:mm:ss";
 
-    class NotiMsgFormat {
-        static NEW_COMMENT = "{sender_nickname}님의 새 코멘트: {content}"
-    }
-
     //create instance with baseURL and timeout
     const axiosInstance = axios.create({
         baseURL: BASE_URL,
@@ -58,12 +54,34 @@ export const useNotificationManagerStore = defineStore('notificationManager', ()
     }
 
     /**
+     * 로드한 알림 목록의 `createdAt`에 format을 적용한다.
+     */
+    function applyDataFormat() {
+        if(notifications.value) {
+            notifications.value = notifications.value.map((value) => {
+                return {
+                    ...value,
+                    createdAt: dayjs(value.createdAt).format(DATETIME_FORMAT)
+                }
+            })
+        }
+    }
+
+    /**
      * 알림을 기준에 따라 정렬한다. 
      * @param {string} column 정렬 기준이 될 컬럼, Default is created_at
      * @param {boolean} isAsc 오름차순 여부, Default is false
      */
     function sortNotifications(column='createdAt', isAsc=false) {
-
+        
+        notifications.value.sort((a, b) => {
+            if(a[column] > b[column]) 
+                return 1;
+            else if (a[column] < b[column])
+                return -1;
+            else 
+                return 0;
+        });
     }
 
     /**
@@ -106,11 +124,22 @@ export const useNotificationManagerStore = defineStore('notificationManager', ()
         return str.replace(/{(\w+)}/g, (_, key) => obj[key] ?? '');
     }
 
+    /**
+     * 
+     * @param {str} template 
+     * @param {str[]} values 
+     * @returns 
+     */
+    function format(template, values) {
+        let i = 0;
+        return template.replace(/\{\}/g, () => values[i++] ?? '');
+    }
+
     return {
         notifications,
         loadNotifications,
         sortNotifications,
         formatObj,
-        NotiMsgFormat,
+        format,
     }
 })
