@@ -6,24 +6,20 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import org.diarymoodanalyzer.config.TokenAuthenticationFilter;
 import org.diarymoodanalyzer.config.jwt.TokenProvider;
-import org.diarymoodanalyzer.domain.Comment;
-import org.diarymoodanalyzer.domain.Diary;
-import org.diarymoodanalyzer.domain.Expert;
-import org.diarymoodanalyzer.domain.User;
+import org.diarymoodanalyzer.domain.*;
 import org.diarymoodanalyzer.dto.request.AddCommentRequest;
 import org.diarymoodanalyzer.dto.request.AddDiaryRequest;
 import org.diarymoodanalyzer.dto.request.GetDiaryByPageRequest;
 import org.diarymoodanalyzer.dto.response.GetAvgDepressionLevel;
-import org.diarymoodanalyzer.repository.CommentRepository;
-import org.diarymoodanalyzer.repository.DiaryRepository;
-import org.diarymoodanalyzer.repository.ExpertRepository;
-import org.diarymoodanalyzer.repository.UserRepository;
+import org.diarymoodanalyzer.repository.*;
+import org.diarymoodanalyzer.service.NotificationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
@@ -34,6 +30,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -76,6 +73,15 @@ class DiaryApiControllerTest {
     @Autowired
     private TokenProvider tokenProvider;
 
+    @Autowired
+    private NotificationRepository notificationRepository;
+
+    @Autowired
+    private UserNotificationSettingRepository notificationSettingRepository;
+
+    @Autowired
+    private NotificationService notificationService;
+
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -90,9 +96,11 @@ class DiaryApiControllerTest {
                 .build();
         diaryRepository.deleteAll();
         userRepository.deleteAll();
+        commentRepository.deleteAll();
+        notificationRepository.deleteAll();
     }
 
-    @DisplayName("addDiary: Diary를 추가한다.")
+    @DisplayName("addDiary: Diary를 추가한다. Diary 추가 시 알림이 전송된다. ")
     @Test
     public void addDiary() throws Exception {
 
@@ -105,11 +113,25 @@ class DiaryApiControllerTest {
         final String userEmail = "example@example.com";
         final String userPw = "password";
 
+        //검증용 전문가 데이터
+        final String expertEmail = "expert@example.com";
+        final String expertPw = "password";
+
+        Expert expert = expertRepository.save(new Expert(expertEmail, expertPw));
+
+        // 알림 설정 초기화 (회원 가입 엔드포인트를 사용하지 않으므로 수동으로 실행한다.)
+        notificationService.initializeDefaultNotificationSettings(expert);
+
         //User 데이터 저장
-        User user = userRepository.save(User.builder()
+        User user = User.builder()
                 .email(userEmail)
                 .password(bCryptPasswordEncoder.encode(userPw))
-                .build());
+                .build();
+
+        // 관계 설정
+        expert.addManagedUser(user);
+
+        userRepository.save(user);
 
         //엑세스 토큰 발급
         String accessToken = tokenProvider.createToken(user, TokenProvider.ACCESS_EXPIRE);
@@ -141,6 +163,14 @@ class DiaryApiControllerTest {
         assertThat(diaries.get(0).getTitle()).isEqualTo(title);
         assertThat(diaries.get(0).getContent()).isEqualTo(content);
         assertThat(diaries.get(0).getUser().getEmail()).isEqualTo(userEmail);
+
+        //담당 전문가의 모든 알림 조회
+        List<Notification> notifications = notificationRepository.findByTargetUserEmail(expertEmail);
+
+        //알림이 정확히 전송되었는지 검토.
+        assertThat(notifications.size()).isEqualTo(1);
+        NotificationType notificationType = notifications.get(0).getNotificationType();
+        assertThat(notificationType.getName()).isEqualTo("NEW_DIARY");
     }
 
     @DisplayName("getDiariesByEmail: 사용자의 이메일을 받아 해당 사용자의 Diary를 Page로 리턴한다.")
@@ -379,8 +409,9 @@ class DiaryApiControllerTest {
 
     }
 
-    @DisplayName("addCommentToDiary: 전문가가 자신이 담당하는 사용자의 다이어리에 코멘트를 추가할 수 있다.")
+    @DisplayName("addCommentToDiary: 전문가가 자신이 담당하는 사용자의 다이어리에 코멘트를 추가할 수 있다. 해당 유저에게 알림이 정상적으로 도착한다.")
     @Test
+    @Transactional
     public void addCommentToDiary() throws Exception {
         final String url = "/api/diary/{id}/comments";
 
@@ -390,6 +421,9 @@ class DiaryApiControllerTest {
 
         Expert expert = new Expert(expertEmail, password);
         expertRepository.save(expert);
+
+        //알림 설정 수동 초기화
+        notificationService.initializeDefaultNotificationSettings(expert);
 
         final String userEmail = "test@email.com";
 
@@ -402,6 +436,9 @@ class DiaryApiControllerTest {
         expert.addManagedUser(user);
 
         userRepository.save(user);
+
+        //알림 설정 수동 초기화
+        notificationService.initializeDefaultNotificationSettings(user);
 
         Diary diary = Diary.builder()
                 .title("TestTitle")
@@ -433,6 +470,16 @@ class DiaryApiControllerTest {
         result.andDo(MockMvcResultHandlers.print())
                 .andExpect(MockMvcResultMatchers.status().isCreated());
 
+        Diary savedDiary = diaryRepository.findById(diary.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found " + diary.getId()));
+
+        assertThat(savedDiary.getComments().size()).isEqualTo(1);
+
+        // Check notifications
+        List<Notification> notifications = notificationRepository.findByTargetUserEmail(userEmail);
+        assertThat(notifications.size()).isEqualTo(1);
+        NotificationType notificationType = notifications.get(0).getNotificationType();
+        assertThat(notificationType.getName()).isEqualTo("NEW_COMMENT");
     }
 
     @Transactional
