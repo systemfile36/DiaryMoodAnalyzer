@@ -4,22 +4,25 @@ import { createWebHistory, createRouter } from "vue-router";
 import { useAuthManagerStore } from "../stores/AuthManager";
 
 import SignUp from "../components/SignUp.vue";
-import Title from "../components/Title.vue";
+
 import SignIn from "../components/SignIn.vue";
 import WriteDiary from "../components/WriteDiary.vue";
-import WrittenDiary from "../components/WrittenDiary.vue";
 import TempDiaryList from "../components/TempDiaryList.vue";
 import TempDiaryDetail from "../components/TempDiaryDetail.vue";
-import FrontPage from "../components/FrontPage.vue";
-import Chart from "../components/Chart.vue";
-import ExpertPage from "../components/ExpertPage.vue";
-import CounselWritePage from "../components/CounselWritePage.vue";
-import CounselEditPage from "../components/CounselEditPage.vue";
-import TempTitle from "../components/TempTitle.vue";
-import UserGuide from "../components/UserGuide.vue";
-
 import Authority from "../utils/Authority";
 import TempLogin from "../components/TempLogin.vue";
+import ExpertPage from "../components/ExpertPage.vue";
+import TempNotifications from "../components/TempNotifications.vue";
+
+import CounselWritePage from "../components/CounselWritePage.vue";
+import CounselEditPage from "../components/CounselEditPage.vue";
+import Chart from "../components/Chart.vue";
+
+import TempTitle from "../components/TempTitle.vue";
+import UserGuide from "../components/UserGuide.vue";
+import FrontPage from "../components/FrontPage.vue";
+import Title from "../components/Title.vue";
+
 
 //router 인스턴스 생성 
 const router = createRouter({
@@ -31,10 +34,6 @@ const router = createRouter({
         { path: '/', component: Title, meta: { requireAuth: true } },
         { path: '/diary', name: 'WriteDiary', component: WriteDiary, meta: { requireAuth: true } },
         
-        //{ path: '/writtenDiary', component: WrittenDiary, meta: { requireAuth: true }},
-
-        //{ path: '/updateDiary/:id', name: 'UpdateDiary', component: () => import('../components/UpdateDiary.vue') },
-
         { path: '/chart', component: Chart, meta: { requireAuth: true} },
         { path: '/expertPage', component: ExpertPage, meta: { requireAuth: true} },
         { path: '/counselWritePage', name: 'CounselWritePage',component: CounselWritePage, meta: { requireAuth: true} },
@@ -44,8 +43,11 @@ const router = createRouter({
         //다이어리 상세보기
         { path: '/diaries/:id', component: TempDiaryDetail, meta: {requireAuth: true}},
 
-        //전문가용 특정 사용자의 다이어리 목록 조회
+        //전문가용 담당 사용자의 다이어리 목록 조회
         { path: '/expert/diaries/:email', component: TempDiaryList, meta: { requireAuth: true, authority: Authority.EXPERT } },
+
+        //알림 상세보기 페이지 
+        { path: '/notifications', component: TempNotifications, meta: { requireAuth: true }},
 
         { path: '/tempTitle', component: TempTitle, meta: { requireAuth: true} },
         { path: '/userGuide', name: 'UserGuide', component: UserGuide, meta: { requireAuth: true} },
