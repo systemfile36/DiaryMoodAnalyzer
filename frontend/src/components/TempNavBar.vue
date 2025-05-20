@@ -28,22 +28,18 @@
                         </div>
                         <div class="dropdown-divider"></div>
                         <ul class="notification-wrapper">
-                            <li class="notification-item dropdown-item d-flex flex-column text-break">
-                                <router-link class="text-clip-2 content">
-                                        Lorem ipsum dolor sit amet,consectetur adipiscing elit. Suspendisse rutrum ex quis lorem porta, porttitor lacinia mauris placerat. Nullam fringilla consectetur mi a porttitor.
+                            <!-- v-for로 반복 -->
+                            <li class="notification-item dropdown-item d-flex flex-column text-break"
+                                v-for="(notification, i) in notifications" :key="i">
+                                <router-link to="/" class="text-clip-2 content">
+                                        {{ notification.content }}
                                 </router-link>
-                                <span class="time-ago">16시간 전</span>
-                            </li>
-                            <li class="notification-item dropdown-item d-flex flex-column text-break">
-                                <router-link class="text-clip-2 content">
-                                        Lorem ipsum dolor sit amet,consectetur adipiscing elit. Suspendisse rutrum ex quis lorem porta, porttitor lacinia mauris placerat. Nullam fringilla consectetur mi a porttitor.
-                                </router-link>
-                                <span class="time-ago">16시간 전</span>
+                                <span class="time-ago">{{ notificationStore.formatRelativeTime(notification.createdAt) }}</span>
                             </li>
                         </ul>
                         <div class="dropdown-divider"></div>
                         <div class="notification-footer d-block text-center">
-                            <router-link>
+                            <router-link to="/">
                                 전체 보기
                             </router-link>
                         </div>
@@ -98,6 +94,7 @@ import { useThemeStore } from '@/stores/ThemeManager';
 import { useNotificationManagerStore } from '@/stores/NotificationManager';
 
 import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { storeToRefs } from 'pinia';
 
 //SideBar 관리를 위함
 const sidebarStore = useSideBarStore();
@@ -107,6 +104,9 @@ const themeStore = useThemeStore();
 
 //For manage notifications
 const notificationStore = useNotificationManagerStore();
+
+//반응형을 유지하기 위해 destructuring 해서 받아옴 
+const { notifications } = storeToRefs(notificationStore)
 
 //darkmode-menu template ref
 const darkmodeMenuRef = ref(null);
@@ -149,9 +149,9 @@ function onDocumentClick(event) {
 onMounted(() => {
     document.addEventListener('click', onDocumentClick);
 
-    //for test
     //Load notifications 
     notificationStore.loadNotifications();
+    notificationStore.sortNotifications()
 })
 
 onBeforeUnmount(()=>{
