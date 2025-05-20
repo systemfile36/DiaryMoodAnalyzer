@@ -170,6 +170,9 @@ onBeforeUnmount(()=>{
 #topbar {
     position: sticky;
     top: 0;
+
+    //상단바 요소들을 항상 위에 표시하기 위해 z-index 설정
+    z-index: 1;
 }
 
 #darkmode-menu {
@@ -224,6 +227,7 @@ onBeforeUnmount(()=>{
         right: 0;
     }
 
+    //align dropdown menu to right side
     .dropdown-menu-end {
         right: 0;
         left: auto;
