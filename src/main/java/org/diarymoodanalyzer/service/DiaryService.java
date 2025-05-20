@@ -75,7 +75,7 @@ public class DiaryService {
                 .content("")
                 .values(currentUserEmail)
                 .refLink("/diaries" + savedDiary.getId())
-                .targetEmail(user.getExpert().getEmail()) // Set target
+                .targetEmail(user.getExpert() != null ? user.getExpert().getEmail() : "") // Set target
                 .build());
 
         return new AddDiaryResponse(savedDiary.getId(), currentUserEmail, dto.getTitle());
