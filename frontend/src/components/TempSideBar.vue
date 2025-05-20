@@ -35,7 +35,7 @@
                     </router-link>
                 </li>
                 <li class="nav-item">
-                    <router-link to="/" class="nav-link">
+                    <router-link to="/notifications" class="nav-link">
                         <i class="fa-solid fa-bell"></i>
                         <span>Notifications</span>
                     </router-link>
