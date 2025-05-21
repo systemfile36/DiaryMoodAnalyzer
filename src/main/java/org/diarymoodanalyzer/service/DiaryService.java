@@ -5,6 +5,7 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.diarymoodanalyzer.domain.Diary;
+import org.diarymoodanalyzer.domain.Expert;
 import org.diarymoodanalyzer.domain.User;
 import org.diarymoodanalyzer.domain.UserAuthority;
 import org.diarymoodanalyzer.dto.request.*;
@@ -43,8 +44,6 @@ public class DiaryService {
     @Transactional
     public AddDiaryResponse addDiary(AddDiaryRequest dto) throws ResponseStatusException {
 
-        //리팩터링 예정. (변경 감지를 활용함. 프록세 객체 필요없음)
-
         //현재 인증된 사용자의 정보를 가져옴
         String currentUserEmail = AuthenticationUtils.getCurrentUserEmail()
                 .orElseThrow(()->new ResponseStatusException(HttpStatus.FORBIDDEN, "There is no Authentication"));
@@ -69,22 +68,22 @@ public class DiaryService {
         //비동기로 실행되며, 분석이 완료되면 DB에 반영 될것이다.
         diaryEmotionService.submitTask(new DiaryEmotionTask(savedDiary));
 
-        //알림 전송
-        notificationService.sendNotification(currentUserEmail, NotificationRequest.builder()
-                .notificationTypeName("NEW_DIARY")
-                .content("")
-                .values(currentUserEmail)
-                .refLink("/diaries" + savedDiary.getId())
-                .targetEmail(user.getExpert() != null ? user.getExpert().getEmail() : "") // Set target
-                .build());
+        Expert expert = user.getExpert();
+
+        // Send notification when expert is not null
+        if(expert != null) {
+            //알림 전송
+            notificationService.sendNotification(currentUserEmail, NotificationRequest.builder()
+                    .notificationTypeName("NEW_DIARY")
+                    .content("")
+                    .values(currentUserEmail)
+                    .refLink("/diaries" + savedDiary.getId())
+                    .targetEmail(user.getExpert() != null ? user.getExpert().getEmail() : "") // Set target
+                    .build());
+        }
 
         return new AddDiaryResponse(savedDiary.getId(), currentUserEmail, dto.getTitle());
-
-        /*
-        프록시 객체의 속성에 접근하지 않고 단순히 diary에 참조만 넘겼다.
-        따라서 실제 DB에서 User 엔티티를 불러오는 쿼리가 실행되지 않는다.
-        이를 통해 불필요하게 엔티티 전체를 불러오는 오버헤드를 막을 수 있다.
-         */
+        
     }
 
     public GetDiaryByIdResponse getDiaryById(long id) throws ResponseStatusException {
