@@ -101,7 +101,7 @@ const commentContent = ref("");
 
 //URL 파라미터로 받은 id로 다이어리를 읽어옴
 onMounted(async ()=>{
-    diary.value = diaryManager.getDiaryById(route.params.id);
+    diary.value = await diaryManager.getDiaryById(route.params.id);
 
     if(diary.value === null){
         console.log('Invalid URL Parameter');

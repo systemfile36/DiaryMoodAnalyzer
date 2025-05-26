@@ -255,17 +255,32 @@ export const useDiaryManagerStore = defineStore('diaryManager', ()=>{
     /**
      * id를 받아서 해당 id와 일치하는 다이어리 객체를 반환함
      * 상세 보기에서 사용할 예정
-     * (해당 함수는 store 내부에서 검색한다. 따라서 사전에 로드된 다이어리 내에서만 찾을 수 있다.)
+     * 
+     * If there is no diary in `diaries`, then fetch it from server.
      * @param {number} id - 찾을 다이어리의 id
      * @returns id가 일치하는 다이어리 객체. 찾지 못하면 null
      */
-    function getDiaryById(id) {
-        const result = diaries.value.filter((value)=>{
+    async function getDiaryById(id) {
+        //Search `diaries` first
+        const result = diaries.value.find((value)=>{
             return value['id'] == id;
         });
 
-        //result가 존재하면 해당 객체, 그렇지 않으면 null
-        return result.length > 0 ? result[0] : null;
+        //If there is no diary with `id` in `diaries`, 
+        //Fetch from server 
+        if(!result) { 
+
+            return await axios.get(`${diaryUrl}/${id}`, {
+                headers: authManager.getDefaultHeaders()
+            }).then((res) => {
+                return res.data
+            }).catch((error)=> {
+                console.log(error);
+                return undefined;
+            })
+        } else {
+            return result;
+        }
     }
 
     /**
