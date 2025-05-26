@@ -49,6 +49,11 @@ public class AuthenticationUtils {
     /*
     현재 프로젝트에서는 principal == UserDetails == User 이다.
      */
+
+    /**
+     * principal == ? extends UserDetails == User
+     * @return 현재 인증된 사용자의 User 엔티티
+     */
     public static User getCurrentUser() {
         Authentication auth = getAuthentication();
         if(auth != null && auth.getPrincipal() instanceof User) {

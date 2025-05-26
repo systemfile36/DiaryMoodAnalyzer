@@ -12,12 +12,13 @@ import org.diarymoodanalyzer.domain.NotificationType;
 public class NotificationResponse extends TimeStampedResponse{
     private Long id;
     private String senderEmail;
+    // 타입 관련 정보는 그리 크지 않으므로 그대로 보낸다.
     private NotificationType notificationType;
     private String content;
     private String refLink;
     private boolean isRead;
 
-    //Constructor from DTO
+    // constructor from Entity
     public NotificationResponse(Notification notification) {
         this.id = notification.getId();
         this.senderEmail =
