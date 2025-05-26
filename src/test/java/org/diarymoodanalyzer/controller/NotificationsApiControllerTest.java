@@ -1,6 +1,7 @@
 package org.diarymoodanalyzer.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.transaction.Transactional;
 import org.diarymoodanalyzer.config.TokenAuthenticationFilter;
 import org.diarymoodanalyzer.config.jwt.TokenProvider;
 import org.diarymoodanalyzer.domain.*;
@@ -162,6 +163,7 @@ public class NotificationsApiControllerTest {
 
     @DisplayName("sendNotification: target 사용자에게 알림을 보낼 수 있다.")
     @Test
+    @Transactional //For validate target user
     void sendNotification() throws Exception {
         //Set test data
         final String url = "/api/notifications";
@@ -184,6 +186,8 @@ public class NotificationsApiControllerTest {
         sender.addManagedUser(target);
 
         userRepository.save(target);
+
+        notificationService.initializeDefaultNotificationSettings(target);
 
         //Create Token
         String accessToken = tokenProvider.createToken(sender, TokenProvider.ACCESS_EXPIRE);
@@ -503,6 +507,8 @@ public class NotificationsApiControllerTest {
         sender.addManagedUser(target);
 
         userRepository.save(target);
+
+        notificationService.initializeDefaultNotificationSettings(target);
 
         NotificationType notificationType = notificationTypeRepository.findByName(notificationTypeName)
                 .orElse(null);
