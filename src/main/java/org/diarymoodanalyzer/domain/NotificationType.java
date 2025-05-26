@@ -42,6 +42,15 @@ public class NotificationType {
     @Column(name = "default_template", nullable = false, columnDefinition = "TEXT")
     private String defaultTemplate;
 
+    /**
+     * 알림의 우선순위, 레벨을 나타내는 열거형 컬럼
+     * DB에는 열거형의 이름이 문자열로 저장된다.
+     * 기본 값은 DEFAULT
+     */
+    @Column(name = "level", nullable = false)
+    @Enumerated(EnumType.STRING) // Save Enum name as String
+    private NotificationLevel level = NotificationLevel.DEFAULT;
+
     @Builder
     public NotificationType(String name, String description, String defaultTemplate,
                             boolean defaultNotifyEnabled, boolean defaultWebEnabled, boolean defaultEmailEnabled) {
