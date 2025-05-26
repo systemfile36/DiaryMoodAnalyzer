@@ -39,7 +39,7 @@
                         </ul>
                         <div class="dropdown-divider"></div>
                         <div class="notification-footer d-block text-center">
-                            <router-link to="/">
+                            <router-link to="/notifications">
                                 전체 보기
                             </router-link>
                         </div>
@@ -146,16 +146,24 @@ function onDocumentClick(event) {
 }
 
 //마운트 시점에 따라 이벤트 추가/삭제
-onMounted(() => {
+onMounted(async () => {
     document.addEventListener('click', onDocumentClick);
 
-    //Load notifications 
-    notificationStore.loadNotifications();
-    notificationStore.sortNotifications()
+    //Load notifications (await)
+    //Sort when `loadNotifications` done successfuly (by callback)
+    await notificationStore.loadNotifications(
+        () => notificationStore.sortNotifications()
+    );
+
+    //Set polling
+    notificationStore.setPollingInterval();
 })
 
 onBeforeUnmount(()=>{
     document.removeEventListener('click', onDocumentClick);
+
+    //Clear polling
+    notificationStore.clearPollingInterval();
 })
 
 </script>
@@ -247,7 +255,8 @@ onBeforeUnmount(()=>{
         
         padding-left: 0;
 
-        min-height: 30vh;
+        min-height: 25vh;
+        max-height: 30vh;
     }
 
     //알림 요소 
