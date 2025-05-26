@@ -71,8 +71,10 @@ public class ExpertApiController {
      * 현재 인증된 전문가가 관리하는 사용자의 특정 다이어리를 반환
      * @param req - 요청 DTO. 조회할 다이어리의 id와 소유자의 이메일을 가진다.
      * @return 요청의 ownerEmail과 id에 해당하는 사용자의 단일 Diary를 반환
+     * @deprecated this function is deprecated. use `getDiaryById` instead of this
      */
     @GetMapping("/api/expert/diary")
+    @Deprecated
     public ResponseEntity<GetDiaryByIdResponse> getDiaryByIdForExpert(
             @ModelAttribute GetDiaryForExpertRequest req
     ) {
