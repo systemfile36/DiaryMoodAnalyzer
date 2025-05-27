@@ -43,17 +43,39 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
      * @param userEmail 지정할 사용자의 이메일
      * @param isRead 설정할 읽음 설정
      */
+    @Deprecated //UPDATE and DELETE query not support JOIN
     @Modifying
     @Query(value="UPDATE Notification n SET n.isRead = :isRead WHERE n.targetUser.email = :email")
     void updateIsReadByTargetUserEmail(@Param("email") String userEmail, @Param("isRead") boolean isRead);
 
     /**
+     * `userId`에 해당하는 사용자의 모든 알림의 `isRead` 컬럼을 `:isRead`로 설정한다.
+     * @param userId 지정할 사용자의 id
+     * @param isRead 설정할 컬럼 값
+     */
+    @Modifying
+    @Query(value="UPDATE Notification n SET n.isRead = :isRead WHERE n.targetUser.id = :userId")
+    void updateIsReadByTargetUserId(@Param("userId") Long userId, @Param("isRead") boolean isRead);
+    //UPDATE and DELETE query not support JOIN. So use FK instead of email
+
+
+    /**
      * userEmail에 해당하는 사용자의 모든 알림을 삭제한다.
      * @param userEmail
      */
+    @Deprecated //UPDATE and DELETE query not support JOIN
     @Modifying
     @Query(value="DELETE FROM Notification n WHERE n.targetUser.email = :email")
     void deleteAllByTargetUserEmail(@Param("email") String userEmail);
+
+    /**
+     * `userId`에 해당하는 사용자의 모든 알림을 삭제한다.
+     * @param userId 지정할 사용자의 `id`
+     */
+    @Modifying
+    @Query(value="DELETE FROM Notification n WHERE n.targetUser.id = :userId")
+    void deleteAllByTargetUserId(@Param("userId") Long userId);
+    //UPDATE and DELETE query not support JOIN. So use FK instead of email
 
     /**
      * 사용자의 알림 개수를 조회한다. 

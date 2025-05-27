@@ -114,17 +114,29 @@ public class NotificationService {
 
         String currentUserEmail = AuthenticationUtils.getCurrentUserEmail()
                 .orElseThrow(()-> new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid Authentication"));
-        
-       updateAllAsRead(currentUserEmail);
+
+        Long userId = userRepository.findIdByEmail(currentUserEmail);
+
+       updateAllAsRead(userId);
     }
 
     /**
      * userEmail에 해당하는 사용자의 모든 알림을 읽음으로 처리
      * @param userEmail
      */
+    @Deprecated
     @Transactional
     public void updateAllAsRead(String userEmail) {
         notificationRepository.updateIsReadByTargetUserEmail(userEmail, true);
+    }
+
+    /**
+     * `userId`에 해당하는 사용자의 모든 알림을 읽음으로 처리
+     * @param userId
+     */
+    @Transactional
+    public void updateAllAsRead(Long userId) {
+        notificationRepository.updateIsReadByTargetUserId(userId, true);
     }
 
     /**
@@ -179,15 +191,23 @@ public class NotificationService {
         String currentUserEmail = AuthenticationUtils.getCurrentUserEmail()
                 .orElseThrow(()->new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid Authentication"));
 
-        deleteAllNotification(currentUserEmail);
+        Long userId = userRepository.findIdByEmail(currentUserEmail);
+
+        deleteAllNotification(userId);
     }
 
     /**
      * userEmail에 해당하는 사용자의 모든 알림을 삭제한다.
      * @param userEmail 알림을 삭제할 사용자의 이메일
      */
+    @Deprecated
     public void deleteAllNotification(String userEmail) {
         notificationRepository.deleteAllByTargetUserEmail(userEmail);
+    }
+
+    @Transactional
+    public void deleteAllNotification(Long userId) {
+        notificationRepository.deleteAllByTargetUserId(userId);
     }
 
     /**
