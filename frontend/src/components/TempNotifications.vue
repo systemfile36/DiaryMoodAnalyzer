@@ -7,19 +7,19 @@
     <nav class="notification-category navbar navbar-expand px-4">
         <!--카테코리를 선택하면 `localNotifications`를 필터링한 후 동기화한다.-->
         <ul class="navbar-nav">
-            <li class="nav-item" :class="currentType == 'ALL' ? 'active' : ''" type="ALL" @click="syncNotificationsToLocal('ALL')">
+            <li class="nav-item" :class="currentType.name == 'ALL' ? 'active' : ''" type="ALL" @click="syncNotificationsToLocal('ALL')">
                 <a class="nav-link">전체</a>
             </li>
-            <li class="nav-item" :class="currentType == 'NEW_DIARY' ? 'active' : ''" type="NEW_DIARY" @click="syncNotificationsToLocal('NEW_DIARY')">
+            <li class="nav-item" :class="currentType.name == 'NEW_DIARY' ? 'active' : ''" type="NEW_DIARY" @click="syncNotificationsToLocal('NEW_DIARY')">
                 <a class="nav-link">새로운 Diary</a>
             </li>
-            <li class="nav-item" :class="currentType == 'NEW_COMMENT' ? 'active' : ''" type="NEW_COMMENT" @click="syncNotificationsToLocal('NEW_COMMENT')">
+            <li class="nav-item" :class="currentType.name == 'NEW_COMMENT' ? 'active' : ''" type="NEW_COMMENT" @click="syncNotificationsToLocal('NEW_COMMENT')">
                 <a class="nav-link">새로운 코멘트</a>
             </li>
-            <li class="nav-item" :class="currentType == 'HIGH' ? 'active' : ''" level="HIGH" @click="syncNotificationsToLocal('HIGH', false)">
+            <li class="nav-item" :class="currentType.name == 'HIGH' ? 'active' : ''" level="HIGH" @click="syncNotificationsToLocal('HIGH', false)">
                 <a class="nav-link">중요</a>
             </li>
-            <li class="nav-item" :class="currentType == 'WARNING' ? 'active' : ''" level="WARNING" @click="syncNotificationsToLocal('WARNING', false)">
+            <li class="nav-item" :class="currentType.name == 'WARNING' ? 'active' : ''" level="WARNING" @click="syncNotificationsToLocal('WARNING', false)">
                 <a class="nav-link">경고</a>
             </li>
         </ul>
@@ -38,11 +38,11 @@
             </button>
         </div>
         <button type="button" class="btn btn-outline-primary"
-            @click="notificationStore.updateAllAsRead">
+            @click="onClickReadAll">
             전체 읽음
         </button>
         <button type="button" class="btn btn-outline-danger"
-            @click="notificationStore.deleteAllNotifications">
+            @click="onClickReadAll">
             전체 삭제
         </button>
     </div>
@@ -70,7 +70,7 @@
 </div>
 </template>
 <script setup>
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, reactive, ref, watch } from 'vue';
 import { useNotificationManagerStore } from '../stores/NotificationManager';
 import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
@@ -85,10 +85,10 @@ const { notifications } = storeToRefs(notificationStore)
 //Local notifications. use for filtering or categorizing
 const localNotifications = ref(null);
 
-//Current selected category; Default is "ALL"
-const currentType = ref("ALL");
+// Store current selected category name and isType
+const currentType = ref({name: 'ALL', isType: true});
 
-//Array contains the id from currently selected notification
+//Array contains the id from current selected notification
 //Use `v-model` binding. See following link https://vuejs.org/guide/essentials/forms.html#checkbox
 const checkedNotificationIds = ref([]);
 
@@ -102,7 +102,7 @@ const router = useRouter();
 // watch `notifications` reactive for sync with `localNotifications`
 //UI 표시용과, Pinia 저장소의 알림 정보를 동기화한다. 
 watch(notifications, async () => {
-    await syncNotificationsToLocal(currentType.value);
+    await syncNotificationsToLocal(currentType.value.name, currentType.value.isType);
 })
 
 onMounted(async ()=>{
@@ -113,7 +113,7 @@ onMounted(async ()=>{
         () => notificationStore.sortNotifications()
     );
 
-    await syncNotificationsToLocal(currentType.value);
+    await syncNotificationsToLocal(currentType.value.name, currentType.value.isType);
 
     //Turn on notification polling
     notificationStore.setPollingInterval();
@@ -143,7 +143,10 @@ async function syncNotificationsToLocal(category_name = "ALL", isType = true) {
         localNotifications.value = [...notifications.value];
 
         //Set current selected category on local reactive
-        currentType.value = category_name;
+        currentType.value = {
+            name: category_name,
+            isType: isType
+        }
 
     } else {
         //when `isType` flag is true, return `getNotificationByType` else `getNotificationByLevel`
@@ -152,7 +155,10 @@ async function syncNotificationsToLocal(category_name = "ALL", isType = true) {
                  : notificationStore.getNotificationByLevel(category_name);
 
         //Set current selected category on local reactive
-        currentType.value = category_name;
+        currentType.value = {
+            name: category_name,
+            isType: isType
+        }
     }
 }
 
@@ -165,12 +171,26 @@ function onChangeCheckbox() {
 
 async function onClickRead() {
     await notificationStore.updateAsReads(checkedNotificationIds.value);
-    //Reload page
-    router.go(0);
+    //Reload
+    await syncNotificationsToLocal(currentType.value.name, currentType.value.isType);
 }
 
 async function onClickDelete() {
     await notificationStore.deleteNotifications(checkedNotificationIds.value);
+    //Reload
+    await syncNotificationsToLocal(currentType.value.name, currentType.value.isType);
+}
+
+async function onClickReadAll() {
+    await notificationStore.updateAllAsRead();
+    //Reload
+    await syncNotificationsToLocal(currentType.value.name, currentType.value.isType);
+}
+
+async function onClickDeleteAll() {
+    await notificationStore.deleteAllNotifications();
+    //Reload
+    await syncNotificationsToLocal(currentType.value.name, currentType.value.isType);
 }
 
  /**
@@ -274,8 +294,10 @@ function getTruncated(content, maxLength = 140) {
         flex-grow: 1;
 
         //diable when `read` is true
+        //change color and opacity
         &.disabled {
             color: var(--bs-secondary-color);
+            opacity: 0.6;
         }
 
         * {
