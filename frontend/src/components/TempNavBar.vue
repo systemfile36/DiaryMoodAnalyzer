@@ -14,7 +14,7 @@
                     :aria-expanded="isNotiMenuExpanded.toString()"
                     @click="toggleNotifiMenu">
                         <div class="notify-dot"
-                        :class="notificationStore.notifications.length > 0 ? 'd-block' : 'd-none'"></div>
+                        :class="notificationStore.unReadCount > 0 ? 'd-block' : 'd-none'"></div>
                         <i class="fa-solid fa-bell"></i>
                     </button>
                     <div class="dropdown-menu dropdown-menu-end"
@@ -29,13 +29,16 @@
                         <div class="dropdown-divider"></div>
                         <ul class="notification-wrapper">
                             <!-- v-for로 반복 -->
-                            <li class="notification-item dropdown-item d-flex flex-column text-break"
-                                v-for="(notification, i) in notifications" :key="i">
-                                <router-link to="/" class="text-clip-2 content">
-                                        {{ notification.content }}
-                                </router-link>
-                                <span class="time-ago">{{ notificationStore.formatRelativeTime(notification.createdAt) }}</span>
-                            </li>
+                             <div v-for="(notification, i) in notifications" :key="i">
+                                <li class="notification-item dropdown-item d-flex flex-column text-break"
+                                    :class="notification.read ? 'disabled' : ''">
+                                    <router-link :to="notification.refLink ? notification.refLink : ''" class="text-clip-2 content">
+                                            {{ getTruncated(notification.content, 35) }}
+                                    </router-link>
+                                    <span class="time-ago">{{ notificationStore.formatRelativeTime(notification.createdAt) }}</span>
+                                </li>
+                             </div>
+
                         </ul>
                         <div class="dropdown-divider"></div>
                         <div class="notification-footer d-block text-center">
@@ -166,6 +169,20 @@ onBeforeUnmount(()=>{
     notificationStore.clearPollingInterval();
 })
 
+ /**
+  * maxLength 만큼 자른 값을 반환한다. 
+  * 만약 길이가 maxLength보다 작다면 그대로 리턴한다.
+  * @param {string} content 
+  * @param {number} maxLength 최대 길이. 기본값 140
+  * @returns {string}
+  */
+function getTruncated(content, maxLength = 140) {
+
+    //길이가 최대 길이를 넘으면 잘라서, 그렇지 않으면 그냥 리턴
+    return content.length > maxLength ? 
+        content.substring(0, maxLength) + '...' : content;
+}
+
 </script>
 <style lang="scss">
 @import '../style.scss';
@@ -265,6 +282,13 @@ onBeforeUnmount(()=>{
 
         //.dropdown-item의 white-space: nowrap; 을 덮어쓴다.
         white-space: normal;
+
+        //diable when `read` is true
+        //change color and opacity
+        &.disabled {
+            color: var(--bs-secondary-color);
+            opacity: 0.6;
+        }
 
         //알림 본문
         .content {

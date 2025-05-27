@@ -23,6 +23,10 @@ export const useNotificationManagerStore = defineStore('notificationManager', ()
     let isThrottled = false;
     const THROTTLE_TIME = 5000;
 
+    //`loadNotificationSetting`의 최소 호출 간격을 고정하기 위한 변수 
+    let isThrottled_setting = false;
+    const THROTTLE_TIME_SETTING = 10000;
+
     //create instance with baseURL and timeout
     const axiosInstance = axios.create({
         baseURL: BASE_URL,
@@ -31,6 +35,9 @@ export const useNotificationManagerStore = defineStore('notificationManager', ()
 
     //알림들이 저장되는 반응형 변수 
     const notifications = ref([]);
+
+    //읽지 않은 알림의 개수를 저장하는 반응형 변수 
+    const unReadCount = ref(0);
 
     //현재 인증된 유저의 알림 설정 반응형 변수
     const notificationSettings = ref([]);
@@ -67,6 +74,11 @@ export const useNotificationManagerStore = defineStore('notificationManager', ()
                 
                 console.log(res.data);
 
+                //Counting unread notifications
+                notifications.value.forEach((value) => {
+                    if(!value['read']) unReadCount.value++;
+                })
+
                 onSuccess();
             }).catch(err => {
                 console.log(err);
@@ -91,6 +103,12 @@ export const useNotificationManagerStore = defineStore('notificationManager', ()
         onSuccess=()=>{console.log("Successfully load notification settings")},
         onFailure=()=>{console.log("Fail on load notification settings")}
     ){
+
+        if(isThrottled_setting) return;
+
+        // Set throttle flag; now running 
+        isThrottled_setting = true;
+
         if(await authManager.checkTokens()) {
             await axiosInstance.get('/settings', {
                 headers: authManager.getDefaultHeaders()
@@ -108,6 +126,11 @@ export const useNotificationManagerStore = defineStore('notificationManager', ()
         } else {
             onFailure();
         }
+
+        //Reset throttle flag at `THROTTLE_TIME_SETTING`ms later
+        setTimeout(() => {
+            isThrottled_setting = true;
+        }, THROTTLE_TIME_SETTING)
     }
 
     /**
@@ -335,6 +358,7 @@ export const useNotificationManagerStore = defineStore('notificationManager', ()
     return {
         notifications,
         notificationSettings,
+        unReadCount,
         loadNotifications,
         loadNotificationSetting,
         getNotificationByType,
