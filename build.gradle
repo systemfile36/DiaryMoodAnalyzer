@@ -26,6 +26,11 @@ dependencies {
     //WebClient 사용하기 위해 WebFlux 의존성 추가
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
+    // JavaMail
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+    // Redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
     runtimeOnly 'com.h2database:h2' //임베디드 인메모리 데이터베이스
     compileOnly 'org.projectlombok:lombok' //코드 단순화를 위한 롬복
