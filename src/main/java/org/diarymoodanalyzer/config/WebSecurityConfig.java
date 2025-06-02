@@ -57,7 +57,12 @@ public class WebSecurityConfig {
                 //UsernamePasswordAuthenticationFilter 앞에 필터 추가함 (실질적으로 맨 앞에 위치)
                 .addFilterBefore(new TokenAuthenticationFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests()
-                .requestMatchers("/api/auth/**", "/api/token").permitAll() //로그인/회원가입 엔드 포인트는 인증 불필요. 누구나 접근 O
+                .requestMatchers(
+                        "/api/auth/**", // auth endpoint like signUp, login/logout is allowed by anyone
+                        "/api/token", // token provide endpoint is allowed by anyone
+                        "/api/email/send/verification-code", // email verification endpoint is allowed by anyone
+                        "/api/email/verify" // email verification endpoint is allowed by anyone
+                ).permitAll() //로그인/회원가입 엔드 포인트는 인증 불필요. 누구나 접근 O
                 .anyRequest().authenticated() //다른 모든 요청은 인증이 필요
                 .and()
                 .build();
