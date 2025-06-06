@@ -8,8 +8,8 @@
                     <img src="../assets/images/default_profile_image.png" alt="profile-image">
                 </router-link>
                 <div class="user-info">
-                    <span class="user-name">Default</span>
-                    <span class="user-email">{{ authManager.userName }}</span>
+                    <span class="user-name">{{ authManager.role }}</span>
+                    <span class="user-email" :title="authManager.userName">{{ authManager.userName }}</span>
                 </div>
             </div>
         </header>
@@ -134,11 +134,14 @@ function logoutHandler() {
             }   
 
             .user-info {
-
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 justify-content: start;
+
+                // 이메일의 길이가 길 경우
+                // Limit max-width
+                max-width: 60%;
 
                 color: var(	--bs-light-text-emphasis);
 
@@ -157,16 +160,8 @@ function logoutHandler() {
                     text-overflow: ellipsis;
                 }
             }
-
-
-           
         }
-
-
-
-
     }
-
     //사이드바 메뉴
     nav {
         .nav-item {
@@ -208,7 +203,6 @@ function logoutHandler() {
 
         }
     }
-
     //사이드바 하단
     .sidebar-bottom {
         .nav-item {
@@ -250,7 +244,6 @@ function logoutHandler() {
                 color: var(--bs-secondary-color);
             }
         }
-
     }
 }
 </style>
