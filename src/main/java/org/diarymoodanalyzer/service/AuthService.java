@@ -41,6 +41,8 @@ public class AuthService {
 
     private final NotificationService notificationService;
 
+    private final EmailService emailService;
+
     @Transactional
     public LoginResponse login(LoginRequest req) throws IllegalArgumentException {
 
@@ -75,11 +77,16 @@ public class AuthService {
     @Transactional
     public void signUp(SignUpRequest req) throws IllegalArgumentException, DuplicateKeyException {
 
-        //이메일 형식이 유효한 지 체크
+        // Validate format of Email by Regex
         if(!EmailValidator.isValidEmail(req.getEmail()))
             throw new IllegalArgumentException("Invalid email");
 
-        //이메일이 DB에 이미 존재하는지 체크
+        // Check email is verified
+        if(!emailService.isVerified(req.getEmail())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Email is not verified");
+        }
+
+        // Check conflict of email
         if(userRepository.existsByEmail(req.getEmail())) {
             throw new DuplicateKeyException("Already exists email : " + req.getEmail());
         }
@@ -100,7 +107,7 @@ public class AuthService {
             userRepository.save(user);
         }
 
-        // 알림 설정을 기본으로 초기화
+        // Initialize notification setting by default
         notificationService.initializeDefaultNotificationSettings(req.getEmail());
     }
 

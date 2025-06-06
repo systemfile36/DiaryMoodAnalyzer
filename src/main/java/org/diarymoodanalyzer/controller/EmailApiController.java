@@ -32,6 +32,11 @@ public class EmailApiController {
         return ResponseEntity.ok().build();
     }
 
+    /**
+     * Verify <code>req.getEmail()</code> by 6-digit <code>req.getCode()</code>
+     * @param req Request DTO with <code>email</code> and <code>code</code>
+     * @return ResponseEntity with Response DTO <code>VerifyCodeResponse</code>
+     */
     @PostMapping("/verify")
     public ResponseEntity<VerifyCodeResponse> verifyCode(
             @RequestBody VerifyCodeRequest req
@@ -40,10 +45,13 @@ public class EmailApiController {
         try {
             boolean result = emailService.verifyCode(req.getEmail(), req.getCode());
             response = new VerifyCodeResponse(result, false);
+
+            return ResponseEntity.ok(response);
         } catch (EmailService.FailCountExceedException e) {
             // When exceed fail count, set `isFailCountExceed` flag as false
             response = new VerifyCodeResponse(false, true);
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
-        return ResponseEntity.ok(response);
     }
 }
