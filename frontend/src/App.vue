@@ -41,6 +41,9 @@ themeManager.initTheme();
   <div v-else>
     <!-- 인증 되지 않았을 때 -->
     <router-view/>
+
+    <!--Add Modal for signup and login-->
+    <Modal/>
   </div>
 
 </template>

@@ -14,6 +14,10 @@ export const useAuthManagerStore = defineStore('authManager', () => {
     const signUpUrl = '/api/auth/signup'
     const refreshTokenUrl = '/api/token'
     const expertPrefix = '/api/expert'
+
+    const SEND_VERIFICATION_URL = '/api/email/send/verification-code'
+    const VERIFY_CODE_URL = '/api/email/verify'
+
     const TOKEN_PREFIX = 'Bearer '
 
     //store에서 router를 사용하기 위함
@@ -34,8 +38,10 @@ export const useAuthManagerStore = defineStore('authManager', () => {
     /**
      * 
      * @param {{email: string, password: string}} credentials 
+     * @param {(err)=>void} onFailure handler will be executed when failure
      */
-    async function login(credentials) {
+    async function login(credentials, 
+        onFailure=(err)=>{console.log("Fail on login : " + err)}) {
         await axios.post(loginUrl, credentials, 
             {
                 headers: getDefaultHeaders()
@@ -51,25 +57,91 @@ export const useAuthManagerStore = defineStore('authManager', () => {
 
             router.push(redirectUrl);
         }).catch((error) => {
-            console.log(error);
+            onFailure(error);
+        })
+    }
+
+    /**
+     * Send verification code to `email`
+     * @param {string} email email will receive verification code
+     * @param {()=>void} onSuccess handler will be executed when success
+     * @param {()=>void} onFailure handler will be executed when failure
+     */
+    async function sendVerificationCode(email, 
+        onSuccess=()=>{console.log("Successfully send verification code")}, 
+        onFailure=()=>{console.log("Fail on send verification code")}
+    ) {
+        await axios.post(SEND_VERIFICATION_URL, {
+            email: email
+        }, {
+            headers: getDefaultHeaders()
+        }).then((res) => {
+            onSuccess();
+        }).catch((err) => {
+            console.log(err);
+            onFailure();
+        })
+    }
+
+    /**
+     * Verify email verification code. 
+     * @param {string} email email to verify
+     * @param {string} code verification code that received
+     * @param {()=>void} onSuccess handler will be executed when success
+     * @param {()=>void} onFailure handler will be executed when failure
+     * @param {()=>void} onFailCountExceed handler will be executed when fail count exceed
+     */
+    async function verifyCode(email, code, 
+        onSuccess=()=>{console.log("Successfully verified email")}, 
+        onFailure=()=>{console.log("Fail on verify email")}, 
+        onFailCountExceed=()=>{console.log("Fail count exceed. re-send verification code")}
+    ) {
+        await axios.post(VERIFY_CODE_URL, {
+            email: email,
+            code: code
+        }, {
+            headers: getDefaultHeaders()
+        }).then((res) => {
+            console.log(res);
+
+            if(res.data['verified']) {
+                onSuccess();
+            } else {
+                onFailure();
+            }
+        }).catch((err) => {
+            const resBody = err.response.data;
+
+            if(resBody['isFailCountExceed']) {
+                onFailCountExceed();
+            } else {
+                onFailure();
+            }
         })
     }
 
     /**
      * 회원가입 요청을 보낸다. authority는 포함하지 않으면 `ROLE_USER`로 작동한다.
      * @param {{email: string, password: string, authority: string}} info 
+     * @param {(res)=>void} onSuccess handler will be executed when success
+     * @param {(err)=>void} onFailure handler will be executed when failure
      */
-    async function signUp(info) {
+    async function signUp(info, 
+        onSuccess=(_)=>{console.log("Successfully send signUp request")}, 
+        onFailure=(err)=>{console.log("Fail on send signUp request : " + err)}
+    ) {
         await axios.post(signUpUrl, info, 
             {
                 headers: getDefaultHeaders()
             }
         ).then((res)=>{
             console.log(res.status);
-            alert('회원가입에 성공하였습니다.');
-            router.push('/');
+            // alert('회원가입에 성공하였습니다.');
+            // router.push('/');
+            onSuccess(res);
         }).catch((error)=>{
             console.log(error);
+            onFailure(error);
         })
     }
 
@@ -232,6 +304,8 @@ export const useAuthManagerStore = defineStore('authManager', () => {
         logout,
         signUp,
         refreshAccessToken,
+        sendVerificationCode,
+        verifyCode,
         isAccessTokenExpired,
         isRefreshTokenExpired,
         checkTokens,
