@@ -15,13 +15,23 @@ repositories {
 
 //필요한 기능들의 의존성 목록
 dependencies {
-    //기본 MVC 프레임워크
+    // Default Spring MVC framework
     implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    // For using SLF4J + Logback
+    implementation 'org.springframework.boot:spring-boot-starter-logging'
+
+    // For using AOP Logging
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
+
+    // Test framework
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa' //스프링 데이터 JPA
+    // Spring Data JPA
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
-    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf' //thymeleaf 템플릿 엔진
+    // Thymeleaf template engine
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
     //WebClient 사용하기 위해 WebFlux 의존성 추가
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
@@ -32,14 +42,14 @@ dependencies {
     // Redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
-    runtimeOnly 'com.h2database:h2' //임베디드 인메모리 데이터베이스
-    compileOnly 'org.projectlombok:lombok' //코드 단순화를 위한 롬복
+    runtimeOnly 'com.h2database:h2' //임베디드 인메모리 데이터베이스 H2
+    compileOnly 'org.projectlombok:lombok' //코드 단순화를 위한 Lombok
     annotationProcessor 'org.projectlombok:lombok'
 
     implementation 'org.springframework.boot:spring-boot-starter-security' //스프링 시큐리티
 
-    implementation 'io.jsonwebtoken:jjwt:0.9.1' //자바용 JWT 라이브러리 
-    implementation 'javax.xml.bind:jaxb-api:2.3.1' //XML과 자바 매핑 자동화
+    implementation 'io.jsonwebtoken:jjwt:0.9.1' //자바용 JWT 라이브러리; For using JWT
+    implementation 'javax.xml.bind:jaxb-api:2.3.1' //XML과 자바 매핑 자동화; For using objectMapper
 }
 
 test {
