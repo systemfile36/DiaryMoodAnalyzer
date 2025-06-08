@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.diarymoodanalyzer.dto.ai.request.VadScore;
+import org.diarymoodanalyzer.dto.ai.response.DiaryAnalyzeResponse;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,6 +48,25 @@ public class Diary extends BaseEntity { //공통 컬럼 상속
      */
     @Column(name = "depression_level")
     private Byte depressionLevel = -1;
+
+    /**
+     * VAD score. Will be set by {@link org.diarymoodanalyzer.service.DiaryAnalyzeService DiaryAnalyzeService} asynchronously
+     */
+    @Embedded
+    private VadScore vadScore;
+
+    /**
+     * Depression score. Will be set by {@link org.diarymoodanalyzer.service.DiaryAnalyzeService DiaryAnalyzeService} asynchronously
+     */
+    @Column(name = "depression_score")
+    private int depressionScore;
+
+    /**
+     * Result of PHQ classification. Set type to String temporary.
+     * Will be set by {@link org.diarymoodanalyzer.service.DiaryAnalyzeService DiaryAnalyzeService} asynchronously
+     */
+    @Column(name = "classification")
+    private String classification;
 
     /**
      * Diary에 달린 코멘트들.
@@ -90,5 +111,17 @@ public class Diary extends BaseEntity { //공통 컬럼 상속
             this.setDepressionLevel(DepressionLevel.ERROR);
         }
 
+    }
+
+    /**
+     * Set result of analyze from {@link DiaryAnalyzeResponse DiaryAnalyzeResponse}.
+     * <br/>
+     * Used by {@link org.diarymoodanalyzer.service.DiaryAnalyzeService DiaryAnalyzeService}.
+     * @param dto DTO
+     */
+    public void setAnalyzeResult(DiaryAnalyzeResponse dto) {
+        this.vadScore = dto.getVad_score();
+        this.depressionScore = dto.getDepression_score();
+        this.classification = dto.getClassification();
     }
 }
