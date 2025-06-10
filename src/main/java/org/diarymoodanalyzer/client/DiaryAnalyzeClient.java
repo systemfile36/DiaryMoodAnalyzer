@@ -1,6 +1,6 @@
 package org.diarymoodanalyzer.client;
 
-import org.diarymoodanalyzer.config.DiaryEmotionProperties;
+import org.diarymoodanalyzer.config.DiaryAnalyzeProperties;
 import org.diarymoodanalyzer.dto.ai.request.DiaryAnalyzeRequest;
 import org.diarymoodanalyzer.dto.ai.response.DiaryAnalyzeResponse;
 import org.springframework.http.HttpHeaders;
@@ -18,16 +18,16 @@ public class DiaryAnalyzeClient {
     private final WebClient webClient;
 
     /**
-     * Inject {@link WebClient WebClient} and {@link DiaryEmotionProperties DiaryEmotionProperties} from Spring container <br/>
+     * Inject {@link WebClient WebClient} and {@link DiaryAnalyzeProperties DiaryEmotionProperties} from Spring container <br/>
      * Initialize {@link WebClient WebClient} by set base url and headers.
      * @param webClientBuilder Builder of {@link WebClient WebClient}. Will be injected by Spring container
-     * @param diaryEmotionProperties Properties contain URL of AI server. Will be injected by Spring container
+     * @param diaryAnalyzeProperties Properties contain URL of AI server. Will be injected by Spring container
      */
-    public DiaryAnalyzeClient(WebClient.Builder webClientBuilder, DiaryEmotionProperties diaryEmotionProperties) {
+    public DiaryAnalyzeClient(WebClient.Builder webClientBuilder, DiaryAnalyzeProperties diaryAnalyzeProperties) {
 
         // Use property for set base url of AI server
         this.webClient = webClientBuilder
-                .baseUrl(diaryEmotionProperties.getUrl())
+                .baseUrl(diaryAnalyzeProperties.getUrl())
                 // Default header
                 .defaultHeaders(httpHeaders -> {
                     httpHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);

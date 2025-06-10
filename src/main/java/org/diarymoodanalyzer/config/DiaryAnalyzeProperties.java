@@ -6,13 +6,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 /**
- * Diary 감정 분석 서버와 통신하기 위한 설정 파일
+ * Configuration file for {@link org.diarymoodanalyzer.service.DiaryAnalyzeService DiaryAnalyzeService}.
  */
 @Component
 @ConfigurationProperties(prefix = "diary-emotion")
 @Getter
 @Setter
-public class DiaryEmotionProperties {
-
+public class DiaryAnalyzeProperties {
     private String url;
 }
