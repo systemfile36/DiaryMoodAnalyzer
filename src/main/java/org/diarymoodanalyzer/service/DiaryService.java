@@ -37,7 +37,9 @@ public class DiaryService {
 
     private final ExpertRepository expertRepository;
 
-    private final DiaryEmotionService diaryEmotionService;
+//    private final DiaryEmotionService diaryEmotionService;
+
+    private final DiaryAnalyzeService diaryAnalyzeService;
 
     private final NotificationService notificationService;
 
@@ -70,7 +72,11 @@ public class DiaryService {
 
         //AI 서버에 분석을 요청한다.
         //비동기로 실행되며, 분석이 완료되면 DB에 반영 될것이다.
-        diaryEmotionService.submitTask(new DiaryEmotionTask(savedDiary));
+//        diaryEmotionService.submitTask(new DiaryEmotionTask(savedDiary));
+
+        // Send analyze request to AI server
+        // Will be applied when task completed
+        diaryAnalyzeService.submitTask(new DiaryAnalyzeTask(savedDiary));
 
         Expert expert = user.getExpert();
 

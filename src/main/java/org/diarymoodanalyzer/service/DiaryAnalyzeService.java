@@ -1,7 +1,10 @@
 package org.diarymoodanalyzer.service;
 
+import jakarta.transaction.Transactional;
 import org.diarymoodanalyzer.client.DiaryAnalyzeClient;
 import org.diarymoodanalyzer.client.DiaryEmotionClient;
+import org.diarymoodanalyzer.domain.DepressionLevel;
+import org.diarymoodanalyzer.domain.Diary;
 import org.diarymoodanalyzer.dto.ai.request.DiaryAnalyzeRequest;
 import org.diarymoodanalyzer.dto.ai.request.DiaryEmotionRequest;
 import org.diarymoodanalyzer.dto.ai.response.DiaryAnalyzeResponse;
@@ -17,7 +20,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 /**
  * Service class for analyze {@link org.diarymoodanalyzer.domain.Diary Diary} asynchronously.
  * <br/>
- * Limit request rate by scheduled polling to reduce load on the AI server
+ * Limit request rate by scheduled polling to reduce load on the AI server. <br/>
+ * This class created for replace <code>DiaryEmotionService</code> (already deprecated)
  */
 @Service
 public class DiaryAnalyzeService {
@@ -27,6 +31,11 @@ public class DiaryAnalyzeService {
 
     private final DiaryRepository diaryRepository;
 
+    /**
+     * Max retry count of task
+     */
+    private static final int maxRetryCount = 3;
+
     // Will be injected by Spring container
     public DiaryAnalyzeService(DiaryAnalyzeClient client, DiaryRepository diaryRepository) {
         this.client = client;
@@ -35,7 +44,7 @@ public class DiaryAnalyzeService {
 
     /**
      * Offer task to queue.
-     * @param task 요청할 작업
+     * @param task task to offer
      */
     public void submitTask(DiaryAnalyzeTask task) {
         if(!taskQueue.offer(task)) {
@@ -45,10 +54,11 @@ public class DiaryAnalyzeService {
     }
 
     /**
-     * Process task from queue asynchronously. <br/>
-     * Using {@link Scheduled Scheduled} with <code>fixedRate</code> to limit request rate.
+     * Get task from queue and process it asynchronously.
+     * <br/>
+     * Using {@link Scheduled Scheduled} with <code>fixedDelay</code> to limit request rate.
      */
-    @Scheduled(fixedRate = 1000)
+    @Scheduled(fixedDelay = 200) // Use fixed delay to limit request rate
     public void processQueue() {
         // pop from queue
         DiaryAnalyzeTask task = taskQueue.poll();
@@ -60,8 +70,10 @@ public class DiaryAnalyzeService {
     }
 
     /**
-     * 작업을 비동기로 처리한다. 예외 발생 시 handleTaskFailure를 호출하여 복구를 시도한다.
-     * @param task 요청 작업
+     * Process task asynchronously.
+     * <br/>
+     * If the task throw exception, try recovery by calling <code>handleTaskFailure</code>
+     * @param task task to process
      */
     @Async
     public void processTask(DiaryAnalyzeTask task) {
@@ -69,21 +81,71 @@ public class DiaryAnalyzeService {
             // Will be replaced to Logger
             System.out.println("Processing : " + task);
 
-            //요청 DTO를 구성한다.
+            // Create request DTO instance
             DiaryAnalyzeRequest req = new DiaryAnalyzeRequest();
             req.setDiaryContent(task.getContent());
 
-            //client를 통해 AI 서버에 요청을 보낸다.
+            // Send request using WebClient
             DiaryAnalyzeResponse res = client.sendRequest(req);
 
-            //결과를 저장한다.
+            // Apply result to DB by calling `saveResult`
             saveResult(task, res);
 
         } catch(Exception e) {
-            //오류 발생 시 복구를 시도한다.
+            // Try to recovery
             handleTaskFailure(task, e);
         }
     }
 
+    /**
+     * Increase retry count and submit task again.<br/>
+     * If retry count of the task exceed max value, drop it and save as failure.
+     * @param task task to be saved
+     * @param e Exception thrown during the task
+     */
+    private void handleTaskFailure(DiaryAnalyzeTask task, Exception e) {
+        // Increase retry count
+        task.incrementRetryCount();
 
+        // If retry count of the task does not exceed max value,
+        // insert it to queue again
+        if(!task.isRetryCountExceeded(maxRetryCount)) {
+            submitTask(task);
+        } else {
+            // Will be replaced to Logger
+            System.err.println(
+                    "Task exceeded max retry count : " + task + "\n" + e);
+
+            // Save as failure
+            saveResultAsFailure(task);
+        }
+    }
+
+    /**
+     * Save result of analyze to DB
+     * @param task task to save
+     * @param res Response DTO from AI server
+     */
+    @Transactional
+    private void saveResult(DiaryAnalyzeTask task, DiaryAnalyzeResponse res) {
+        Diary diary = diaryRepository.findById(task.getDiaryId())
+                .orElseThrow(()->new IllegalArgumentException("There is no diary : " + task.getDiaryId()));
+
+        // Update entity and save (dirty checking)
+        diary.setAnalyzeResult(res);
+        diaryRepository.save(diary);
+    }
+
+    /**
+     * Save result of analyze to DB as failure.
+     * @param task task to save
+     */
+    private void saveResultAsFailure(DiaryAnalyzeTask task) {
+        Diary diary = diaryRepository.findById(task.getDiaryId())
+                .orElseThrow(()->new IllegalArgumentException("There is no diary : " + task.getDiaryId()));
+
+        // Update entity and save (dirty checking)
+        diary.setAnalyzeAsFail();
+        diaryRepository.save(diary);
+    }
 }

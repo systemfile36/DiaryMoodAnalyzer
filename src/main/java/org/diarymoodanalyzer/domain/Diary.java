@@ -124,4 +124,25 @@ public class Diary extends BaseEntity { //공통 컬럼 상속
         this.depressionScore = dto.getDepression_score();
         this.classification = dto.getClassification();
     }
+
+    /**
+     * Set result of analyze to failure.
+     * <br/>
+     * This method sets fields related to analyze to failure-indicate values like -1, null, or an empty string
+     */
+    public void setAnalyzeAsFail() {
+        this.vadScore = null;
+        this.depressionScore = -1;
+        this.classification = null;
+    }
+
+    /**
+     * Check analyze was successful.
+     * <br/>
+     * This method check fields related to analyze has valid value
+     * @return Return true if result of analyze has valid value, otherwise false
+     */
+    public boolean isAnalyzeSuccess() {
+        return this.vadScore != null || this.depressionScore != -1 || this.classification != null;
+    }
 }
