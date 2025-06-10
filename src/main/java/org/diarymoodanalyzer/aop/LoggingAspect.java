@@ -50,7 +50,7 @@ public class LoggingAspect {
             return result;
         } catch (Exception e) {
             // Log Exception and propagation it
-            logger.error("Exception in {}", methodName, e);
+            logger.debug("Exception in {}", methodName, e);
             throw e;
         }
     }

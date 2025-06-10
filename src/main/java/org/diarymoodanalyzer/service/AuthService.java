@@ -9,6 +9,7 @@ import org.diarymoodanalyzer.domain.UserAuthority;
 import org.diarymoodanalyzer.dto.request.LoginRequest;
 import org.diarymoodanalyzer.dto.request.SignUpRequest;
 import org.diarymoodanalyzer.dto.response.LoginResponse;
+import org.diarymoodanalyzer.exception.*;
 import org.diarymoodanalyzer.repository.ExpertRepository;
 import org.diarymoodanalyzer.repository.UserRepository;
 import org.diarymoodanalyzer.util.AuthenticationUtils;
@@ -16,6 +17,7 @@ import org.diarymoodanalyzer.util.EmailValidator;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -43,62 +45,81 @@ public class AuthService {
 
     private final EmailService emailService;
 
+    /**
+     * Login.
+     * <br/>
+     * Create access token and update refresh token when <code>email</code> and <code>password</code> is valid.
+     * @param req Request DTO indicates authentication info
+     * @return Response DTO contain access token and refresh token
+     */
     @Transactional
-    public LoginResponse login(LoginRequest req) throws IllegalArgumentException {
+    public LoginResponse login(LoginRequest req) {
 
-        //이메일을 기반으로 사용자 정보를 받아옴. 없는 이메일이면 예외 발생
-        UserDetails userDetails = userDetailService.loadUserByUsername(req.getEmail());
+        // Throw exception when User not found with email
+        UserDetails userDetails;
+        try {
+            userDetails = userDetailService.loadUserByUsername(req.getEmail()); // Query 0
+        } catch(UsernameNotFoundException e) {
+            throw new NotFoundException(e.getMessage());
+        }
 
-        //요청의 비밀번호와 저장된 사용자의 비밀번호 일치 여부 비교
+        // Check password
         if(bCryptPasswordEncoder.matches(req.getPassword(), userDetails.getPassword())) {
 
-            //UserDetails 를 User 로 형변환 (원래 User 엔티티였기에 가능)
+            // Cast UserDetails to User. (UserDetails loaded from UserDetailService is instance of User)
             User user = (User)userDetails;
 
-            //인증되면 토큰 생성
+            // Create access token and refresh token
             String accessToken = tokenProvider.createToken(user, TokenProvider.ACCESS_EXPIRE);
             String refreshToken = tokenProvider.createToken(user, TokenProvider.REFRESH_EXPIRE);
 
-            //리프레쉬 토큰을 저장하거나, 업데이트함
-            refreshTokenService.saveOrUpdate(user.getId(), refreshToken);
+            // Save or update refresh token
+            refreshTokenService.saveOrUpdate(user.getId(), refreshToken); // Query 1
 
-            //응답 DTO 구성
+            // Create instance of DTO
             LoginResponse response = new LoginResponse();
             response.setAccessToken(accessToken);
             response.setRefreshToken(refreshToken);
 
             return response;
         } else {
-            //비밀 번호가 불일치하면 예외 던짐
-            throw new IllegalArgumentException("invalid password");
+            // Throw exception when password not matches
+            throw new InvalidPasswordException("Invalid password: " + req.getEmail());
         }
+
+        // Total Query: [1, 2]
     }
 
+    /**
+     * Sign up. <br/>
+     * Create proper entity and save it.
+     * And initialize notification setting by default
+     * @param req Request DTO contain info about signup
+     */
     @Transactional
-    public void signUp(SignUpRequest req) throws IllegalArgumentException, DuplicateKeyException {
+    public void signUp(SignUpRequest req) {
 
         // Validate format of Email by Regex
         if(!EmailValidator.isValidEmail(req.getEmail()))
-            throw new IllegalArgumentException("Invalid email");
+            throw new InvalidEmailException("Invalid email: " + req.getEmail());
 
         // Check email is verified
         if(!emailService.isVerified(req.getEmail())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Email is not verified");
+            throw new NotVerifiedEmailException("Email is not verified: " + req.getEmail());
         }
 
         // Check conflict of email
         if(userRepository.existsByEmail(req.getEmail())) {
-            throw new DuplicateKeyException("Already exists email : " + req.getEmail());
+            throw new DuplicateEmailException("Already exists email : " + req.getEmail());
         }
 
-        //일단은 권한에 따라 분기
+        // Check authority and create proper entity
         if(req.getAuthority() == UserAuthority.EXPERT) {
             Expert expert = new Expert(req.getEmail(),
                     bCryptPasswordEncoder.encode(req.getPassword()));
 
             expertRepository.save(expert);
         } else {
-            //모든 체크를 통과하면 User 엔티티 만들어서 저장
             User user = User.builder()
                     .email(req.getEmail())
                     .password(bCryptPasswordEncoder.encode(req.getPassword()))
@@ -111,15 +132,21 @@ public class AuthService {
         notificationService.initializeDefaultNotificationSettings(req.getEmail());
     }
 
+    /**
+     * Logout current authenticated user.
+     * <br/>
+     * Delete refresh token of current authenticated user
+     * @throws ResponseStatusException
+     */
     public void logout() throws ResponseStatusException {
-        //현재 인증된 유저의 이메일 받아옴
+        // Load current authenticated user's email
         String currentUserEmail = AuthenticationUtils.getCurrentUserEmail()
-                .orElseThrow(()->new ResponseStatusException(HttpStatus.FORBIDDEN, "There is no Authentication"));
+                .orElseThrow(()->new NotAuthenticatedException("There is no Authentication"));
 
-        //인증된 유저의 이메일로 userId 받아옴
+        // Load user's id by email
         Long userId = userRepository.findIdByEmail(currentUserEmail);
 
-        //로그아웃시, 리프레쉬 토큰 삭제
+        // Delete refresh token when logout
         refreshTokenService.deleteByUserId(userId);
 
     }
