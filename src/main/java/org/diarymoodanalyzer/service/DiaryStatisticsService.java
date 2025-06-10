@@ -17,7 +17,10 @@ import java.util.stream.Collectors;
 
 /**
  * Diary의 통계 관련 정보를 반환하는 서비스 클래스
+ * @deprecated Deprecated due to changes in the AI server architecture.
+ * Use {@link DiaryAnalyzeStatService DiaryAnalyzeStatService} instead.
  */
+@Deprecated
 @RequiredArgsConstructor
 @Service
 public class DiaryStatisticsService {

@@ -44,13 +44,66 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
     @Query("SELECT d.user.id FROM Diary d WHERE d.id = :id")
     Long findUserIdById(@Param("id") Long diaryId);
 
+    /**
+     * Return <code>createdAt</code> and <code>depressionScore</code>
+     * where <code>createdAt</code> between <code>start</code> and <code>end</code>
+     * <br/>
+     * This method use JPQL
+     * @param email owner's email
+     * @param start start of date range
+     * @param end end of date range
+     * @return List of <code>createdAt</code> as {@link LocalDateTime LocalDateTime}
+     * and <code>depressionScore</code> as <code>int</code>
+     */
+    @Query(value="SELECT d.createdAt, d.depressionScore FROM Diary d WHERE (d.createdAt BETWEEN :start AND :end) AND d.user.email = :email")
+    List<Object[]> findDepressionScoreBetween(@Param("email") String email, @Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+
+    /**
+     * Return <code>createdAt</code> and daily average <code>depressionScore</code>
+     * where <code>createdAt</code> between <code>start</code> and <code>end</code>
+     * <br/>
+     * This method use native SQL query
+     * @param email owner's email
+     * @param start start of date range
+     * @param end end of date range
+     * @return List of <code>createdAt</code> as {@link LocalDateTime LocalDateTime}
+     * and daily average <code>depressionScore</code> as <code>double</code>
+     */
+    @Query(value= """
+            SELECT DATE(d.created_at) AS date, AVG(d.depression_level)
+            FROM diaries d
+            INNER JOIN users u ON u.id = d.user_id
+            WHERE u.email = :email
+                AND (created_at BETWEEN :start AND :end)
+            GROUP BY DATE(d.created_at)
+            """, nativeQuery = true) // Use native query for performance and convenience
+    List<Object[]> findDailyDepressionScoreAvg(@Param("email") String email, @Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+
+    /**
+     * Return <code>createdAt</code> and daily average <code>depressionScore</code> without range
+     * <br/>
+     * This method use native SQL query
+     * @param email owner's email
+     * @return List of <code>createdAt</code> as {@link LocalDateTime LocalDateTime}
+     * and daily average <code>depressionScore</code> as <code>double</code>
+     */
+    @Query(value= """
+            SELECT DATE(d.created_at) AS date, AVG(d.depression_level)
+            FROM diaries d
+            INNER JOIN users u ON u.id = d.user_id
+            WHERE u.email = :email
+            GROUP BY DATE(d.created_at)
+            """, nativeQuery = true) // Use native query for performance and convenience
+    List<Object[]> findDailyDepressionScoreAvg(@Param("email") String email);
 
     /**
      * 사용자의 이메일을 받아서 해당 사용자가 작성한 Diary의
      * 날짜별 depression level의 평균을 반환한다.
      * @param email - 사용자의 이메일. Diary의 주인
      * @return (날짜, 평균 depression_level)의 쌍을 담은 리스트
+     * @deprecated <code>depressionLevel</code> not be used anymore
      */
+    @Deprecated
     @Query( value = """
             SELECT DATE(d.created_at) AS date, AVG(d.depression_level)
             FROM diaries d
@@ -70,7 +123,9 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
      * @param startDate - 시작 날짜
      * @param endDate - 종료 날짜
      * @return (날짜, 평균 depression_level)의 쌍을 담은 리스트
+     * @deprecated <code>depressionLevel</code> not be used anymore
      */
+    @Deprecated
     @Query(value = """
             SELECT DATE(d.created_at) AS date, AVG(d.depression_level)
             FROM diaries d

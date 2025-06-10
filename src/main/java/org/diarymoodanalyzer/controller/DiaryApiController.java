@@ -1,12 +1,10 @@
 package org.diarymoodanalyzer.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.diarymoodanalyzer.dto.request.AddCommentRequest;
-import org.diarymoodanalyzer.dto.request.AddDiaryRequest;
-import org.diarymoodanalyzer.dto.request.GetDailyAvgDepressionLevelRequest;
-import org.diarymoodanalyzer.dto.request.GetDiaryByPageRequest;
+import org.diarymoodanalyzer.dto.request.*;
 import org.diarymoodanalyzer.dto.response.*;
 import org.diarymoodanalyzer.service.CommentService;
+import org.diarymoodanalyzer.service.DiaryAnalyzeStatService;
 import org.diarymoodanalyzer.service.DiaryService;
 import org.diarymoodanalyzer.service.DiaryStatisticsService;
 import org.springframework.data.domain.Page;
@@ -23,7 +21,9 @@ public class DiaryApiController {
 
     private final DiaryService diaryService;
 
-    private final DiaryStatisticsService diaryStatisticsService;
+//    private final DiaryStatisticsService diaryStatisticsService;
+
+    private final DiaryAnalyzeStatService diaryAnalyzeStatService;
 
     private final CommentService commentService;
 
@@ -123,14 +123,24 @@ public class DiaryApiController {
 
     /* 통계 관련 엔드 포인트 */
 
+    @Deprecated
     @GetMapping("/api/diaries/statistics/average/depressionLevel/daily")
-    public ResponseEntity<GetAvgDepressionLevel> getDailyAverageDepressionLevel(
+    public ResponseEntity<?> getDailyAverageDepressionLevel(
             @ModelAttribute GetDailyAvgDepressionLevelRequest req //DTO 사용
-            ) {
+    ) {
         //start와 end 둘 중 하나라도 null이면 전체 Diary에 대해, 둘 다 있으면 해당 범위 내의 Diary에 대해 일별 평균 계산
-        return ResponseEntity.ok((req.getStart() == null || req.getEnd() == null) ?
-                diaryStatisticsService.getDailyAvgDepressionLevel() : diaryStatisticsService.getDailyAvgDepressionLevel(req.getStart(), req.getEnd()));
+//        return ResponseEntity.ok((req.getStart() == null || req.getEnd() == null) ?
+//                diaryStatisticsService.getDailyAvgDepressionLevel() : diaryStatisticsService.getDailyAvgDepressionLevel(req.getStart(), req.getEnd()));
 
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Deprecated endpoint");
+    }
+
+
+    @GetMapping("/api/diaries/statistics/average/depressionScore/daily")
+    public ResponseEntity<DailyAvgDepressionScoreResponse> getDailyAverageDepressionScore(
+            @ModelAttribute DailyAvgDepressionScoreRequest req // Mapping to DTO by using `@ModelAttribute`
+    ) {
+        return ResponseEntity.ok(diaryAnalyzeStatService.getDailyAvgDepressionScore(req));
     }
 
 }
