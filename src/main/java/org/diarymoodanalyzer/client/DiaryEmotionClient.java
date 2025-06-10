@@ -1,9 +1,6 @@
 package org.diarymoodanalyzer.client;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
-import org.diarymoodanalyzer.config.DiaryEmotionProperties;
+import org.diarymoodanalyzer.config.DiaryAnalyzeProperties;
 import org.diarymoodanalyzer.dto.ai.request.DiaryEmotionRequest;
 import org.diarymoodanalyzer.dto.ai.response.DiaryEmotionResponse;
 import org.springframework.http.HttpHeaders;
@@ -12,27 +9,26 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
-import org.springframework.web.server.ResponseStatusException;
 
 /**
  * Diary 감정 분석 AI 서버와의 통신을 담당하는 클래스
  */
+@Deprecated
 @Component
 public class DiaryEmotionClient {
     private final WebClient webClient;
 
-    private final DiaryEmotionProperties diaryEmotionProperties;
+    private final DiaryAnalyzeProperties diaryAnalyzeProperties;
 
     //자동으로 등록된 WebClient.Builder 를 주입받아서 구성한다.
-    public DiaryEmotionClient(WebClient.Builder webClientBuilder, DiaryEmotionProperties diaryEmotionProperties) {
+    public DiaryEmotionClient(WebClient.Builder webClientBuilder, DiaryAnalyzeProperties diaryAnalyzeProperties) {
 
         //프로퍼티 클래스 초기화
-        this.diaryEmotionProperties = diaryEmotionProperties;
+        this.diaryAnalyzeProperties = diaryAnalyzeProperties;
 
         //프로퍼티에 설정된 url 사용
         this.webClient = webClientBuilder
-                .baseUrl(diaryEmotionProperties.getUrl())
+                .baseUrl(diaryAnalyzeProperties.getUrl())
                 //기본적으로 application/json 추가
                 .defaultHeaders(httpHeaders -> {
                     httpHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);

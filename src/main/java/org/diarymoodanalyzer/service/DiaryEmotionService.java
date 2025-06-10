@@ -18,7 +18,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 /**
  * Diary의 감정 분석을 관리하는 서비스 클래스
  * 내부의 BlockingQueue를 사용해 AI 서버에 보내는 요청을 관리한다.
+ * @deprecated Deprecated due to changes in the AI server architecture.
+ * Use {@link DiaryAnalyzeService} instead
  */
+@Deprecated
 @Service
 public class DiaryEmotionService {
 

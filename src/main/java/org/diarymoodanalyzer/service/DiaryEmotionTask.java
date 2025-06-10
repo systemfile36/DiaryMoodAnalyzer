@@ -5,7 +5,10 @@ import org.diarymoodanalyzer.domain.Diary;
 
 /**
  * 외부에서 Diary 감정 분석을 요청할 때 사용할 태스크 객체
+ * @deprecated Deprecated due to changes in the AI server architecture.
+ * Use {@link DiaryAnalyzeTask} instead.
  */
+@Deprecated
 @Getter
 public class DiaryEmotionTask {
     /**

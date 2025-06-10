@@ -9,7 +9,10 @@ import java.util.Map;
 /**
  * 평균 depressionLevel을 Map으로 반환하는 DTO 이다.
  * 기준 컬럼(날짜 등)을 key, 평균을 value로 가지는 Map으로 표현된다.
+ * @deprecated Deprecated due to changes in the AI server architecture.
+ * Use {@link DailyAvgDepressionScoreResponse} instead.
  */
+@Deprecated
 @NoArgsConstructor
 @Getter
 @Setter //ObjectMapper에서 사용하기 위해 Getter와 Setter, 기본 생성자 추가.
