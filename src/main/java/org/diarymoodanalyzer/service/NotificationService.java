@@ -13,6 +13,9 @@ import org.diarymoodanalyzer.dto.request.NotificationSettingRequest;
 import org.diarymoodanalyzer.dto.request.NotificationTypeRequest;
 import org.diarymoodanalyzer.dto.response.NotificationResponse;
 import org.diarymoodanalyzer.dto.response.UserNotificationSettingResponse;
+import org.diarymoodanalyzer.exception.NoPermissionException;
+import org.diarymoodanalyzer.exception.NotAuthenticatedException;
+import org.diarymoodanalyzer.exception.NotFoundException;
 import org.diarymoodanalyzer.repository.NotificationRepository;
 import org.diarymoodanalyzer.repository.NotificationTypeRepository;
 import org.diarymoodanalyzer.repository.UserNotificationSettingRepository;
@@ -48,11 +51,15 @@ public class NotificationService {
 
     // Notification methods
 
+    /**
+     * Get all {@link Notification} has current authenticated user as target
+     * @return List of DTO contain {@link Notification} entity
+     */
     public List<NotificationResponse> getNotificationsForTarget() {
 
-        //현재 유저 이메일 조회
+        // Load current authenticated user's email
         String currentUserEmail = AuthenticationUtils.getCurrentUserEmail()
-                .orElseThrow(()-> new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid Authentication"));
+                .orElseThrow(()-> new NotAuthenticatedException("Invalid Authentication"));
 
         //Mapping Entity to DTO
         return notificationRepository.findByTargetUserEmail(currentUserEmail)
@@ -60,60 +67,61 @@ public class NotificationService {
     }
 
     /**
-     * is_read 필드를 true로 설정하여 읽음으로 표시.
-     * @param id 읽음으로 표시할 알림의 id
+     * Mark <code>is_read</code> field of {@link Notification} entity.
+     * @param id id of {@link Notification} to be updated
      */
     @Transactional
     public void updateAsRead(Long id) {
-        //권한 확인 필요
 
-        //현재 유저 이메일 조회
+        // Load current authenticated user's email
         String currentUserEmail = AuthenticationUtils.getCurrentUserEmail()
-                .orElseThrow(()-> new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid Authentication"));
+                .orElseThrow(()-> new NotAuthenticatedException("Invalid Authentication"));
 
         Notification notification = notificationRepository.findById(id)
-                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no notification : " + id));
+                        .orElseThrow(() -> new NotFoundException("There is no notification : " + id));
 
-        //해당 알림의 target이 현재 인증된 유저와 다를 경우, 예외 throw
+        // Check owner of specified Notification entity
         if(!notification.getTargetUser().getEmail().equals(currentUserEmail)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You have not permission");
+            throw new NoPermissionException("You have not permission");
         }
 
+        // Apply to DB
         notificationRepository.updateIsReadById(id, true);
     }
 
     /**
-     * is_read 필드를 true로 설정하여 읽음으로 표시
-     * @param ids 읽음으로 표시할 알림의 id 리스트
+     * Mark <code>is_read</code> field of {@link Notification} entity in batch.
+     * @param ids id list of {@link Notification} to be updated
      */
     @Transactional
     public void updateAsRead(List<Long> ids) {
 
         String currentUserEmail = AuthenticationUtils.getCurrentUserEmail()
-                .orElseThrow(()-> new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid Authentication"));
+                .orElseThrow(()-> new NotAuthenticatedException("Invalid Authentication"));
 
         List<Notification> notifications = notificationRepository.findAllById(ids);
 
-        //인자로 받은 모든 알림의 target과 현재 유저의 이메일이 일치하지 않을 시, 예외 throw
+        // Check owner of specified Notification entities
         if(!notifications.stream().allMatch(
                 (value) -> value.getTargetUser().getEmail().equals(currentUserEmail)
         )) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You have not permission");
+            throw new NoPermissionException("You have not permission");
         } else if (notifications.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id list is empty");
+            throw new IllegalArgumentException("Id list is empty");
         }
 
         notificationRepository.updateIsReadByIds(ids, true);
     }
 
     /**
-     * 현재 인증된 사용자의 모든 알림을 읽음으로 처리
+     * Mark <code>is_read</code> field of {@link Notification} entity. <br/>
+     * Process all {@link Notification} has current authenticated user as target.
      */
     @Transactional
     public void updateAllAsRead() {
 
         String currentUserEmail = AuthenticationUtils.getCurrentUserEmail()
-                .orElseThrow(()-> new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid Authentication"));
+                .orElseThrow(()-> new NotAuthenticatedException("Invalid Authentication"));
 
         Long userId = userRepository.findIdByEmail(currentUserEmail);
 
@@ -131,8 +139,9 @@ public class NotificationService {
     }
 
     /**
-     * `userId`에 해당하는 사용자의 모든 알림을 읽음으로 처리
-     * @param userId
+     * Mark <code>is_read</code> field of {@link Notification} entity. <br/>
+     *      * Process all {@link Notification} has user specified by id as target.
+     * @param userId id of {@link User} to specify target
      */
     @Transactional
     public void updateAllAsRead(Long userId) {
@@ -140,30 +149,28 @@ public class NotificationService {
     }
 
     /**
-     * 알림을 삭제한다.
-     * @param id 삭제할 알림의 id
+     * Delete specific {@link Notification}
+     * @param id id of {@link Notification} to specify target
      */
     public void deleteNotification(Long id) {
-        //권한 확인 필요
 
-        //현재 유저 이메일 조회
         String currentUserEmail = AuthenticationUtils.getCurrentUserEmail()
-                .orElseThrow(()-> new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid Authentication"));
+                .orElseThrow(()-> new NotAuthenticatedException("Invalid Authentication"));
 
         Notification notification = notificationRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no notification : " + id));
+                .orElseThrow(() -> new NotFoundException("There is no notification : " + id));
 
-        //해당 알림의 target이 현재 인증된 유저와 다를 경우, 예외 throw
+        // Check owner of specified Notification entity
         if(!notification.getTargetUser().getEmail().equals(currentUserEmail)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You have not permission");
+            throw new NoPermissionException("You have not permission");
         }
 
         notificationRepository.deleteById(id);
     }
 
     /**
-     * 알림을 삭제한다.
-     * @param ids 삭제할 알림의 id 목록
+     * Delete specific {@link Notification}
+     * @param ids id list of {@link Notification} to be deleted
      */
     public void deleteNotification(List<Long> ids) {
 
@@ -184,7 +191,7 @@ public class NotificationService {
     }
 
     /**
-     * 현재 인증된 사용자의 모든 알림을 삭제한다.
+     * Delete all {@link Notification} has current authenticated user as target
      */
     public void deleteAllNotification() {
 
@@ -282,13 +289,12 @@ public class NotificationService {
         UserNotificationSetting setting =
                 notificationSettingRepository.findByUserEmailAndTypeName(targetRef.getEmail(), req.getNotificationTypeName());
 
-        //해당 알림이 꺼져 있다면 알림을 생성하지 않고 종료한다.
-        //Check Notification of this type is enabled
+        // Check Notification of this type is enabled
+        // If notify is disabled, cancel send notification
         if(!setting.isNotifyEnabled()) {
             return;
         }
 
-        // 템플릿 처리를 위한 캐싱
         String content = req.getContent();
         NotificationType notificationType = getNotificationType(req.getNotificationTypeName());
 
@@ -300,7 +306,6 @@ public class NotificationService {
             content = SimpleTemplateRenderer.render(content, req.getValues().split(","));
         }
 
-
         Notification notification = Notification.builder()
                 .senderUser(senderRef)
                 .targetUser(targetRef)
@@ -311,10 +316,13 @@ public class NotificationService {
 
         notificationRepository.save(notification);
 
+        // Check email is enabled
+        // If email notify is enabled, send email using EmailService
         if(setting.isEmailEnabled()) {
-            //이메일 보내기 처리 
+            // Temporary placeholder
         }
 
+        // Delete exceeded notifications
         deleteOldestNotifications(req.getTargetEmail());
     }
 
@@ -322,8 +330,8 @@ public class NotificationService {
     // NotificationType methods
 
     /**
-     * 모든 알림 타입을 가져온다. 
-     * @return 모든 알림 타입 리스트 
+     * Get all notification types
+     * @return list of notification type
      */
     public List<NotificationType> getAllNotificationTypes() {
         return notificationTypeRepository.findAll();
@@ -331,14 +339,14 @@ public class NotificationService {
 
     public NotificationType getNotificationType(String typeName) {
         return notificationTypeRepository.findByName(typeName).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no notification " + typeName)
+                () -> new NotFoundException("There is no notification " + typeName)
         );
     }
 
     /**
-     * 새로운 알림 타입을 추가한다. 
-     * @param req 추가할 알림의 정보를 담은 DTO
-     * @return 추가된 알림 타입 엔티티 
+     * Add new notification type
+     * @param req Request DTO contain notification type info
+     * @return {@link NotificationType} entity has been added
       */
     @Transactional
     public NotificationType addNotificationType(NotificationTypeRequest req) {
@@ -346,34 +354,34 @@ public class NotificationService {
     }
 
     /**
-     * 알림 타입을 삭제한다. 
-     * @param typeId 삭제할 알림 타입의 id
+     * Delete notification type
+     * @param typeId id of {@link NotificationType} entity
      */
     public void deleteNotificationType(Long typeId) {
         notificationTypeRepository.deleteById(typeId);
     }
 
     /**
-     * 알림 타입을 삭제한다. 
-     * @param typeName 삭제할 알림 타입의 name 컬럼
+     * Delete notification type
+     * @param typeName type name of {@link NotificationType} entity
      */
     public void deleteNotificationType(String typeName) {
         notificationTypeRepository.deleteByName(typeName);
     }
 
     /**
-     * 알림 타입의 description을 엄데이트한다.
-     * @param typeId 업데이트할 알림 타입의 id
-     * @param description 업데이트할 description 내용
+     * Update description of notification type
+     * @param typeId id of {@link NotificationType} entity
+     * @param description content of description to be updated
      */
     public void updateNotificationType(Long typeId, String description) {
         notificationTypeRepository.updateDescriptionById(typeId, description);
     }
 
     /**
-     * 알림 타입의 description을 엄데이트한다.
-     * @param typeName 업데이트할 알림 타입의 name 컬럼
-     * @param description 업데이트할 description 내용
+     * Update description of notification type
+     * @param typeName name of {@link NotificationType} entity
+     * @param description content of description to be updated
      */
     public void updateNotificationType(String typeName, String description) {
         updateNotificationType(
@@ -384,14 +392,13 @@ public class NotificationService {
     // UserNotificationSetting methods
 
     /**
-     * 현재 인증된 사용자의 모든 알림 설정을 반환한다.
-     * DTO로 necessary 정보만 반환한다.
-     * @return 알림 설정 DTO 리스트
+     * Get all current authenticated user's {@link UserNotificationSetting}
+     * @return list of Response DTO contain notification setting info
      */
     public List<UserNotificationSettingResponse> getUserNotificationSettings() {
 
         String currentUserEmail = AuthenticationUtils.getCurrentUserEmail()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid Authentication"));
+                .orElseThrow(() -> new NotAuthenticatedException("Invalid Authentication"));
 
         List<UserNotificationSetting> result = getUserNotificationSettings(currentUserEmail);
 
@@ -400,9 +407,9 @@ public class NotificationService {
     }
 
     /**
-     * userEmail에 해당하는 사용자의 모든 알림 설정을 반환한다.
-     * @param userEmail 알림 설정을 조회할 사용자의 이메일
-     * @return 알림 설정 리스트
+     * Get all user's {@link UserNotificationSetting}
+     * @param userEmail email to specify target user
+     * @return list of Response DTO contain notification setting info
      */
     public List<UserNotificationSetting> getUserNotificationSettings(String userEmail) {
         return notificationSettingRepository.findByUserEmail(userEmail);

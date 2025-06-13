@@ -1,13 +1,13 @@
 package org.diarymoodanalyzer.service;
 
 import jakarta.transaction.Transactional;
+import org.diarymoodanalyzer.annotation.SkipLogging;
 import org.diarymoodanalyzer.client.DiaryEmotionClient;
 import org.diarymoodanalyzer.domain.DepressionLevel;
 import org.diarymoodanalyzer.domain.Diary;
 import org.diarymoodanalyzer.dto.ai.request.DiaryEmotionRequest;
 import org.diarymoodanalyzer.dto.ai.response.DiaryEmotionResponse;
 import org.diarymoodanalyzer.repository.DiaryRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -23,6 +23,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 @Deprecated
 @Service
+@SkipLogging // Skip AOP logging because this class use asynchronous methods
 public class DiaryEmotionService {
 
     private final BlockingQueue<DiaryEmotionTask> taskQueue = new LinkedBlockingQueue<>();

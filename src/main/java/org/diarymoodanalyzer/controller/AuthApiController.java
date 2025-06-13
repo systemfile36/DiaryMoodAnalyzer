@@ -18,42 +18,31 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthApiController {
     private final AuthService authService;
 
-    /*
-    AuthService를 통해 로그인 처리. 예외 발생 시, 에러 메시지를 보냄
-    따라서 반환형의 제네릭을 <?>로 설정 
+    /**
+     * Login endpoint. <br/>
+     * @param req Request DTO contain authentication info
+     * @return Response DTO when logic complete without exception, otherwise {@link org.diarymoodanalyzer.exception.GlobalExceptionHandler} will handle exception.
      */
     @PostMapping("/api/auth/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest req) {
-        try {
-            LoginResponse result = authService.login(req);
-            
-            //인증 성공시 응답
-            return ResponseEntity.ok().body(result);
-        } catch(IllegalArgumentException e) {
-            //인증 실패 시 HTTP 401 반환
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
-        }
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest req) {
+        LoginResponse result = authService.login(req);
+
+        return ResponseEntity.ok().body(result);
     }
 
-    /*
-    회원 가입 메소드. 성공 시 HTTP 201 Created 를 반환한다.
-    이메일이 형식에 맞지 않으면 HTTP 400 Bad Request 와 에러 메시지를 반환한다.
-    중복된 이메일이면 HTTP 409 Conflict 와 에러 메시지를 반환한다.
+    /**
+     * Signup endpoint. <br/>
+     * @param req Request DTO contain signup info
+     * @return None. If exception occurred in process, {@link org.diarymoodanalyzer.exception.GlobalExceptionHandler} will handle it.
      */
     @PostMapping("/api/auth/signup")
-    public ResponseEntity<?> signUp(@RequestBody SignUpRequest req) {
-        try {
-            authService.signUp(req);
-        } catch(IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        } catch(DuplicateKeyException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
-        }
+    public ResponseEntity<Void> signUp(@RequestBody SignUpRequest req) {
+        authService.signUp(req);
         return ResponseEntity.status(HttpStatus.CREATED).body(null);
     }
 
-    /*
-    로그아웃
+    /**
+     * Logout endpoint.
      */
     @GetMapping("/api/logout")
     public ResponseEntity<Void> logout() {
