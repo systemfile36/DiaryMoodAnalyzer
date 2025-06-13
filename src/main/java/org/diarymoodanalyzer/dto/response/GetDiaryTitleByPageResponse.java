@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.diarymoodanalyzer.domain.Diary;
 
 import java.time.LocalDateTime;
 
@@ -11,9 +12,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class GetDiaryTitleByPageResponse extends BaseGetDiaryResponse{
-
-    public GetDiaryTitleByPageResponse(long id, String title, byte depressionLevel, LocalDateTime createdAt, LocalDateTime updatedAt, String userEmail) {
-        super(id, title, depressionLevel, createdAt, updatedAt, userEmail);
+    public GetDiaryTitleByPageResponse(Diary diary) {
+        super(diary);
     }
-
 }

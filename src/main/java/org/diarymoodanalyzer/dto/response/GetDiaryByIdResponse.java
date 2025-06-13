@@ -11,7 +11,8 @@ public class GetDiaryByIdResponse extends BaseGetDiaryResponse {
 
     //엔티티에서 DTO를 만듬
     public GetDiaryByIdResponse(Diary diary) {
-        super(diary.getId(), diary.getTitle(), diary.getDepressionLevel(), diary.getCreatedAt(), diary.getUpdatedAt(), diary.getUser().getEmail());
+        // init fields from entity by calling super constructor
+        super(diary);
         this.content = diary.getContent();
     }
 }

@@ -1,12 +1,15 @@
 package org.diarymoodanalyzer.dto.response;
 
 import lombok.*;
+import org.diarymoodanalyzer.domain.Diary;
+import org.diarymoodanalyzer.dto.ai.request.VadScore;
 
 import java.time.LocalDateTime;
 
-/*
-Diary를 반환할때 사용하는 DTO의 추상 클래스이다.
-기본적인 정보들은 한군데로 모아서 관리하고, 자식 객체들은 그때그때 필요한 것을 확장해서 사용한다.
+/**
+ * Abstract class for response DTO contain info of {@link org.diarymoodanalyzer.domain.Diary} entity.
+ * <br/>
+ * This class is base class of response DTO that return Diary entity
  */
 @Getter
 @Setter
@@ -17,7 +20,36 @@ public abstract class BaseGetDiaryResponse {
     private String title;
     private byte depressionLevel;
 
+    // About analyze results
+    private VadScore vadScore;
+    private int depressionScore;
+    private String classification;
+
+    /**
+     * Flag to indicate analyze was successfully completed
+     */
+    private boolean isAnalyzeSuccess = false;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String userEmail;
+
+    /**
+     * Set fields from {@link Diary} entity.
+     * @param diary {@link Diary} entity.
+     */
+    public BaseGetDiaryResponse(Diary diary) {
+        this.id = diary.getId(); this.title = diary.getTitle();
+        this.depressionLevel = diary.getDepressionLevel();
+        this.vadScore = diary.getVadScore();
+        this.depressionScore = diary.getDepressionScore();
+        this.classification = diary.getClassification();
+        this.createdAt = diary.getCreatedAt();
+        this.updatedAt = diary.getUpdatedAt();
+        this.userEmail = diary.getUser().getEmail();
+
+        //Check analyze was success
+        this.isAnalyzeSuccess = diary.isAnalyzeSuccess();
+    }
+
 }

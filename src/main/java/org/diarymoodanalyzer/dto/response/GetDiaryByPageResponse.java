@@ -15,7 +15,7 @@ public class GetDiaryByPageResponse extends BaseGetDiaryResponse{
     private final int commentsSize;
 
     public GetDiaryByPageResponse(Diary diary) {
-        super(diary.getId(), diary.getTitle(), diary.getDepressionLevel(), diary.getCreatedAt(), diary.getUpdatedAt(), diary.getUser().getEmail());
+        super(diary);
         this.content = diary.getContent();
         this.commentsSize = diary.getComments().size();
     }
