@@ -1,6 +1,7 @@
 package org.diarymoodanalyzer.service;
 
 import jakarta.transaction.Transactional;
+import org.diarymoodanalyzer.annotation.SkipLogging;
 import org.diarymoodanalyzer.client.DiaryAnalyzeClient;
 import org.diarymoodanalyzer.client.DiaryEmotionClient;
 import org.diarymoodanalyzer.domain.DepressionLevel;
@@ -23,6 +24,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * Limit request rate by scheduled polling to reduce load on the AI server. <br/>
  * This class created for replace <code>DiaryEmotionService</code> (already deprecated)
  */
+@SkipLogging
 @Service
 public class DiaryAnalyzeService {
     private final BlockingQueue<DiaryAnalyzeTask> taskQueue = new LinkedBlockingQueue<>();

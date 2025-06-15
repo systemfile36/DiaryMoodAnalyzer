@@ -70,11 +70,11 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
      * and daily average <code>depressionScore</code> as <code>double</code>
      */
     @Query(value= """
-            SELECT DATE(d.created_at) AS date, AVG(d.depression_level)
+            SELECT DATE(d.created_at) AS date, AVG(d.depression_score)
             FROM diaries d
             INNER JOIN users u ON u.id = d.user_id
             WHERE u.email = :email
-                AND (created_at BETWEEN :start AND :end)
+                AND (d.created_at BETWEEN :start AND :end)
             GROUP BY DATE(d.created_at)
             """, nativeQuery = true) // Use native query for performance and convenience
     List<Object[]> findDailyDepressionScoreAvg(@Param("email") String email, @Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
@@ -88,7 +88,7 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
      * and daily average <code>depressionScore</code> as <code>double</code>
      */
     @Query(value= """
-            SELECT DATE(d.created_at) AS date, AVG(d.depression_level)
+            SELECT DATE(d.created_at) AS date, AVG(d.depression_score)
             FROM diaries d
             INNER JOIN users u ON u.id = d.user_id
             WHERE u.email = :email

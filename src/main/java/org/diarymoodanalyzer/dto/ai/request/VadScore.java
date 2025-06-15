@@ -1,5 +1,6 @@
 package org.diarymoodanalyzer.dto.ai.request;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,7 +18,10 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class VadScore {
+    @Column(nullable = true)
     private float v;
+    @Column(nullable = true)
     private float a;
+    @Column(nullable = true)
     private float d;
 }
