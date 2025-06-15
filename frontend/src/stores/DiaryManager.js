@@ -176,7 +176,7 @@ export const useDiaryManagerStore = defineStore('diaryManager', ()=>{
     */
     async function getDailyAvgDepressionLevel(start, end, target=undefined) {
 
-        const temp = "/average/depressionLevel/daily";
+        const temp = "/average/depressionScore/daily";
 
         let url = diariesStatisticsUrl + temp;
 
@@ -197,6 +197,7 @@ export const useDiaryManagerStore = defineStore('diaryManager', ()=>{
                 headers: authManager.getDefaultHeaders(),
                 params: params
             }).then((res) => {
+                console.log(res.data)
                 return res.data.dailyAvg;
             }).catch((error)=>{
                 console.log(error);

@@ -24,8 +24,16 @@
                                     {{ diaryManager.formatDate(diary.createdAt) }}
                                 </time>
                                 <!-- 감정 분석 결과 -->
-                                <i :class="DepressionLevel.getValue(diary.depressionLevel).icon"></i>
-                                <span class="sentimental">{{ DepressionLevel.getValue(diary.depressionLevel).status }}</span>
+
+                                <i v-if="diary.depressionScore > 0" :class="DepressionLevel.getValue(parseInt(diary.depressionScore / 10)).icon"></i>
+                                <i v-else class="fa-regular fa-circle"></i>
+                                
+                                <span v-if="diary.depressionScore > 0" class="sentimental">{{ DepressionLevel.getValue(parseInt(diary.depressionScore / 10)).status }}</span>
+                                <span v-else class="sentimental">측정중...</span>
+
+                                <span v-if="diary.depressionScore > 0" class="depressionScore">우울 수치 : {{ diary.depressionScore }} / 70</span>
+                                <span v-else class="depressionScore">우울 수치 : 측정중...</span>
+
                                 <!-- 코멘트 개수 -->
                                 <i class="fa-solid fa-comments"></i>
                                 <span class="comments">{{ diary.commentsSize + "개" }}</span>

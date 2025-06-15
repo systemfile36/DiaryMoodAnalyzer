@@ -36,7 +36,41 @@
                         </span>
                     </div>   
                 </li>
+                <!-- Indicate no comment on this diary -->
+                <span v-if="comments.length < 1">코멘트가 없습니다.</span>
             </ul>
+
+            <!-- VAD score에 해석에 대한 안내 -->
+            <div v-if="diary.vadScore != null" class="analyze-detail mt-4 p-3 border rounded bg-light">
+                <h5 class="mb-3">
+                    <i class="fa-solid fa-chart-line me-2"></i>감정 분석 결과 (VAD 점수)
+                </h5>
+
+                <ul class="ps-3 mb-3">
+                    <li>
+                        <strong>Valence (기분 정도)</strong>:
+                        <span class="ms-1">{{ diary.vadScore.v }}</span>
+                        <small class="text-muted ms-2">1 (부정적) ~ 9 (긍정적)</small>
+                    </li>
+                    <li>
+                        <strong>Arousal (긴장감)</strong>:
+                        <span class="ms-1">{{ diary.vadScore.a }}</span>
+                        <small class="text-muted ms-2">1 (평온/무기력) ~ 9 (긴장/활성)</small>
+                    </li>
+                    <li>
+                        <strong>Dominance (통제감)</strong>:
+                        <span class="ms-1">{{ diary.vadScore.d }}</span>
+                        <small class="text-muted ms-2">1 (무력) ~ 9 (주도적)</small>
+                    </li>
+                </ul>
+
+                <p class="text-muted mb-0" style="font-size: 0.9rem;">
+                    * 이 점수는 일기의 내용 기반으로 자동 분석된 결과이며, 참고용으로 제공됩니다.
+                </p>
+            </div>
+            <div v-else class="analyze-detail mt-4 p-3 border rounded bg-light">
+                <h5 class="mb-3">아직 측정 중입니다...</h5>
+            </div>
 
             <form class="comment-write d-flex flex-column mt-3"
             v-if="authManager.role === Authority.EXPERT">
@@ -183,6 +217,12 @@ function onAddComment() {
 
     .comment-write {
         margin-left: 2rem;
+    }
+
+    // Temp analyze detail display
+    .analyze-info {
+        margin-top: 2.0rem;
+        border-top: 1px solid #ccc;
     }
 
 </style>
