@@ -180,10 +180,13 @@ export const useDiaryManagerStore = defineStore('diaryManager', ()=>{
 
         let url = diariesStatisticsUrl + temp;
 
+        // Add 1 day for proper range of avg depression score endpoing
+        const adjustedEnd = dayjs(end).add(1, 'day').format('YYYY-MM-DD')
+
         //GET 요청으로 넘길 파라미터 
         const params = {
             start: start,
-            end: end
+            end: adjustedEnd
         }
 
         //대상이 지정되었을 경우, URL을 변경하고 파라미터에 조회할 대상의 이메일을 추가한다.

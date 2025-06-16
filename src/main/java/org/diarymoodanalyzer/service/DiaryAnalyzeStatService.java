@@ -1,12 +1,15 @@
 package org.diarymoodanalyzer.service;
 
 import lombok.RequiredArgsConstructor;
+import org.diarymoodanalyzer.aop.LoggingAspect;
 import org.diarymoodanalyzer.domain.User;
 import org.diarymoodanalyzer.dto.request.DailyAvgDepressionScoreRequest;
 import org.diarymoodanalyzer.dto.response.DailyAvgDepressionScoreResponse;
 import org.diarymoodanalyzer.repository.DiaryRepository;
 import org.diarymoodanalyzer.repository.UserRepository;
 import org.diarymoodanalyzer.util.AuthenticationUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -97,7 +100,7 @@ public class DiaryAnalyzeStatService {
      * @return daily average depression score as DTO.
      */
     public DailyAvgDepressionScoreResponse getDailyAvgDepressionScore(String email, LocalDate start, LocalDate end) {
-        List<Object[]> result = diaryRepository.findDailyDepressionScoreAvg(email, start.atStartOfDay(), end.atStartOfDay());
+        List<Object[]> result = diaryRepository.findDailyDepressionScoreAvg(email, start, end);
 
         return convertToDto(result);
     }

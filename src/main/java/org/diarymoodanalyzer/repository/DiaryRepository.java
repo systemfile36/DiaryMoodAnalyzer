@@ -52,11 +52,11 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
      * @param email owner's email
      * @param start start of date range
      * @param end end of date range
-     * @return List of <code>createdAt</code> as {@link LocalDateTime LocalDateTime}
+     * @return List of <code>createdAt</code> as {@link LocalDate LocalDate}
      * and <code>depressionScore</code> as <code>int</code>
      */
     @Query(value="SELECT d.createdAt, d.depressionScore FROM Diary d WHERE (d.createdAt BETWEEN :start AND :end) AND d.user.email = :email")
-    List<Object[]> findDepressionScoreBetween(@Param("email") String email, @Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+    List<Object[]> findDepressionScoreBetween(@Param("email") String email, @Param("start") LocalDate start, @Param("end") LocalDate end);
 
     /**
      * Return <code>createdAt</code> and daily average <code>depressionScore</code>
@@ -66,7 +66,7 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
      * @param email owner's email
      * @param start start of date range
      * @param end end of date range
-     * @return List of <code>createdAt</code> as {@link LocalDateTime LocalDateTime}
+     * @return List of <code>createdAt</code> as {@link LocalDate LocalDate}
      * and daily average <code>depressionScore</code> as <code>double</code>
      */
     @Query(value= """
@@ -77,14 +77,14 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
                 AND (d.created_at BETWEEN :start AND :end)
             GROUP BY DATE(d.created_at)
             """, nativeQuery = true) // Use native query for performance and convenience
-    List<Object[]> findDailyDepressionScoreAvg(@Param("email") String email, @Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+    List<Object[]> findDailyDepressionScoreAvg(@Param("email") String email, @Param("start") LocalDate start, @Param("end") LocalDate end);
 
     /**
      * Return <code>createdAt</code> and daily average <code>depressionScore</code> without range
      * <br/>
      * This method use native SQL query
      * @param email owner's email
-     * @return List of <code>createdAt</code> as {@link LocalDateTime LocalDateTime}
+     * @return List of <code>createdAt</code> as {@link LocalDate LocalDateTime}
      * and daily average <code>depressionScore</code> as <code>double</code>
      */
     @Query(value= """

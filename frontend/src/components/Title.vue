@@ -134,7 +134,7 @@ function drawDepressionChart(labels, data) {
                 text: "우울 수치",
               },
               min: 0.0,
-              max: 10.0,
+              max: 70.0,
             },
           },
         },
