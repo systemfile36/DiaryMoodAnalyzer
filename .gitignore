@@ -46,3 +46,6 @@ application.yml
 
 #ignore backup directory
 h2_backup
+
+#ignore logs directory
+logs/
